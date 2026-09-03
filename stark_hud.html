@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J.A.R.V.I.S. STARK HUD — Tactical AI Command Center</title>
+  <meta name="description" content="Stark Industries Tactical J.A.R.V.I.S. Cybernetic HUD Command Center Dashboard.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── STARK HUD LAYOUT & CUSTOM STYLING ────────────────────────────── */
+    :root {
+      --hud-c1: #00D4FF;
+      --hud-c1d: #0088AA;
+      --hud-c2: #FF6B35;
+      --hud-c4: #00FF88;
+      --hud-card-bg: rgba(2, 14, 30, 0.75);
+      --hud-border: rgba(0, 212, 255, 0.25);
+      --hud-glow: 0 0 12px rgba(0, 212, 255, 0.35);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #010814;
+      font-family: var(--fbody, 'Rajdhani', sans-serif);
+      color: var(--cp, #C8E8FF);
+    }
+
+    .stark-hud-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at center, #041830 0%, #010814 80%);
+      position: relative;
+      z-index: 10;
+      padding-bottom: 20px;
+    }
+
+    /* ── HEADER NAVIGATION ────────────────────────────────────────────── */
+    .stark-header {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(2, 12, 26, 0.9);
+      border-bottom: 1px solid var(--hud-border);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .stark-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 400px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--hud-c1), transparent);
+      box-shadow: 0 0 15px var(--hud-c1);
+    }
+
+    /* Top stats header bar */
+    .stark-top-bar {
+      display: grid;
+      grid-template-columns: 260px 240px 1fr 260px 220px;
+      gap: 12px;
+      padding: 12px 18px;
+      background: rgba(1, 10, 22, 0.85);
+      border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+    }
+
+    @media (max-width: 1400px) {
+      .stark-top-bar {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+    }
+
+    /* Box Widget Styling */
+    .hud-box {
+      background: var(--hud-card-bg);
+      border: 1px solid var(--hud-border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      position: relative;
+      box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.05), 0 4px 20px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .hud-box:hover {
+      border-color: rgba(0, 212, 255, 0.6);
+      box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.1), 0 0 15px rgba(0, 212, 255, 0.2);
+    }
+
+    /* Corner Bracket Accents */
+    .hud-box::before, .hud-box::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-color: var(--hud-c1);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .hud-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .hud-box::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    .box-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--hud-c1);
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-transform: uppercase;
+      text-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
+    }
+
+    /* Progress bar metric */
+    .metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 11px;
+    }
+
+    .metric-name {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: #7A9BB8;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-bar-wrap {
+      flex: 1;
+      height: 4px;
+      background: rgba(0, 212, 255, 0.1);
+      border-radius: 2px;
+      margin: 0 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .metric-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0088AA, #00D4FF);
+      border-radius: 2px;
+      box-shadow: 0 0 8px var(--hud-c1);
+      transition: width 0.6s ease;
+    }
+
+    .metric-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--hud-c1);
+      font-weight: bold;
+    }
+
+    /* ── MAIN DASHBOARD GRID ────────────────────────────────────────── */
+    .stark-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr 280px;
+      gap: 16px;
+      padding: 16px 18px;
+      flex: 1;
+    }
+
+    @media (max-width: 1200px) {
+      .stark-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .left-col, .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .center-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── CENTRAL HOLOGRAM ORB CANVAS ───────────────────────────────── */
+    .central-orb-wrap {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 15, 35, 0.5);
+      border: 1px solid var(--hud-border);
+      border-radius: 12px;
+      box-shadow: inset 0 0 40px rgba(0, 212, 255, 0.15), 0 0 30px rgba(0, 212, 255, 0.1);
+      overflow: hidden;
+    }
+
+    #centralOrbCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+      cursor: grab;
+    }
+
+    .orb-prompt-badge {
+      position: relative;
+      z-index: 5;
+      background: rgba(2, 16, 36, 0.85);
+      border: 1px solid var(--hud-c1);
+      padding: 10px 24px;
+      border-radius: 30px;
+      box-shadow: 0 0 25px rgba(0, 212, 255, 0.4), inset 0 0 12px rgba(0, 212, 255, 0.2);
+      backdrop-filter: blur(12px);
+      text-align: center;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .orb-prompt-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 35px rgba(0, 212, 255, 0.7);
+    }
+
+    .orb-prompt-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 12px var(--hud-c1);
+    }
+
+    /* Voice command pills */
+    .vcmd-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .vcmd-pill {
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--hud-c1);
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .vcmd-pill:hover {
+      background: var(--hud-c1);
+      color: #000;
+      box-shadow: 0 0 15px var(--hud-c1);
+      transform: translateY(-2px);
+    }
+
+    /* Quick Access Icon Grid */
+    .quick-access-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .quick-access-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .qa-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 6px;
+      background: rgba(0, 212, 255, 0.04);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.22s;
+    }
+
+    .qa-btn:hover {
+      background: rgba(0, 212, 255, 0.18);
+      border-color: var(--hud-c1);
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .qa-icon {
+      font-size: 20px;
+    }
+
+    .qa-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 8px;
+      font-weight: 700;
+      color: var(--hud-c1);
+      letter-spacing: 0.12em;
+    }
+
+    /* Bottom center 3-box row */
+    .bottom-center-row {
+      display: grid;
+      grid-template-columns: 1fr 180px 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 800px) {
+      .bottom-center-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Messages list */
+    .msg-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.08);
+    }
+
+    .msg-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00D4FF, #005577);
+      border: 1px solid var(--hud-c1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: bold;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    .msg-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--hud-c1);
+    }
+
+    .msg-sub {
+      font-size: 11px;
+      color: #8AA4BC;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .msg-time {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 8px;
+      color: #557799;
+      margin-left: auto;
+    }
+
+    /* System commands list */
+    .sys-cmd-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      background: rgba(0, 212, 255, 0.04);
+      border: 1px solid rgba(0, 212, 255, 0.18);
+      border-radius: 4px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--cp);
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .sys-cmd-btn:hover {
+      background: rgba(0, 212, 255, 0.2);
+      border-color: var(--hud-c1);
+      color: var(--hud-c1);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+      padding-left: 14px;
+    }
+
+    /* News feed items */
+    .news-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.08);
+    }
+
+    .news-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #B0D8F8;
+    }
+
+    .news-time {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 8px;
+      color: #5A7B98;
+    }
+
+    /* Schedule list */
+    .sched-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 0;
+    }
+
+    .sched-time {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--hud-c1);
+      background: rgba(0, 212, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .sched-desc {
+      font-size: 11px;
+      font-weight: 600;
+      color: #C8E8FF;
+    }
+
+    .sched-loc {
+      font-size: 9px;
+      color: #5A7B98;
+    }
+
+    /* Iron Man Armor Graphic SVG container */
+    .armor-graphic-wrap {
+      width: 100%;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 70%);
+      margin-top: 6px;
+    }
+
+    /* System log console */
+    .log-console {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: #00D4FF;
+      height: 90px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      scrollbar-width: thin;
+      scrollbar-color: #0088AA transparent;
+    }
+
+    .log-line {
+      display: flex;
+      gap: 8px;
+      opacity: 0.9;
+    }
+
+    .log-ts {
+      color: #5A7B98;
+    }
+
+    /* Modal dialog overrides */
+    .hud-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(0, 5, 15, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .hud-modal-box {
+      width: 100%;
+      max-width: 650px;
+      background: #020C1C;
+      border: 1px solid var(--hud-c1);
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+      padding: 24px;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scanlines"></div>
+  <div class="bg-grid"></div>
+
+  <div class="stark-hud-container">
+
+    <!-- ── NAV HEADER ────────────────────────────────────────────────────── -->
+    <header class="stark-header">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="logo-mark"><span class="logo-s">S</span>TARK HUD</div>
+        <div class="vline"></div>
+        <div class="main-nav-links">
+          <a href="index.html"       class="nav-tab"      data-label="HUD">🤖 <span>HUD</span></a>
+          <a href="stark_hud.html"   class="nav-tab active" data-label="STARK HUD">🌐 <span>STARK HUD</span></a>
+          <a href="3d_lab.html"      class="nav-tab"      data-label="3D LAB">🌌 <span>3D LAB</span></a>
+          <a href="tracker.html"     class="nav-tab"      data-label="TRACKER">🛰️ <span>TRACKER</span></a>
+          <a href="code_studio.html" class="nav-tab"      data-label="CODE">🧠 <span>CODE</span></a>
+          <a href="cyber_soc.html"   class="nav-tab"      data-label="CYBER">🛡️ <span>CYBER</span></a>
+          <a href="cmd_hacker.html"  class="nav-tab"      data-label="TERMINAL">💻 <span>TERMINAL</span></a>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div style="text-align:right;">
+          <div id="liveClock" class="clock" style="font-size:18px;">10:30:00 AM</div>
+          <div id="liveDate" class="clockdate">MAY 24, 2026</div>
+        </div>
+        <div class="sys-status">
+          <div class="sdot pulse"></div>
+          <span class="slabel">SYSTEM ONLINE</span>
+        </div>
+        <button class="hbtn" onclick="toggleStealthMode()" title="Toggle Stealth Theme">👁️</button>
+        <button class="hbtn" onclick="speakJarvisGreeting()" title="Audio Voice Feedback">🔊</button>
+      </div>
+    </header>
+
+    <!-- ── TOP STATS BAR ─────────────────────────────────────────────────── -->
+    <section class="stark-top-bar">
+      
+      <!-- SYSTEM STATUS (Top Left Box) -->
+      <div class="hud-box">
+        <div class="box-title">
+          <span>SYSTEM STATUS</span>
+          <span style="color:#00FF88;">100% ONLINE</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">CPU USAGE</span>
+          <div class="metric-bar-wrap"><div class="metric-bar-fill" id="cpuBar" style="width: 23%;"></div></div>
+          <span class="metric-val" id="cpuVal">23%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">MEMORY</span>
+          <div class="metric-bar-wrap"><div class="metric-bar-fill" id="memBar" style="width: 42%;"></div></div>
+          <span class="metric-val" id="memVal">42%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">NETWORK</span>
+          <div class="metric-bar-wrap"><div class="metric-bar-fill" id="netBar" style="width: 68%;"></div></div>
+          <span class="metric-val" id="netVal">68%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">STORAGE</span>
+          <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 71%;"></div></div>
+          <span class="metric-val">71%</span>
+        </div>
+      </div>
+
+      <!-- J.A.R.V.I.S CORE (Top Center Left Box) -->
+      <div class="hud-box" style="display:flex; align-items:center; gap:12px;">
+        <canvas id="coreRingCanvas" width="65" height="65"></canvas>
+        <div style="flex:1;">
+          <div class="box-title" style="margin-bottom:4px;">J.A.R.V.I.S. CORE</div>
+          <div style="font-family:'Share Tech Mono', monospace; font-size:9px; color:#5A7B98; line-height:1.5;">
+            AI MODEL: <span style="color:#00D4FF;">JARVIS v9.7</span><br>
+            LEARNING MODE: <span style="color:#00FF88;">ACTIVE</span><br>
+            NEURAL NETWORK: <span style="color:#00FF88;">ONLINE</span><br>
+            UPTIME: <span style="color:#00D4FF;">99.97%</span> | LATENCY: <span style="color:#00FF88;">0.03s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- J.A.R.V.I.S CENTER HEADER TITLE -->
+      <div class="hud-box" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+        <div style="font-family:'Orbitron', sans-serif; font-size:24px; font-weight:900; color:#00D4FF; letter-spacing:0.25em; text-shadow:0 0 20px #00D4FF;">
+          J.A.R.V.I.S.
+        </div>
+        <div style="font-family:'Share Tech Mono', monospace; font-size:9px; color:#5A7B98; letter-spacing:0.2em; margin-top:2px;">
+          JUST A RATHER VERY INTELLIGENT SYSTEM
+        </div>
+      </div>
+
+      <!-- UPCOMING SCHEDULE (Top Center Right Box) -->
+      <div class="hud-box">
+        <div class="box-title">UPCOMING SCHEDULE</div>
+        <div class="sched-item">
+          <span class="sched-time">10:30 AM</span>
+          <div>
+            <div class="sched-desc">BOARD MEETING</div>
+            <div class="sched-loc">STARK TOWER</div>
+          </div>
+        </div>
+        <div class="sched-item">
+          <span class="sched-time">01:00 PM</span>
+          <div>
+            <div class="sched-desc">LUNCH WITH PEPPER</div>
+            <div class="sched-loc">THE PEPPER POTTS</div>
+          </div>
+        </div>
+        <div class="sched-item">
+          <span class="sched-time">03:30 PM</span>
+          <div>
+            <div class="sched-desc">PROJECT PEGASUS REVIEW</div>
+            <div class="sched-loc">LAB 42</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLOCK & STARK EMBLEM -->
+      <div class="hud-box" style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px;">
+        <div>
+          <div style="font-family:'Orbitron', sans-serif; font-size:18px; font-weight:700; color:#00D4FF; text-shadow:0 0 10px #00D4FF;" id="topClock">
+            10:30 AM
+          </div>
+          <div style="font-family:'Share Tech Mono', monospace; font-size:9px; color:#5A7B98; letter-spacing:0.1em;" id="topDate">
+            FRIDAY, MAY 24, 2026
+          </div>
+        </div>
+        <svg width="45" height="45" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#00D4FF" stroke-width="2" opacity="0.6"/>
+          <circle cx="50" cy="50" r="32" fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <polygon points="50,22 65,38 65,62 50,78 35,62 35,38" fill="rgba(0,212,255,0.2)" stroke="#00D4FF" stroke-width="2"/>
+          <circle cx="50" cy="50" r="10" fill="#00D4FF"/>
+        </svg>
+      </div>
+
+    </section>
+
+    <!-- ── MAIN CONTENT GRID ─────────────────────────────────────────────── -->
+    <main class="stark-grid">
+
+      <!-- LEFT COLUMN -->
+      <aside class="left-col">
+
+        <!-- VOICE RECOGNITION WIDGET -->
+        <div class="hud-box">
+          <div class="box-title">
+            <span>VOICE RECOGNITION</span>
+            <span id="voiceStatusLbl" style="color:#00FF88;">LISTENING...</span>
+          </div>
+          <div style="height:45px; position:relative; margin-bottom:6px;">
+            <canvas id="voiceWaveCanvas" width="240" height="45" style="width:100%; height:100%;"></canvas>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <button class="sys-cmd-btn" style="margin:0; width:auto; padding:4px 10px;" onclick="triggerVoiceMic()">
+              🎙️ START SPEECH
+            </button>
+            <span style="font-family:'Share Tech Mono', monospace; font-size:9px; color:#5A7B98;">INPUT: DEFAULT MIC</span>
+          </div>
+        </div>
+
+        <!-- SUIT STATUS MARK 85 -->
+        <div class="hud-box">
+          <div class="box-title">
+            <span>SUIT STATUS</span>
+            <span style="color:#00D4FF;">MARK 85</span>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-name">POWER LEVEL</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 100%;"></div></div>
+            <span class="metric-val">100%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-name">ARMOR INTEGRITY</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 100%;"></div></div>
+            <span class="metric-val">100%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-name">SYSTEMS ONLINE</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 100%;"></div></div>
+            <span class="metric-val">100%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-name">WEAPONS ONLINE</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 100%;"></div></div>
+            <span class="metric-val">100%</span>
+          </div>
+
+          <!-- Iron Man Mark 85 Vector Graphic -->
+          <div class="armor-graphic-wrap">
+            <svg width="120" height="130" viewBox="0 0 100 120">
+              <!-- Metallic Armor Head Silhouette -->
+              <path d="M35 20 Q50 10 65 20 Q75 35 70 55 Q65 65 50 68 Q35 65 30 55 Q25 35 35 20 Z" fill="rgba(0,212,255,0.08)" stroke="#00D4FF" stroke-width="2"/>
+              <!-- Glowing Eyes -->
+              <polygon points="38,36 46,38 44,42 36,40" fill="#00D4FF" filter="drop-shadow(0 0 4px #00D4FF)"/>
+              <polygon points="62,36 54,38 56,42 64,40" fill="#00D4FF" filter="drop-shadow(0 0 4px #00D4FF)"/>
+              <!-- Chest Arc Reactor -->
+              <path d="M25 65 L75 65 L65 110 L35 110 Z" fill="rgba(0,212,255,0.05)" stroke="#00D4FF" stroke-width="1.5"/>
+              <circle cx="50" cy="85" r="14" fill="none" stroke="#00D4FF" stroke-width="2"/>
+              <circle cx="50" cy="85" r="8" fill="#00D4FF" filter="drop-shadow(0 0 8px #00D4FF)"/>
+              <!-- Laser scan line -->
+              <line x1="10" y1="50" x2="90" y2="50" stroke="#00FF88" stroke-width="1" stroke-dasharray="4,2" opacity="0.8">
+                <animate attributeName="y1" values="20;110;20" dur="3s" infinite="repeat"/>
+                <animate attributeName="y2" values="20;110;20" dur="3s" infinite="repeat"/>
+              </line>
+            </svg>
+          </div>
+        </div>
+
+        <!-- LOCATION WIDGET -->
+        <div class="hud-box">
+          <div class="box-title">LOCATION</div>
+          <!-- World Map SVG -->
+          <div style="height:90px; background:rgba(0,10,25,0.6); border:1px solid rgba(0,212,255,0.15); border-radius:4px; margin-bottom:8px; position:relative; overflow:hidden;">
+            <svg width="100%" height="100%" viewBox="0 0 300 150">
+              <path d="M30 40 Q40 30 60 45 T100 50 T140 30 T190 40 T240 35 T280 60" fill="none" stroke="rgba(0,212,255,0.2)" stroke-width="1.5"/>
+              <path d="M40 70 Q70 90 90 120 T150 110 T220 120" fill="none" stroke="rgba(0,212,255,0.2)" stroke-width="1.5"/>
+              <!-- New York Pin -->
+              <circle cx="75" cy="45" r="5" fill="#FF2244" filter="drop-shadow(0 0 6px #FF2244)"/>
+              <circle cx="75" cy="45" r="12" fill="none" stroke="#FF2244" stroke-width="1">
+                <animate attributeName="r" values="4;16;4" dur="2s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="1;0;1" dur="2s" repeatCount="indefinite"/>
+              </circle>
+            </svg>
+          </div>
+          <div style="font-family:'Orbitron', sans-serif; font-size:10px; font-weight:700; color:#00D4FF;">
+            STARK TOWER — NEW YORK, USA
+          </div>
+          <div style="font-family:'Share Tech Mono', monospace; font-size:9px; color:#5A7B98; margin-top:2px;">
+            LAT: 40.7484° N | LON: 73.9857° W<br>
+            TIME: 10:30 AM | TEMP: 24°C | WEATHER: CLEAR
+          </div>
+        </div>
+
+        <!-- NEWS FEED WIDGET -->
+        <div class="hud-box">
+          <div class="box-title">NEWS FEED</div>
+          <div class="news-item">
+            <span class="news-title">STARK INDUSTRIES UNVEILS NEW ARC REACTOR</span>
+            <span class="news-time">2h ago</span>
+          </div>
+          <div class="news-item">
+            <span class="news-title">GLOBAL CLEAN ENERGY SUMMIT LIVE</span>
+            <span class="news-time">5h ago</span>
+          </div>
+          <div class="news-item">
+            <span class="news-title">MARK 85 UPGRADES DEPLOYED</span>
+            <span class="news-time">1d ago</span>
+          </div>
+          <div class="news-item">
+            <span class="news-title">NEW AI ALGORITHM BREAKTHROUGH</span>
+            <span class="news-time">2d ago</span>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- CENTER COLUMN -->
+      <section class="center-col">
+
+        <!-- 3D HOLOGRAPHIC PROJECTOR & CENTRAL ORB -->
+        <div class="central-orb-wrap">
+          <canvas id="centralOrbCanvas"></canvas>
+          <div class="orb-prompt-badge" onclick="handleOrbClick()">
+            <div class="orb-prompt-text">"HOW CAN I ASSIST YOU, TONY STARK?"</div>
+            <div style="font-family:'Share Tech Mono', monospace; font-size:9px; color:#00D4FF; opacity:0.8; margin-top:4px;">
+              [ CLICK OR SPEAK TO ENGAGE J.A.R.V.I.S. ]
+            </div>
+          </div>
+        </div>
+
+        <!-- VOICE COMMAND EXAMPLES -->
+        <div class="vcmd-pills">
+          <button class="vcmd-pill" onclick="executeQuickCmd('OPEN J.A.R.V.I.S INTERFACE')">"OPEN J.A.R.V.I.S INTERFACE"</button>
+          <button class="vcmd-pill" onclick="executeQuickCmd('SHOW ME THE NEWS')">"SHOW ME THE NEWS"</button>
+          <button class="vcmd-pill" onclick="executeQuickCmd('ACTIVATE SUIT')">"ACTIVATE SUIT"</button>
+          <button class="vcmd-pill" onclick="executeQuickCmd('RUN SYSTEM DIAGNOSTICS')">"RUN SYSTEM DIAGNOSTICS"</button>
+        </div>
+
+        <!-- QUICK ACCESS GRID -->
+        <div class="hud-box">
+          <div class="box-title" style="margin-bottom:10px;">QUICK ACCESS</div>
+          <div class="quick-access-grid">
+            <button class="qa-btn" onclick="openQuickModal('holograms')">
+              <span class="qa-icon">🌐</span>
+              <span class="qa-label">HOLOGRAMS</span>
+            </button>
+            <button class="qa-btn" onclick="openQuickModal('blueprints')">
+              <span class="qa-icon">📐</span>
+              <span class="qa-label">BLUEPRINTS</span>
+            </button>
+            <button class="qa-btn" onclick="openQuickModal('inventory')">
+              <span class="qa-icon">🎒</span>
+              <span class="qa-label">INVENTORY</span>
+            </button>
+            <button class="qa-btn" onclick="openQuickModal('messages')">
+              <span class="qa-icon">✉️</span>
+              <span class="qa-label">MESSAGES</span>
+            </button>
+            <button class="qa-btn" onclick="openQuickModal('calendar')">
+              <span class="qa-icon">📅</span>
+              <span class="qa-label">CALENDAR</span>
+            </button>
+            <button class="qa-btn" onclick="openQuickModal('settings')">
+              <span class="qa-icon">⚙️</span>
+              <span class="qa-label">SETTINGS</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- BOTTOM CENTER ROW (MESSAGES, CONSOLE PLATFORM, SYSTEM LOG) -->
+        <div class="bottom-center-row">
+          
+          <!-- MESSAGES -->
+          <div class="hud-box">
+            <div class="box-title">MESSAGES</div>
+            <div class="msg-item">
+              <div class="msg-avatar">PP</div>
+              <div style="flex:1; overflow:hidden;">
+                <div class="msg-name">PEPPER POTTS</div>
+                <div class="msg-sub">See you at 1 PM.</div>
+              </div>
+              <span class="msg-time">10:15 AM</span>
+            </div>
+            <div class="msg-item">
+              <div class="msg-avatar" style="background:linear-gradient(135deg,#FF2D7B,#880033);">NF</div>
+              <div style="flex:1; overflow:hidden;">
+                <div class="msg-name">NICK FURY</div>
+                <div class="msg-sub">The mission is a go.</div>
+              </div>
+              <span class="msg-time">09:45 AM</span>
+            </div>
+            <div class="msg-item">
+              <div class="msg-avatar" style="background:linear-gradient(135deg,#FFD21E,#886600);">JR</div>
+              <div style="flex:1; overflow:hidden;">
+                <div class="msg-name">JAMES RHODES</div>
+                <div class="msg-sub">Systems check complete.</div>
+              </div>
+              <span class="msg-time">09:30 AM</span>
+            </div>
+          </div>
+
+          <!-- ARC PLATFORM CANVAS -->
+          <div class="hud-box" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6px;">
+            <canvas id="platformDiscCanvas" width="130" height="90"></canvas>
+            <div style="font-family:'Orbitron', sans-serif; font-size:7px; color:#00D4FF; letter-spacing:0.1em; margin-top:2px;">
+              ARC CONSOLE PLATFORM
+            </div>
+          </div>
+
+          <!-- SYSTEM LOG -->
+          <div class="hud-box">
+            <div class="box-title">SYSTEM LOG</div>
+            <div class="log-console" id="sysLogBox">
+              <div class="log-line"><span class="log-ts">10:30:15</span> SYSTEM STARTUP COMPLETE</div>
+              <div class="log-line"><span class="log-ts">10:30:16</span> ALL SYSTEMS OPERATIONAL</div>
+              <div class="log-line"><span class="log-ts">10:30:18</span> BIOMETRIC VERIFICATION SUCCESS</div>
+              <div class="log-line"><span class="log-ts">10:30:20</span> J.A.R.V.I.S. ONLINE</div>
+              <div class="log-line"><span class="log-ts">10:30:22</span> AWAITING COMMAND...</div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN -->
+      <aside class="right-col">
+
+        <!-- ACTIVE PROJECTS & STARK TOWER GRAPHIC -->
+        <div class="hud-box">
+          <div class="box-title">
+            <span>STARK INDUSTRIES</span>
+            <span style="color:#00D4FF;">ACTIVE PROJECTS</span>
+          </div>
+
+          <div style="height:80px; text-align:center; margin-bottom:8px;">
+            <svg width="140" height="80" viewBox="0 0 140 80">
+              <!-- Skyscraper wireframe graphic -->
+              <polygon points="70,5 95,25 95,75 45,75 45,25" fill="rgba(0,212,255,0.06)" stroke="#00D4FF" stroke-width="1.5"/>
+              <line x1="70" y1="5" x2="70" y2="75" stroke="#00D4FF" stroke-width="1" stroke-dasharray="2,2"/>
+              <line x1="45" y1="40" x2="95" y2="40" stroke="#00D4FF" stroke-width="1" stroke-dasharray="2,2"/>
+              <circle cx="70" cy="18" r="4" fill="#00FF88" filter="drop-shadow(0 0 4px #00FF88)"/>
+            </svg>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-name">ARC REACTOR MK-II</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 85%;"></div></div>
+            <span class="metric-val">85%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-name">STARK DRONE SYSTEM</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 68%;"></div></div>
+            <span class="metric-val">68%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-name">PROJECT PEGASUS</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 92%;"></div></div>
+            <span class="metric-val">92%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-name">NEW ELEMENT DISCOVERY</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 75%;"></div></div>
+            <span class="metric-val">75%</span>
+          </div>
+        </div>
+
+        <!-- SYSTEM COMMANDS -->
+        <div class="hud-box">
+          <div class="box-title">SYSTEM COMMANDS</div>
+          <button class="sys-cmd-btn" onclick="executeSysCmd('OPEN LAB 42')">👤 OPEN LAB 42</button>
+          <button class="sys-cmd-btn" onclick="executeSysCmd('ACTIVATE STEALTH MODE')">👁️ ACTIVATE STEALTH MODE</button>
+          <button class="sys-cmd-btn" onclick="executeSysCmd('RUN DIAGNOSTICS')">📈 RUN DIAGNOSTICS</button>
+          <button class="sys-cmd-btn" onclick="executeSysCmd('ACCESS FILES')">📂 ACCESS FILES</button>
+          <button class="sys-cmd-btn" onclick="executeSysCmd('GLOBAL NETWORK')">🌐 GLOBAL NETWORK</button>
+          <button class="sys-cmd-btn" onclick="executeSysCmd('SHUTDOWN SYSTEM')" style="border-color:rgba(255,34,68,0.4); color:#FF2D7B;">🔌 SHUTDOWN SYSTEM</button>
+        </div>
+
+        <!-- GLOBAL NETWORK MAP -->
+        <div class="hud-box">
+          <div class="box-title">GLOBAL NETWORK</div>
+          <div style="height:90px; background:rgba(0,10,25,0.6); border:1px solid rgba(0,212,255,0.15); border-radius:4px; position:relative; overflow:hidden;">
+            <svg width="100%" height="100%" viewBox="0 0 260 100">
+              <!-- Global Network Nodes -->
+              <circle cx="50" cy="35" r="3" fill="#00D4FF"/><circle cx="120" cy="45" r="3" fill="#00D4FF"/>
+              <circle cx="180" cy="30" r="3" fill="#00D4FF"/><circle cx="210" cy="70" r="3" fill="#00D4FF"/>
+              <!-- Laser Connections -->
+              <line x1="50" y1="35" x2="120" y2="45" stroke="#00D4FF" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="120" y1="45" x2="180" y2="30" stroke="#00D4FF" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="180" y1="30" x2="210" y2="70" stroke="#00D4FF" stroke-width="1" stroke-dasharray="3,3"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- SECURITY STATUS WIDGET -->
+        <div class="hud-box">
+          <div class="box-title">
+            <span>SECURITY STATUS</span>
+            <span style="color:#00FF88;">SYSTEM SECURE</span>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+            <div style="font-size:24px;">🔒</div>
+            <div>
+              <div style="font-family:'Orbitron', sans-serif; font-size:10px; font-weight:700; color:#00FF88;">
+                NO THREATS DETECTED
+              </div>
+              <div style="font-family:'Share Tech Mono', monospace; font-size:8px; color:#5A7B98;">
+                SHIELD DEFENSES AT MAX CAPACITY
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-name">FIREWALL</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 100%;"></div></div>
+            <span class="metric-val">100%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-name">ENCRYPTION</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 100%;"></div></div>
+            <span class="metric-val">100%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-name">BIOMETRIC</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 100%;"></div></div>
+            <span class="metric-val">100%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-name">SURVEILLANCE</span>
+            <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 100%;"></div></div>
+            <span class="metric-val">ACTIVE</span>
+          </div>
+        </div>
+
+      </aside>
+
+    </main>
+
+    <!-- ── FOOTER STATUS ─────────────────────────────────────────────────── -->
+    <footer class="hud-foot">
+      <span class="fl">STARK INDUSTRIES — CLASSIFIED LEVEL 5 COMMAND CENTER</span>
+      <div class="power-cells">
+        <div class="pcell on"></div><div class="pcell on"></div><div class="pcell on"></div>
+        <div class="pcell on"></div><div class="pcell on"></div>
+      </div>
+      <span class="fr">J.A.R.V.I.S. PROTOCOL ACTIVE</span>
+    </footer>
+
+  </div>
+
+  <!-- ── QUICK ACCESS MODAL OVERLAY ────────────────────────────────────── -->
+  <div id="quickModal" class="hud-modal" style="display:none;">
+    <div class="hud-modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--hud-border); padding-bottom:12px; margin-bottom:16px;">
+        <h2 id="modalTitle" style="font-family:'Orbitron', sans-serif; font-size:14px; color:#00D4FF; margin:0;">TITLE</h2>
+        <button onclick="closeQuickModal()" style="background:none; border:1px solid #00D4FF; color:#00D4FF; padding:4px 10px; border-radius:4px; cursor:pointer;">✕ CLOSE</button>
+      </div>
+      <div id="modalBody" style="font-family:'Rajdhani', sans-serif; font-size:14px; line-height:1.6; color:#C8E8FF;">
+        Loading data...
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DYNAMIC ANIMATION CANVASES & LOGIC SCRIPT ─────────────────────── -->
+  <script>
+    // ── 1. REAL-TIME CLOCK ────────────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour12: true });
+      const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+      
+      document.getElementById('liveClock').textContent = timeStr;
+      document.getElementById('liveDate').textContent = dateStr;
+      document.getElementById('topClock').textContent = timeStr;
+      document.getElementById('topDate').textContent = dateStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ── 2. SPEECH SYNTHESIS (J.A.R.V.I.S. VOICE) ───────────────────────────
+    function speakJarvis(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.pitch = 1.0;
+        utterance.rate = 1.0;
+        
+        // Find best male or English voice
+        const voices = window.speechSynthesis.getVoices();
+        const jarvisVoice = voices.find(v => v.name.includes('Google UK English Male') || v.name.includes('Natural') || v.lang.includes('en'));
+        if (jarvisVoice) utterance.voice = jarvisVoice;
+
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function speakJarvisGreeting() {
+      speakJarvis("At your service, Tony. All Stark systems are operating at peak efficiency.");
+    }
+
+    // ── 3. CENTRAL 3D HOLOGRAM ORB CANVAS ─────────────────────────────────
+    const orbCanvas = document.getElementById('centralOrbCanvas');
+    const orbCtx = orbCanvas.getContext('2d');
+    let orbW, orbH;
+
+    function resizeOrbCanvas() {
+      orbW = orbCanvas.width = orbCanvas.parentElement.clientWidth;
+      orbH = orbCanvas.height = orbCanvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeOrbCanvas);
+    resizeOrbCanvas();
+
+    let orbAngle = 0;
+    function renderOrb() {
+      requestAnimationFrame(renderOrb);
+      orbCtx.clearRect(0, 0, orbW, orbH);
+      
+      orbAngle += 0.01;
+      const cx = orbW / 2;
+      const cy = orbH / 2;
+
+      // Outer glowing orbital rings
+      [140, 110, 80, 50].forEach((r, i) => {
+        orbCtx.save();
+        orbCtx.strokeStyle = i % 2 === 0 ? '#00D4FF' : '#00FF88';
+        orbCtx.lineWidth = 1.5;
+        orbCtx.globalAlpha = 0.3 + (i * 0.15);
+        orbCtx.shadowBlur = 15;
+        orbCtx.shadowColor = '#00D4FF';
+
+        orbCtx.beginPath();
+        const rot = orbAngle * (i % 2 === 0 ? 1 : -1) * (i + 1) * 0.4;
+        orbCtx.arc(cx, cy, r, rot, rot + Math.PI * 1.5);
+        orbCtx.stroke();
+        orbCtx.restore();
+      });
+
+      // Core Glowing Sphere
+      const grad = orbCtx.createRadialGradient(cx, cy, 0, cx, cy, 40);
+      grad.addColorStop(0, 'rgba(0, 212, 255, 0.8)');
+      grad.addColorStop(0.5, 'rgba(0, 212, 255, 0.2)');
+      grad.addColorStop(1, 'transparent');
+
+      orbCtx.beginPath();
+      orbCtx.arc(cx, cy, 40, 0, Math.PI * 2);
+      orbCtx.fillStyle = grad;
+      orbCtx.fill();
+    }
+    renderOrb();
+
+    // ── 4. J.A.R.V.I.S. CORE RING CANVAS ──────────────────────────────────
+    const coreCanvas = document.getElementById('coreRingCanvas');
+    const coreCtx = coreCanvas.getContext('2d');
+    let coreAngle = 0;
+
+    function renderCoreRing() {
+      requestAnimationFrame(renderCoreRing);
+      coreCtx.clearRect(0, 0, 65, 65);
+      coreAngle += 0.03;
+
+      coreCtx.save();
+      coreCtx.translate(32.5, 32.5);
+      coreCtx.rotate(coreAngle);
+
+      coreCtx.strokeStyle = '#00D4FF';
+      coreCtx.lineWidth = 2;
+      coreCtx.beginPath();
+      coreCtx.arc(0, 0, 26, 0, Math.PI * 1.5);
+      coreCtx.stroke();
+
+      coreCtx.rotate(-coreAngle * 2);
+      coreCtx.strokeStyle = '#00FF88';
+      coreCtx.lineWidth = 1.5;
+      coreCtx.beginPath();
+      coreCtx.arc(0, 0, 18, 0, Math.PI * 1.2);
+      coreCtx.stroke();
+
+      coreCtx.restore();
+    }
+    renderCoreRing();
+
+    // ── 5. VOICE WAVE ANIMATION CANVAS ────────────────────────────────────
+    const waveCanvas = document.getElementById('voiceWaveCanvas');
+    const waveCtx = waveCanvas.getContext('2d');
+    let waveStep = 0;
+
+    function renderVoiceWave() {
+      requestAnimationFrame(renderVoiceWave);
+      const w = waveCanvas.width = waveCanvas.parentElement.clientWidth;
+      const h = waveCanvas.height = waveCanvas.parentElement.clientHeight;
+
+      waveCtx.clearRect(0, 0, w, h);
+      waveStep += 0.08;
+
+      waveCtx.beginPath();
+      waveCtx.strokeStyle = '#00D4FF';
+      waveCtx.lineWidth = 2;
+      waveCtx.shadowBlur = 10;
+      waveCtx.shadowColor = '#00D4FF';
+
+      for (let x = 0; x < w; x += 4) {
+        const y = (h / 2) + Math.sin(x * 0.05 + waveStep) * 12 * Math.cos(waveStep * 0.5);
+        if (x === 0) waveCtx.moveTo(x, y);
+        else waveCtx.lineTo(x, y);
+      }
+      waveCtx.stroke();
+    }
+    renderVoiceWave();
+
+    // ── 6. CONSOLE PLATFORM DISC CANVAS ──────────────────────────────────
+    const platformCanvas = document.getElementById('platformDiscCanvas');
+    const platformCtx = platformCanvas.getContext('2d');
+    let pAngle = 0;
+
+    function renderPlatformDisc() {
+      requestAnimationFrame(renderPlatformDisc);
+      platformCtx.clearRect(0, 0, 130, 90);
+      pAngle += 0.02;
+
+      platformCtx.save();
+      platformCtx.translate(65, 45);
+      platformCtx.scale(1, 0.4); // 3D perspective oval
+
+      platformCtx.strokeStyle = '#00D4FF';
+      platformCtx.lineWidth = 2;
+      platformCtx.beginPath();
+      platformCtx.arc(0, 0, 40, pAngle, pAngle + Math.PI * 1.6);
+      platformCtx.stroke();
+
+      platformCtx.strokeStyle = '#00FF88';
+      platformCtx.beginPath();
+      platformCtx.arc(0, 0, 25, -pAngle, -pAngle + Math.PI * 1.4);
+      platformCtx.stroke();
+
+      platformCtx.restore();
+    }
+    renderPlatformDisc();
+
+    // ── 7. INTERACTIVE SYSTEM COMMANDS & LOGS ────────────────────────────
+    function addSysLog(msg) {
+      const box = document.getElementById('sysLogBox');
+      const now = new Date();
+      const ts = now.toTimeString().split(' ')[0];
+      
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.innerHTML = `<span class="log-ts">${ts}</span> ${msg}`;
+      box.appendChild(line);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function handleOrbClick() {
+      speakJarvis("How can I assist you, Tony Stark? Voice interfaces and quantum core networks are ready.");
+      addSysLog("USER ENGAGED CENTRAL J.A.R.V.I.S. CORE");
+    }
+
+    function executeQuickCmd(cmd) {
+      addSysLog(`EXECUTED VOICE COMMAND: "${cmd}"`);
+      speakJarvis(`Executing command: ${cmd}. Processing data...`);
+
+      if (cmd === 'ACTIVATE SUIT') {
+        alert("🚀 SUIT-UP PROTOCOL ENGAGED!\n\nMark 85 Nanotech Armor suit assembly initialized!");
+      } else if (cmd === 'OPEN J.A.R.V.I.S INTERFACE') {
+        window.location.href = 'index.html';
+      } else if (cmd === 'RUN SYSTEM DIAGNOSTICS') {
+        runLiveDiagnostics();
+      } else {
+        alert(`⚡ J.A.R.V.I.S PROTOCOL: ${cmd} executed successfully.`);
+      }
+    }
+
+    function executeSysCmd(action) {
+      addSysLog(`SYSTEM COMMAND TRIGGERED: ${action}`);
+      speakJarvis(`System command triggered: ${action}`);
+
+      if (action === 'OPEN LAB 42') {
+        window.location.href = '3d_lab.html';
+      } else if (action === 'ACTIVATE STEALTH MODE') {
+        toggleStealthMode();
+      } else if (action === 'RUN DIAGNOSTICS') {
+        runLiveDiagnostics();
+      } else if (action === 'SHUTDOWN SYSTEM') {
+        if (confirm("⚠️ SHUTDOWN J.A.R.V.I.S. COMMAND CENTER?")) {
+          document.body.style.opacity = '0.1';
+          speakJarvis("Goodbye, Tony. Shutting down systems.");
+          setTimeout(() => { document.body.style.opacity = '1'; }, 3000);
+        }
+      } else {
+        alert(`⚡ STARK SYSTEM: ${action} protocol active.`);
+      }
+    }
+
+    function runLiveDiagnostics() {
+      document.getElementById('cpuBar').style.width = '98%';
+      document.getElementById('cpuVal').textContent = '98%';
+      document.getElementById('memBar').style.width = '88%';
+      document.getElementById('memVal').textContent = '88%';
+
+      setTimeout(() => {
+        document.getElementById('cpuBar').style.width = '23%';
+        document.getElementById('cpuVal').textContent = '23%';
+        document.getElementById('memBar').style.width = '42%';
+        document.getElementById('memVal').textContent = '42%';
+        addSysLog("DIAGNOSTICS COMPLETE — ALL SYSTEMS NOMINAL");
+      }, 1500);
+    }
+
+    function toggleStealthMode() {
+      document.body.classList.toggle('instant-kill-mode');
+      addSysLog("STEALTH / INSTANT KILL MODE TOGGLED");
+    }
+
+    function triggerVoiceMic() {
+      speakJarvis("Listening for your voice input, sir.");
+      addSysLog("VOICE INPUT CAPTURE INITIALIZED");
+    }
+
+    // ── 8. QUICK ACCESS MODALS ────────────────────────────────────────────
+    const modalData = {
+      holograms: {
+        title: "🌐 HOLOGRAMS & 3D PROJECTIONS",
+        content: `
+          <p>Active 3D Holographic Rendering Engines:</p>
+          <ul>
+            <li><strong>Mark 85 Nanotech Mesh:</strong> 100% Calibrated</li>
+            <li><strong>Arc Core Simulation:</strong> Active 1.21 THz</li>
+            <li><strong>Chitti Swarm Vectors:</strong> 1,000 Nodes</li>
+          </ul>
+          <p><a href="3d_lab.html" style="color:#00D4FF; font-weight:bold;">👉 Open Interactive 3D Lab Studio</a></p>
+        `
+      },
+      blueprints: {
+        title: "📐 STARK INDUSTRIES BLUEPRINTS CAD",
+        content: `
+          <p>Classified Armor Schematic Files:</p>
+          <ul>
+            <li><strong>Mark 85 Arc Nanotech Core.cad</strong> (14.2 MB)</li>
+            <li><strong>Stark Tower Arc Grid System.cad</strong> (8.9 MB)</li>
+            <li><strong>Project Pegasus Energy Filter.cad</strong> (32.1 MB)</li>
+          </ul>
+        `
+      },
+      inventory: {
+        title: "🎒 ARMOR & WEAPON INVENTORY",
+        content: `
+          <p>Stark Vault Storage Status:</p>
+          <ul>
+            <li><strong>Iron Man Mark 85 Suit:</strong> Operational</li>
+            <li><strong>Rescue Armor Mark 49:</strong> Standby</li>
+            <li><strong>Hulkbuster Heavy Armor:</strong> Standby</li>
+            <li><strong>Nanotech Gauntlet Mk-II:</strong> Armed</li>
+          </ul>
+        `
+      },
+      messages: {
+        title: "✉️ ENCRYPTED STARK COMMS INBOX",
+        content: `
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div><strong>Pepper Potts:</strong> "Meeting confirmed with the board at 10:30 AM."</div>
+            <div><strong>Nick Fury:</strong> "S.H.I.E.L.D satellite feeds sent to your HUD."</div>
+            <div><strong>James Rhodes:</strong> "War Machine armor maintenance complete."</div>
+          </div>
+        `
+      },
+      calendar: {
+        title: "📅 STARK SCHEDULE & TIMELINE",
+        content: `
+          <ul>
+            <li>10:30 AM — Board Meeting at Stark Tower</li>
+            <li>01:00 PM — Lunch with Pepper Potts</li>
+            <li>03:30 PM — Project Pegasus Energy Review</li>
+            <li>06:00 PM — Charity Gala in Manhattan</li>
+          </ul>
+        `
+      },
+      settings: {
+        title: "⚙️ J.A.R.V.I.S. CONFIGURATION",
+        content: `
+          <p>System Preferences & Key Links:</p>
+          <ul>
+            <li><strong>AI Voice Model:</strong> JARVIS UK Male</li>
+            <li><strong>Neural Interface Mode:</strong> Autonomic</li>
+            <li><strong>PHP Proxy Server:</strong> Online (localhost/jarvis)</li>
+          </ul>
+        `
+      }
+    };
+
+    function openQuickModal(key) {
+      const data = modalData[key];
+      if (!data) return;
+      document.getElementById('modalTitle').innerHTML = data.title;
+      document.getElementById('modalBody').innerHTML = data.content;
+      document.getElementById('quickModal').style.display = 'flex';
+      addSysLog(`OPENED WIDGET: ${key.toUpperCase()}`);
+    }
+
+    function closeQuickModal() {
+      document.getElementById('quickModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
