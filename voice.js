@@ -536,6 +536,29 @@
     if (/open (control panel|control)|^(control panel|control)$/.test(t))
       return openApp('control','Control Panel', '', 'Open pannitten Boss! Opening Control Panel.');
 
+    // ── 4b. Web Search & Video Launcher Triggers ──────────────────────
+    if (/^(search|google|find)\s+(.+)/i.test(t)) {
+      const q = t.replace(/^(search|google|find)\s+/i, '').trim();
+      return debounced('search-' + q.slice(0, 20), () => {
+        const url = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+        window.JarvisApp?.openMultitaskWindow(url, `Search: ${q}`);
+        try { window.open(url, '_blank'); } catch(e){}
+        window.JarvisApp?.appendDirectMessage('ai', `🔍 **Searching Google for "${q}", Boss!**`);
+        speak(`Searching Google for ${q}, Boss!`);
+      });
+    }
+
+    if (/^(play|youtube search)\s+(.+)/i.test(t)) {
+      const q = t.replace(/^(play|youtube search)\s+/i, '').trim();
+      return debounced('yt-' + q.slice(0, 20), () => {
+        const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+        window.JarvisApp?.openMultitaskWindow(url, `YouTube: ${q}`);
+        try { window.open(url, '_blank'); } catch(e){}
+        window.JarvisApp?.appendDirectMessage('ai', `▶️ **Searching YouTube for "${q}", Boss!**`);
+        speak(`Playing ${q} on YouTube, Boss!`);
+      });
+    }
+
     // ── 5. System info / conversational ──────────────────────────────
     if (/how are you|eppadi irukke|how r u/.test(t))
       return debounced('howru', () => {
