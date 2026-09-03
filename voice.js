@@ -1,14 +1,10 @@
 /* ================================================================
-   J.A.R.V.I.S. BOSS TAMIL NEURAL MATRIX v9.0 (Always-On Heartbeat Engine)
+   J.A.R.V.I.S. CROSS-DEVICE MOBILE & DESKTOP VOICE MATRIX v10.0
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ✅ Natural Tamil Conversational Replies:
-      - "தமிழ்ல பேச முடியுமா?" ➔ "ஆமாம் பாஸ்! என்னால் தமிழில் பேச முடியும்!"
-      - "எப்படி இருக்கே?" ➔ "நான் நல்லா இருக்கேன் பாஸ்!"
-      - "என்ன பண்ற?" ➔ "உங்களுக்கான AI சிஸ்டம்களைக் கண்காணிக்கிறேன் பாஸ்!"
-      - "வானிலை என்ன?" ➔ "இன்றைய வானிலை 31°C வெப்பநிலையுடன் தெளிவாக உள்ளது பாஸ்!"
-   ✅ App Open Confirmation: "ஓப்பன் பண்ணிட்டேன் பாஸ்!"
-   ✅ Persistent Heartbeat Watchdog — Microphone NEVER stops or goes offline!
-   ✅ Zero "Backup mode" announcements
+   ✅ Universal Mobile & Desktop Speech Recognition (iOS Safari / Android Chrome / Windows / Mac)
+   ✅ Automatic Mobile Touch Audio Unlock Banner ("Tap anywhere to unlock JARVIS voice")
+   ✅ Persistent Mobile Heartbeat Watchdog — Auto-restarts speech on gesture & focus
+   ✅ 100% Free AI Neural Response for all devices without API keys
    ================================================================ */
 
 (function () {
@@ -43,12 +39,13 @@
       .catch(e => console.warn('[JARVIS DAEMON Offline fallback]', e));
   }
 
-  // ── Unlock Audio Context on first interaction ──────────────────
+  // ── Mobile Touch Audio Unlock Engine ───────────────────────────
   function unlockAudio() {
     if (audioUnlocked) return;
     try {
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
         const u = new SpeechSynthesisUtterance('');
         u.volume = 0;
         window.speechSynthesis.speak(u);
@@ -59,10 +56,39 @@
         ctx.resume();
       }
       audioUnlocked = true;
+
+      // Remove mobile unlock banner if present
+      document.getElementById('mobileUnlockBanner')?.remove();
     } catch(e) {}
   }
-  document.addEventListener('click', unlockAudio, { once: true });
-  document.addEventListener('keydown', unlockAudio, { once: true });
+
+  // ── Add Mobile Gesture Unlock Banner if Mobile Browser ─────────
+  function initMobileBanner() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile && !audioUnlocked) {
+      const banner = document.createElement('div');
+      banner.id = 'mobileUnlockBanner';
+      banner.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+        background: linear-gradient(90deg, #ff007f, #00d2ff);
+        color: #fff; text-align: center; padding: 12px; font-family: sans-serif;
+        font-weight: bold; font-size: 13px; letter-spacing: 0.05em; cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,210,255,0.4);
+      `;
+      banner.innerHTML = '🎙️ TAP ANYWHERE TO ACTIVATE JARVIS VOICE & MICROPHONE ENGINE';
+      banner.addEventListener('click', () => {
+        unlockAudio();
+        window.JarvisVoice.toggle();
+      });
+      document.body.appendChild(banner);
+    }
+  }
+
+  document.addEventListener('click', unlockAudio);
+  document.addEventListener('touchstart', unlockAudio);
+  document.addEventListener('touchend', unlockAudio);
+  document.addEventListener('pointerdown', unlockAudio);
+  document.addEventListener('keydown', unlockAudio);
 
   // ── Audio Feedback ─────────────────────────────────────────────
   function playPing(freq = 880) {
@@ -149,7 +175,10 @@
     },
 
     _startListening() {
-      if (!SR) return;
+      if (!SR) {
+        window.JarvisToast?.show('⚠️ Speech Recognition requires HTTPS or supported browser (Chrome / Safari)', 'warning', 6000);
+        return;
+      }
       if (isListening) return;
       if (isSpeaking) {
         setTimeout(() => this._startListening(), 200);
@@ -603,6 +632,8 @@
 
   // ── Auto-Start Voice Listening Engine on DOM Ready & Gesture ────
   document.addEventListener('DOMContentLoaded', () => {
+    initMobileBanner();
+
     document.getElementById('voiceBtn')?.addEventListener('click', () => {
       window.JarvisVoice.toggle();
     });
@@ -627,9 +658,9 @@
       window.JarvisVoice._startListening();
     };
 
-    window.addEventListener('click', autoActivate, { once: true });
-    window.addEventListener('keydown', autoActivate, { once: true });
-    window.addEventListener('touchstart', autoActivate, { once: true });
+    window.addEventListener('click', autoActivate);
+    window.addEventListener('keydown', autoActivate);
+    window.addEventListener('touchstart', autoActivate);
   });
 
 })();
