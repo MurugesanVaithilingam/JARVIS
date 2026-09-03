@@ -91,12 +91,13 @@ window.JarvisApp = (function() {
   // ── Boot ────────────────────────────────────────────────────
   function boot() {
     const LINES = [
-      'STARK INDUSTRIES SYSTEMS ONLINE',
-      'NEURAL CORE INITIALIZED...',
-      'LOADING AI PROVIDER MATRIX...',
-      'VOICE RECOGNITION ACTIVATED',
-      'PERSONA PROTOCOLS ENGAGED',
-      'ALL SYSTEMS NOMINAL — WELCOME.',
+      '⚡ STARK INDUSTRIES MARK-85 AI NETWORK INITIALIZING...',
+      '🧬 NEURAL MATRIX & QUANTUM ALGORITHMS LOADED',
+      '🤖 CONNECTING 14 AI PROVIDERS (GPT-4o, CLAUDE, GEMINI, DEEPSEEK...)',
+      '🎙️ VOICE SYNTHESIS & RECOGNITION ONLINE',
+      '🛡️ CYBER THREAT SCANNER & INSTANT KILL PROTOCOLS ENGAGED',
+      '🌌 3D HOLOGRAM & SATELLITE TRACKER ACTIVE',
+      '✅ ALL SYSTEMS 100% OPERATIONAL — WELCOME SIR!',
     ];
     const bar = document.getElementById('bootBar');
     const pct = document.getElementById('bootPct');
