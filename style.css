@@ -38,7 +38,7 @@ body.persona-aria    { --c1:#00FF88; --c1d:#009944; --c1g:rgba(0,255,136,.2);  }
 
 /* ── Reset ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--cp);font-family:var(--fbody);font-size:14px;cursor:default;user-select:none;}
+html,body{width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;background:var(--bg);color:var(--cp);font-family:var(--fbody);font-size:14px;cursor:default;user-select:none;}
 .hidden{display:none!important;}
 button{cursor:pointer;}
 input,select,textarea{font-family:var(--fbody);}
@@ -112,7 +112,7 @@ input,select,textarea{font-family:var(--fbody);}
 /* Nav container */
 .main-nav-links, .nav-links {
   display: flex !important;
-  gap: 8px !important;
+  gap: 6px !important;
   align-items: center !important;
   padding: 4px 8px !important;
   background: rgba(2, 11, 24, 0.75) !important;
@@ -120,6 +120,12 @@ input,select,textarea{font-family:var(--fbody);}
   border-radius: 8px !important;
   backdrop-filter: blur(12px) !important;
   box-shadow: inset 0 0 12px rgba(0, 212, 255, 0.05), 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  max-width: 100% !important;
+}
+.main-nav-links::-webkit-scrollbar, .nav-links::-webkit-scrollbar {
+  display: none !important;
 }
 
 /* ── Glowing Nav Tab Buttons ──────────────────────────────────── */

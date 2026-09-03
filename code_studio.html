@@ -10,10 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
-    body { background: #020B18; font-family: var(--fbody); min-height: 100vh; }
-
-    
-    .studio-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px; max-width: 1400px; margin: 0 auto; height: calc(100vh - 100px); }
+    html, body { background: #020B18; font-family: var(--fbody); min-height: 100vh; height: auto !important; overflow-x: hidden !important; overflow-y: auto !important; }
+    .studio-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px; max-width: 1400px; margin: 0 auto; min-height: calc(100vh - 100px); }
     .editor-card { background: rgba(0,212,255,0.03); border: 1px solid var(--brd); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; }
     .editor-title { font-family: var(--fhud); font-size: 13px; color: var(--c1); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
     .code-area { flex: 1; background: #051329; border: 1px solid var(--brd); color: #00ff88; font-family: var(--fmono); font-size: 12px; padding: 14px; border-radius: 6px; resize: none; outline: none; }
