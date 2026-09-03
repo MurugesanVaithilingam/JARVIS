@@ -676,15 +676,16 @@ window.JarvisApp = (function() {
         window.JarvisToast?.show('🖥️ Exited Fullscreen Mode', 'info');
       }
     },
-    openMultitaskWindow(url, title) {
+    openMultitaskWindow(url, title, fullScreen = true) {
       const hud = document.getElementById('multitaskHUD');
       const iframe = document.getElementById('multitaskIframe');
       const t = document.getElementById('mhudTitle');
       if (hud && iframe) {
         iframe.src = url;
-        if (t) t.textContent = `🖥️ MULTITASKING — ${title || 'APP WINDOW'}`;
+        if (t) t.textContent = `🖥️ FULL SCREEN MULTITASKING — ${title || 'APP WINDOW'}`;
         hud.classList.remove('hidden');
-        window.JarvisToast?.show(`🖥️ Split-screen multitasking opened: ${title}`, 'success');
+        if (fullScreen) hud.classList.add('maximized');
+        window.JarvisToast?.show(`🖥️ Full Screen Multitasking Window: ${title}`, 'success');
       }
     },
     closeMultitaskWindow() {

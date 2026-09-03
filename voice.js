@@ -25,7 +25,7 @@
 
   // Per-command debounce map { commandKey → lastExecutedTime }
   const cmdTimestamps = {};
-  const CMD_DEBOUNCE  = 2000; // 2 seconds per unique command
+  const CMD_DEBOUNCE  = 300;  // 0.3s for instant zero-delay execution
 
   // Track opened windows so we can close them by voice
   const openedWindows = {};
