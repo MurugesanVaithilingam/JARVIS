@@ -1,0 +1,14 @@
+# Operating System
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+scratch_run_*.php
+
+# Environment & Credentials
+.env
+config.local.json

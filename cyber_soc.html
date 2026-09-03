@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STARK SOC / NOC — Cyber Security Operations Center</title>
+  <meta name="description" content="Stark Industries Security Operations Center (SOC) — Live Threat Intelligence, OWASP Scanner, and Defense Matrix.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: #020B18; font-family: var(--fbody); min-height: 100vh; }
+
+
+    .soc-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; padding: 24px; max-width: 1400px; margin: 0 auto; }
+    .card { background: rgba(0,212,255,0.03); border: 1px solid var(--brd); border-radius: 8px; padding: 20px; box-shadow: var(--glow1); }
+    .card-title { font-family: var(--fhud); font-size: 13px; color: var(--c1); letter-spacing: 0.12em; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .log-terminal { background: #01060e; border: 1px solid var(--brd); border-radius: 6px; padding: 12px; font-family: var(--fmono); font-size: 11px; color: #00ff88; height: 260px; overflow-y: auto; }
+    .threat-item { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid rgba(255,34,68,0.2); font-family: var(--fmono); font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="lab-nav">
+    <div class="logo-mark" style="font-family:var(--fhud); font-size:16px; color:var(--c1);"><span class="logo-s" style="color:var(--cred); font-weight:900;">S</span>TARK CYBER DEFENSE SOC / NOC</div>
+    <nav class="nav-links">
+      <a href="index.html"       class="nav-tab" data-label="HUD">🤖 <span>HUD</span></a>
+      <a href="3d_lab.html"      class="nav-tab" data-label="3D LAB">🌌 <span>3D LAB</span></a>
+      <a href="tracker.html"     class="nav-tab" data-label="TRACKER">🛰️ <span>TRACKER</span></a>
+      <a href="code_studio.html" class="nav-tab" data-label="CODE">🧠 <span>CODE</span></a>
+      <a href="cyber_soc.html"   class="nav-tab active" data-label="CYBER">🛡️ <span>CYBER</span></a>
+      <a href="cmd_hacker.html"  class="nav-tab" data-label="TERMINAL">💻 <span>TERMINAL</span></a>
+    </nav>
+  </header>
+
+  <!-- SOC GRID -->
+  <div class="soc-grid">
+    <!-- Left Column: Live Traffic Graph & Threat Intelligence -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <!-- Live Network Traffic Canvas -->
+      <div class="card">
+        <div class="card-title">
+          <span>📊 REAL-TIME NETWORK TRAFFIC & ANOMALY GRAPH</span>
+          <span style="color:#00ff88; font-family:var(--fmono); font-size:10px;">FIREWALL: ACTIVE</span>
+        </div>
+        <canvas id="trafficCanvas" width="800" height="220" style="width:100%; max-height:220px; background:#01060e; border:1px solid var(--brd); border-radius:6px;"></canvas>
+      </div>
+
+      <!-- Real-Time Log Terminal -->
+      <div class="card">
+        <div class="card-title">
+          <span>🖥️ REAL-TIME SECURITY EVENT LOGS</span>
+          <button onclick="clearSocLogs()" style="background:transparent; border:1px solid var(--c1); color:var(--c1); padding:4px 10px; font-family:var(--fhud); font-size:10px; border-radius:4px; cursor:pointer;">CLEAR LOGS</button>
+        </div>
+        <div class="log-terminal" id="socLogs">
+          [SYS_INIT] Stark Cyber Defense Firewall v5.2 Active...<br>
+          [RULE_OK] Port 80 (HTTP) WAMP Localhost bound successfully.<br>
+          [MONITOR] Listening for anomalous packet signatures...<br>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: OWASP Top 10 Audit Matrix & Threat Alert -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <!-- OWASP Audit Matrix -->
+      <div class="card">
+        <div class="card-title">🛡️ OWASP TOP 10 AUDIT</div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-family:var(--fmono); font-size:11px;">
+          <div style="display:flex; justify-content:space-between;"><span>A01: BROKEN ACCESS CONTROL</span><span style="color:#00ff88;">PASSED</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>A02: CRYPTOGRAPHIC FAILURES</span><span style="color:#00ff88;">PASSED</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>A03: INJECTION (SQLi / XSS)</span><span style="color:#00ff88;">PROTECTED</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>A04: INSECURE DESIGN</span><span style="color:#00ff88;">PASSED</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>A05: SECURITY MISCONFIG</span><span style="color:#00ff88;">PASSED</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>A06: VULN COMPONENTS</span><span style="color:#00ff88;">0 VULNS</span></div>
+        </div>
+      </div>
+
+      <!-- Active Threat Feed -->
+      <div class="card">
+        <div class="card-title">
+          <span>⚠️ THREAT FEED</span>
+          <button onclick="simulateAttack()" style="background:var(--cred); border:none; color:#fff; padding:4px 10px; font-family:var(--fhud); font-size:10px; border-radius:4px; cursor:pointer;">SIMULATE ATTACK</button>
+        </div>
+        <div id="threatFeed" style="display:flex; flex-direction:column; gap:8px;">
+          <div class="threat-item">
+            <span style="color:var(--cw);">192.168.1.105 (SYN FLOOD)</span>
+            <span style="color:var(--cred);">BLOCKED</span>
+          </div>
+          <div class="threat-item">
+            <span style="color:var(--cw);">10.0.0.44 (PORT SCAN)</span>
+            <span style="color:var(--cred);">BLOCKED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="tools.js"></script>
+  <script>
+    // Live Traffic Graph Animation
+    const tCanvas = document.getElementById('trafficCanvas');
+    const tCtx = tCanvas.getContext('2d');
+    let points = new Array(100).fill(50);
+
+    function drawTraffic() {
+      tCtx.clearRect(0, 0, tCanvas.width, tCanvas.height);
+      points.shift();
+      points.push(Math.floor(20 + Math.random() * 80));
+
+      tCtx.strokeStyle = '#00D4FF';
+      tCtx.lineWidth = 2;
+      tCtx.shadowBlur = 10; tCtx.shadowColor = '#00D4FF';
+
+      tCtx.beginPath();
+      const step = tCanvas.width / (points.length - 1);
+      points.forEach((p, i) => {
+        const x = i * step;
+        const y = tCanvas.height - p;
+        if (i === 0) tCtx.moveTo(x, y);
+        else tCtx.lineTo(x, y);
+      });
+      tCtx.stroke();
+      requestAnimationFrame(drawTraffic);
+    }
+    drawTraffic();
+
+    // Log Streamer
+    function logEvent(msg) {
+      const logs = document.getElementById('socLogs');
+      const time = new Date().toLocaleTimeString();
+      logs.innerHTML += `[${time}] ${msg}<br>`;
+      logs.scrollTop = logs.scrollHeight;
+    }
+
+    setInterval(() => {
+      const events = [
+        '[SEC_OK] Firewall packet inspection clean.',
+        '[TRAFFIC] Localhost server latency 1.2ms.',
+        '[MONITOR] SSL/TLS certificate verification valid.'
+      ];
+      logEvent(events[Math.floor(Math.random() * events.length)]);
+    }, 4000);
+
+    function clearSocLogs() {
+      document.getElementById('socLogs').innerHTML = '[LOGS CLEARED]<br>';
+    }
+
+    function simulateAttack() {
+      window.JarvisAudio?.playAlarm();
+      const randomIP = `192.168.1.${Math.floor(10 + Math.random()*200)}`;
+      const feed = document.getElementById('threatFeed');
+      feed.innerHTML = `
+        <div class="threat-item">
+          <span style="color:var(--cw);">${randomIP} (MALICIOUS PAYLOAD)</span>
+          <span style="color:var(--cred);">INTERCEPTED & BLOCKED</span>
+        </div>
+      ` + feed.innerHTML;
+      logEvent(`<span style="color:var(--cred);">[ATTACK_BLOCKED] Neutralized intrusion from ${randomIP}</span>`);
+      window.JarvisToast?.show(`🛡️ Simulated Attack from ${randomIP} Intercepted!`, 'error');
+    }
+  </script>
+</body>
+</html>

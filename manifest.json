@@ -1,0 +1,16 @@
+{
+  "name": "J.A.R.V.I.S. Stark AI Command Center",
+  "short_name": "JARVIS",
+  "description": "Stark Industries AI Command Center with access to ChatGPT, Claude, Gemini, DeepSeek, Grok, and more.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#020B18",
+  "theme_color": "#00D4FF",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/512/iron-man.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

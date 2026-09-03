@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STARK LABS — 3D Holographic Arc-Reactor & Suit Studio</title>
+  <meta name="description" content="3D Holographic Arc Reactor, Nanotech Suit Assembly, and Interactive WebGL Lab Studio.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root { --lab-accent: #00D4FF; }
+    html, body { overflow: hidden; background: #020B18; font-family: var(--fbody); height: 100%; }
+
+    /* ── NAV ─────────────────────────────────────────────────────── */
+    .lab-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 56px;
+      background: rgba(2,11,24,0.92);
+      border-bottom: 1px solid var(--brd);
+      backdrop-filter: blur(16px);
+      position: relative; z-index: 100;
+    }
+    .lab-nav::after {
+      content: ''; position: absolute; bottom: 0; left: 50%;
+      transform: translateX(-50%); width: 200px; height: 1px;
+      background: var(--c1); box-shadow: var(--glow2);
+    }
+    .nav-links { display: flex; gap: 8px; }
+
+    /* ── LAYOUT ──────────────────────────────────────────────────── */
+    .lab-body {
+      position: fixed; inset: 0; top: 56px;
+      display: flex; overflow: hidden;
+    }
+    .canvas-wrap {
+      flex: 1; position: relative; overflow: hidden;
+    }
+    #threedCanvas { display: block; width: 100%; height: 100%; }
+
+    /* ── LEFT PANEL ──────────────────────────────────────────────── */
+    .lab-side {
+      width: 220px; min-width: 220px;
+      background: rgba(2,11,24,0.88);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--brd);
+      display: flex; flex-direction: column;
+      overflow-y: auto; overflow-x: hidden;
+      scrollbar-width: thin; scrollbar-color: var(--c1d) transparent;
+    }
+    .lab-side-r {
+      border-right: none;
+      border-left: 1px solid var(--brd);
+    }
+    .side-hdr {
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid var(--brd);
+      background: rgba(0,212,255,0.04);
+      position: sticky; top: 0; z-index: 2;
+    }
+    .side-title {
+      font-family: var(--fhud); font-size: 8px; font-weight: 700;
+      color: var(--c1); letter-spacing: .25em; text-shadow: var(--glow1);
+    }
+    .side-body { padding: 12px 10px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* Metric rows */
+    .lab-metric { display: flex; flex-direction: column; gap: 4px; }
+    .lm-row { display: flex; justify-content: space-between; align-items: center; }
+    .lm-lbl { font-family: var(--fmono); font-size: 8px; color: var(--cd); letter-spacing: .1em; }
+    .lm-val { font-family: var(--fmono); font-size: 9px; color: var(--c1); }
+    .lm-bar { height: 3px; background: rgba(0,212,255,.1); border-radius: 2px; overflow: hidden; }
+    .lm-fill { height: 100%; border-radius: 2px; box-shadow: 0 0 6px rgba(0,212,255,.5); transition: width .6s ease; }
+
+    /* Glowing stat card */
+    .lab-stat {
+      background: rgba(0,212,255,.04); border: 1px solid var(--brd);
+      border-radius: 6px; padding: 10px; text-align: center;
+      transition: all .2s;
+    }
+    .lab-stat:hover { border-color: var(--c1); box-shadow: var(--glow1); }
+    .lab-stat-val { font-family: var(--fhud); font-size: 18px; font-weight: 700; color: var(--c1); text-shadow: var(--glow1); }
+    .lab-stat-lbl { font-family: var(--fmono); font-size: 7px; color: var(--cd); letter-spacing: .12em; margin-top: 3px; }
+
+    .stat-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+    /* Section label */
+    .lab-sect { font-family: var(--fhud); font-size: 7px; color: var(--cd); letter-spacing: .2em; margin-bottom: 4px; }
+    .lab-divline { height: 1px; background: var(--brd); margin: 4px 0; }
+
+    /* ── HUD OVERLAYS (on canvas) ────────────────────────────────── */
+    .hud-corner {
+      position: absolute; pointer-events: none;
+      font-family: var(--fmono); font-size: 9px; color: var(--c1);
+      letter-spacing: .12em; line-height: 1.7;
+    }
+    .hud-corner.tl { top: 16px; left: 16px; }
+    .hud-corner.tr { top: 16px; right: 16px; text-align: right; }
+    .hud-corner.bl { bottom: 80px; left: 16px; }
+    .hud-corner.br { bottom: 80px; right: 16px; text-align: right; }
+
+    /* Corner bracket decorators */
+    .hud-corner.tl::before { content: ''; position: absolute; top: -6px; left: -6px; width: 14px; height: 14px; border: 2px solid var(--c1); border-right: none; border-bottom: none; border-radius: 2px 0 0 0; }
+    .hud-corner.tr::after  { content: ''; position: absolute; top: -6px; right: -6px; width: 14px; height: 14px; border: 2px solid var(--c1); border-left: none; border-bottom: none; border-radius: 0 2px 0 0; }
+    .hud-corner.bl::before { content: ''; position: absolute; bottom: -6px; left: -6px; width: 14px; height: 14px; border: 2px solid var(--c1); border-right: none; border-top: none; border-radius: 0 0 0 2px; }
+    .hud-corner.br::after  { content: ''; position: absolute; bottom: -6px; right: -6px; width: 14px; height: 14px; border: 2px solid var(--c1); border-left: none; border-top: none; border-radius: 0 0 2px 0; }
+
+    .hud-label { color: var(--cd); font-size: 8px; }
+    .hud-value { color: var(--c1); font-size: 10px; font-weight: 700; text-shadow: var(--glow1); }
+    .hud-blink { animation: blink .9s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1;}50%{opacity:0.3;} }
+
+    /* Center crosshair */
+    .crosshair {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 60px; height: 60px; pointer-events: none;
+      opacity: 0.35;
+    }
+    .crosshair::before, .crosshair::after {
+      content: ''; position: absolute; background: var(--c1); box-shadow: var(--glow1);
+    }
+    .crosshair::before { width: 100%; height: 1px; top: 50%; transform: translateY(-50%); }
+    .crosshair::after  { width: 1px; height: 100%; left: 50%; transform: translateX(-50%); }
+
+    /* Scanning line */
+    .scan-line {
+      position: absolute; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,212,255,0.6), transparent);
+      box-shadow: 0 0 15px rgba(0,212,255,0.4);
+      animation: scanMove 4s linear infinite;
+      pointer-events: none; top: 0;
+    }
+    @keyframes scanMove { 0%{top:0%} 100%{top:100%} }
+
+    /* ── CONTROLS BAR ────────────────────────────────────────────── */
+    .lab-controls {
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 10px; align-items: center;
+      background: rgba(2,11,24,0.9); backdrop-filter: blur(16px);
+      padding: 12px 20px; border: 1px solid var(--brd);
+      border-radius: 40px; box-shadow: var(--glow1), 0 8px 32px rgba(0,0,0,0.6);
+      z-index: 10;
+    }
+    .lab-controls::before { content: ''; position: absolute; inset: -1px; border-radius: 40px; background: linear-gradient(135deg, rgba(0,212,255,.15), transparent, rgba(0,212,255,.08)); pointer-events: none; }
+    .ctrl-btn {
+      background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.3);
+      color: var(--c1); padding: 7px 16px;
+      font-family: var(--fhud); font-size: 9px; letter-spacing: .1em;
+      cursor: pointer; border-radius: 20px; transition: all .2s;
+      white-space: nowrap;
+    }
+    .ctrl-btn:hover { background: var(--c1); color: #000; box-shadow: var(--glow1); transform: translateY(-1px); }
+    .ctrl-btn.active { background: rgba(0,212,255,.25); border-color: var(--c1); box-shadow: var(--glow2); }
+    .ctrl-sep { width: 1px; height: 24px; background: var(--brd); }
+
+    /* Color buttons */
+    .color-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.2); cursor: pointer;
+      transition: all .2s; position: relative;
+    }
+    .color-btn:hover { transform: scale(1.2); border-color: rgba(255,255,255,.6); }
+    .color-btn.active-color { border-color: #fff; box-shadow: 0 0 12px currentColor; transform: scale(1.15); }
+    .color-btn[data-color="#00D4FF"] { background: #00D4FF; }
+    .color-btn[data-color="#FF2D7B"] { background: #FF2D7B; }
+    .color-btn[data-color="#FFD21E"] { background: #FFD21E; }
+    .color-btn[data-color="#00FF88"] { background: #00FF88; }
+    .color-btn[data-color="#A855F7"] { background: #A855F7; }
+    .color-btn[data-color="#FF6B35"] { background: #FF6B35; }
+
+    /* Mode pills */
+    .mode-pill {
+      display: flex; background: rgba(0,0,0,.4); border: 1px solid var(--brd);
+      border-radius: 20px; overflow: hidden;
+    }
+    .mode-btn {
+      padding: 5px 12px; font-family: var(--fhud); font-size: 8px;
+      letter-spacing: .1em; color: var(--cd); border: none;
+      background: transparent; cursor: pointer; transition: all .2s;
+    }
+    .mode-btn.active { background: var(--c1g); color: var(--c1); }
+
+    /* Live status badge */
+    .live-badge {
+      display: flex; align-items: center; gap: 5px;
+      font-family: var(--fmono); font-size: 8px; color: var(--c4);
+      letter-spacing: .12em;
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--c4);
+      box-shadow: 0 0 8px var(--c4); animation: sdpulse 1.5s infinite;
+    }
+
+    /* Particle count display */
+    .pcount {
+      font-family: var(--fmono); font-size: 8px; color: var(--cd);
+      letter-spacing: .1em; text-align: center; padding: 6px;
+      background: rgba(0,212,255,.03); border: 1px solid var(--brd);
+      border-radius: 4px;
+    }
+    .pcount span { color: var(--c1); font-size: 11px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <!-- NAV -->
+  <header class="lab-nav">
+    <div class="logo-mark">
+      <span class="logo-s">S</span>TARK 3D SUIT LAB
+    </div>
+    <nav class="nav-links">
+      <a href="index.html"       class="nav-tab">🤖 HUD</a>
+      <a href="3d_lab.html"      class="nav-tab active">🌌 3D LAB</a>
+      <a href="tracker.html"     class="nav-tab">🛰️ TRACKER</a>
+      <a href="code_studio.html" class="nav-tab">🧠 CODE</a>
+      <a href="cyber_soc.html"   class="nav-tab">🛡️ CYBER</a>
+    </nav>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      HOLOGRAM LIVE
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <div class="lab-body">
+
+    <!-- LEFT PANEL -->
+    <aside class="lab-side">
+      <div class="side-hdr"><div class="side-title">⚡ ARMOR SYSTEMS</div></div>
+      <div class="side-body">
+
+        <div class="stat-grid-2">
+          <div class="lab-stat">
+            <div class="lab-stat-val" id="fpsVal">60</div>
+            <div class="lab-stat-lbl">FPS</div>
+          </div>
+          <div class="lab-stat">
+            <div class="lab-stat-val" id="partVal">1000</div>
+            <div class="lab-stat-lbl">NODES</div>
+          </div>
+        </div>
+
+        <div class="lab-sect">POWER SYSTEMS</div>
+        <div class="lab-metric">
+          <div class="lm-row"><span class="lm-lbl">ARC REACTOR</span><span class="lm-val" id="arcPower">100%</span></div>
+          <div class="lm-bar"><div class="lm-fill" id="arcBar" style="width:100%;background:linear-gradient(90deg,#0088AA,#00D4FF);"></div></div>
+        </div>
+        <div class="lab-metric">
+          <div class="lm-row"><span class="lm-lbl">PLASMA FIELD</span><span class="lm-val">99.8%</span></div>
+          <div class="lm-bar"><div class="lm-fill" style="width:99.8%;background:linear-gradient(90deg,#009944,#00FF88);"></div></div>
+        </div>
+        <div class="lab-metric">
+          <div class="lm-row"><span class="lm-lbl">REPULSOR PWR</span><span class="lm-val">87%</span></div>
+          <div class="lm-bar"><div class="lm-fill" style="width:87%;background:linear-gradient(90deg,#A83D10,#FF6B35);"></div></div>
+        </div>
+        <div class="lab-metric">
+          <div class="lm-row"><span class="lm-lbl">NANOTECH INK</span><span class="lm-val">74%</span></div>
+          <div class="lm-bar"><div class="lm-fill" style="width:74%;background:linear-gradient(90deg,#997200,#FFD21E);"></div></div>
+        </div>
+
+        <div class="lab-divline"></div>
+        <div class="lab-sect">SUIT INTEGRITY</div>
+        <div class="lab-metric">
+          <div class="lm-row"><span class="lm-lbl">CHEST PLATE</span><span class="lm-val">100%</span></div>
+          <div class="lm-bar"><div class="lm-fill" style="width:100%;background:linear-gradient(90deg,#0088AA,#00D4FF);"></div></div>
+        </div>
+        <div class="lab-metric">
+          <div class="lm-row"><span class="lm-lbl">HELMET</span><span class="lm-val">100%</span></div>
+          <div class="lm-bar"><div class="lm-fill" style="width:100%;background:linear-gradient(90deg,#0088AA,#00D4FF);"></div></div>
+        </div>
+        <div class="lab-metric">
+          <div class="lm-row"><span class="lm-lbl">GAUNTLETS</span><span class="lm-val">95%</span></div>
+          <div class="lm-bar"><div class="lm-fill" style="width:95%;background:linear-gradient(90deg,#0088AA,#00D4FF);"></div></div>
+        </div>
+
+        <div class="lab-divline"></div>
+        <div class="pcount">TOTAL PARTICLES<br><span id="totalPart">1000</span> ACTIVE NODES</div>
+
+      </div>
+    </aside>
+
+    <!-- CENTER CANVAS -->
+    <div class="canvas-wrap">
+      <canvas id="threedCanvas"></canvas>
+
+      <!-- Scanning line -->
+      <div class="scan-line"></div>
+
+      <!-- Crosshair -->
+      <div class="crosshair"></div>
+
+      <!-- HUD overlays -->
+      <div class="hud-corner tl" style="padding:8px 10px;">
+        <div class="hud-label">DESIGNATION</div>
+        <div class="hud-value">MARK L — NANOTECH</div>
+        <div class="hud-label" style="margin-top:6px;">CORE FREQ</div>
+        <div class="hud-value">1.21 THz <span class="hud-blink">█</span></div>
+        <div class="hud-label" style="margin-top:6px;">STATUS</div>
+        <div class="hud-value" style="color:#00FF88;">● ONLINE</div>
+      </div>
+
+      <div class="hud-corner tr" style="padding:8px 10px;">
+        <div class="hud-label">ROTATION</div>
+        <div class="hud-value" id="rotVal">AUTO</div>
+        <div class="hud-label" style="margin-top:6px;">PARTICLES</div>
+        <div class="hud-value" id="hudPartCount">1000</div>
+        <div class="hud-label" style="margin-top:6px;">MODE</div>
+        <div class="hud-value" id="hudMode">SPHERE</div>
+      </div>
+
+      <div class="hud-corner bl" style="padding:8px 10px;">
+        <div class="hud-label">MAGNETIC HARNESS</div>
+        <div class="hud-value">STABLE</div>
+        <div class="hud-label" style="margin-top:6px;">PLASMA CONF.</div>
+        <div class="hud-value">99.8%</div>
+      </div>
+
+      <div class="hud-corner br" style="padding:8px 10px;">
+        <div class="hud-label">STARK INDUSTRIES</div>
+        <div class="hud-value">AI VISION SYSTEMS</div>
+        <div class="hud-label" style="margin-top:6px;">JARVIS v3.0</div>
+        <div class="hud-value" style="color:#00FF88;">ACTIVE <span class="hud-blink">▋</span></div>
+      </div>
+
+      <!-- Controls -->
+      <div class="lab-controls">
+        <button class="ctrl-btn" id="btnExplode" onclick="toggleExplode()">⚡ EXPLODE</button>
+        <button class="ctrl-btn" id="btnSpin" onclick="toggleSpin()">🔄 WARP SPIN</button>
+
+        <div class="ctrl-sep"></div>
+
+        <div class="mode-pill">
+          <button class="mode-btn active" onclick="setMode('sphere',this)">SPHERE</button>
+          <button class="mode-btn" onclick="setMode('torus',this)">TORUS</button>
+          <button class="mode-btn" onclick="setMode('cube',this)">CUBE</button>
+          <button class="mode-btn" onclick="setMode('dna',this)">DNA</button>
+        </div>
+
+        <div class="ctrl-sep"></div>
+
+        <button class="color-btn active-color" data-color="#00D4FF" onclick="changeColor('#00D4FF',this)" title="Cyan"></button>
+        <button class="color-btn" data-color="#FF2D7B" onclick="changeColor('#FF2D7B',this)" title="Pink"></button>
+        <button class="color-btn" data-color="#FFD21E" onclick="changeColor('#FFD21E',this)" title="Gold"></button>
+        <button class="color-btn" data-color="#00FF88" onclick="changeColor('#00FF88',this)" title="Green"></button>
+        <button class="color-btn" data-color="#A855F7" onclick="changeColor('#A855F7',this)" title="Purple"></button>
+        <button class="color-btn" data-color="#FF6B35" onclick="changeColor('#FF6B35',this)" title="Orange"></button>
+
+        <div class="ctrl-sep"></div>
+        <button class="ctrl-btn" onclick="addParticles()">+ NODES</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <aside class="lab-side lab-side-r">
+      <div class="side-hdr"><div class="side-title">🌌 LAB CONTROLS</div></div>
+      <div class="side-body">
+
+        <div class="lab-sect">RENDER STATS</div>
+        <div class="stat-grid-2">
+          <div class="lab-stat">
+            <div class="lab-stat-val" id="angleVal">0°</div>
+            <div class="lab-stat-lbl">ROTATION</div>
+          </div>
+          <div class="lab-stat">
+            <div class="lab-stat-val" id="zoomVal">1.0x</div>
+            <div class="lab-stat-lbl">ZOOM</div>
+          </div>
+        </div>
+
+        <div class="lab-divline"></div>
+        <div class="lab-sect">QUICK MODES</div>
+
+        <button class="ctrl-btn" style="width:100%;margin-bottom:6px;border-radius:6px;" onclick="toggleExplode()">
+          ⚡ EXPLODE / COLLAPSE ARMOR
+        </button>
+        <button class="ctrl-btn" style="width:100%;margin-bottom:6px;border-radius:6px;" onclick="addParticles()">
+          ➕ ADD 200 NODES
+        </button>
+        <button class="ctrl-btn" style="width:100%;margin-bottom:6px;border-radius:6px;" onclick="resetParticles()">
+          🔄 RESET SIMULATION
+        </button>
+        <button class="ctrl-btn" style="width:100%;border-radius:6px;" onclick="toggleGrid()">
+          📐 TOGGLE GRID LINES
+        </button>
+
+        <div class="lab-divline"></div>
+        <div class="lab-sect">SUIT MODES</div>
+
+        <button class="ctrl-btn" style="width:100%;margin-bottom:6px;border-radius:6px;background:rgba(0,212,255,.12);" onclick="changeColor('#00D4FF',null); setMode('sphere',null)">
+          🩵 MARK L CYBER (CYAN)
+        </button>
+        <button class="ctrl-btn" style="width:100%;margin-bottom:6px;border-radius:6px;background:rgba(255,45,123,.1);" onclick="changeColor('#FF2D7B',null); setMode('torus',null)">
+          🩷 RESCUE SUIT (PINK)
+        </button>
+        <button class="ctrl-btn" style="width:100%;margin-bottom:6px;border-radius:6px;background:rgba(255,210,30,.1);" onclick="changeColor('#FFD21E',null); setMode('sphere',null)">
+          💛 CHITTI GOLD
+        </button>
+        <button class="ctrl-btn" style="width:100%;margin-bottom:6px;border-radius:6px;background:rgba(168,85,247,.1);" onclick="changeColor('#A855F7',null); setMode('dna',null)">
+          💜 EDITH DARK (PURPLE)
+        </button>
+        <button class="ctrl-btn" style="width:100%;border-radius:6px;background:rgba(0,255,136,.1);" onclick="changeColor('#00FF88',null); setMode('cube',null)">
+          💚 HULKBUSTER (GREEN)
+        </button>
+
+        <div class="lab-divline"></div>
+        <div class="lab-sect">INFO</div>
+        <div style="font-family:var(--fmono);font-size:8px;color:var(--cd);line-height:1.8;">
+          PARTICLE CORE: 10,000 NODES<br>
+          MAGNETIC HARNESS: STABLE<br>
+          REACTION FREQ: 1.21 THz<br>
+          PLASMA CONF: 99.8%<br>
+          DRAG: ROTATE SPHERE<br>
+          SCROLL: ZOOM IN/OUT
+        </div>
+
+      </div>
+    </aside>
+
+  </div><!-- lab-body -->
+
+  <script>
+    // ── 3D Particle Engine ─────────────────────────────────────────
+    const canvas = document.getElementById('threedCanvas');
+    const ctx    = canvas.getContext('2d');
+    let W, H;
+    let particles = [];
+    let isExploded = false;
+    let spinSpeed  = 0.008;
+    let coreColor  = '#00D4FF';
+    let angle      = 0;
+    let currentMode = 'sphere';
+    let showGrid   = true;
+    let frameCount = 0;
+    let lastFPS    = performance.now();
+    let fps        = 60;
+    let isDragging = false;
+    let dragX = 0, dragY = 0;
+    let rotX = 0, rotY = 0;
+    let zoom = 1;
+    let particleCount = 1000;
+
+    function resize() {
+      W = canvas.width  = canvas.parentElement.clientWidth;
+      H = canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // ── Particle class ─────────────────────────────────────────────
+    class Particle {
+      constructor() { this.reset('sphere'); }
+
+      reset(mode) {
+        this.mode = mode;
+        this.t = Math.random() * Math.PI * 2;
+        this.p = Math.acos((Math.random() * 2) - 1);
+        this.size = Math.random() * 2.2 + 0.6;
+        this.dist = 1;
+        this.speed = (Math.random() * 0.4 + 0.8);
+        this.phase = Math.random() * Math.PI * 2;
+        this.bright = Math.random() * 0.5 + 0.5;
+        this.i = Math.random();  // index 0–1 for DNA
+      }
+
+      getPos(a) {
+        const r = this._baseR();
+        let x, y, z;
+        const ex = isExploded ? 2.2 : 1.0;
+
+        if (currentMode === 'sphere') {
+          const t2 = this.t + a * this.speed * spinSpeed * 60;
+          x = r * ex * Math.sin(this.p) * Math.cos(t2);
+          y = r * ex * Math.sin(this.p) * Math.sin(t2);
+          z = r * ex * Math.cos(this.p);
+        } else if (currentMode === 'torus') {
+          const R = 140, ri = 55;
+          const t2 = this.t + a * this.speed * spinSpeed * 60;
+          const p2 = this.p + a * spinSpeed * 30;
+          x = ex * (R + ri * Math.cos(p2)) * Math.cos(t2);
+          y = ex * (R + ri * Math.cos(p2)) * Math.sin(t2);
+          z = ex * ri * Math.sin(p2);
+        } else if (currentMode === 'cube') {
+          const s = r * ex;
+          x = (Math.sin(this.t + a * spinSpeed * 60) * s);
+          y = (Math.sin(this.p + a * spinSpeed * 45) * s);
+          z = (Math.cos(this.t * 1.3 + a * spinSpeed * 50) * s);
+        } else if (currentMode === 'dna') {
+          const h = (this.i - 0.5) * 500 * ex;
+          const t2 = this.i * Math.PI * 8 + a * spinSpeed * 60;
+          const strand = Math.round(this.t / Math.PI) % 2;
+          const ang = t2 + strand * Math.PI;
+          x = 100 * ex * Math.cos(ang);
+          y = h;
+          z = 100 * ex * Math.sin(ang);
+        }
+        return { x, y, z };
+      }
+
+      _baseR() {
+        if (currentMode === 'torus') return 1;
+        return this.size < 1.5 ? 90 : 170;
+      }
+    }
+
+    function buildParticles(n) {
+      particles = [];
+      for (let i = 0; i < n; i++) particles.push(new Particle());
+      particleCount = n;
+      document.getElementById('partVal').textContent = n;
+      document.getElementById('hudPartCount').textContent = n;
+      document.getElementById('totalPart').textContent = n;
+    }
+    buildParticles(1000);
+
+    // ── Hex-to-RGBA ────────────────────────────────────────────────
+    function hexToRgba(hex, alpha) {
+      const r = parseInt(hex.slice(1,3),16);
+      const g = parseInt(hex.slice(3,5),16);
+      const b = parseInt(hex.slice(5,7),16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    // ── Render ─────────────────────────────────────────────────────
+    function render() {
+      requestAnimationFrame(render);
+      frameCount++;
+      const now = performance.now();
+      if (now - lastFPS >= 1000) {
+        fps = Math.round(frameCount * 1000 / (now - lastFPS));
+        frameCount = 0; lastFPS = now;
+        document.getElementById('fpsVal').textContent = fps;
+        document.getElementById('angleVal').textContent = Math.round(angle * 180 / Math.PI % 360) + '°';
+        document.getElementById('zoomVal').textContent = zoom.toFixed(1) + 'x';
+        document.getElementById('rotVal').textContent = (spinSpeed * 1000).toFixed(1) + ' RPM';
+
+        // Animate arc power bar
+        const pw = Math.round(95 + Math.sin(now/2000) * 5);
+        document.getElementById('arcPower').textContent = pw + '%';
+        document.getElementById('arcBar').style.width = pw + '%';
+      }
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Grid
+      if (showGrid) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0,212,255,0.04)';
+        ctx.lineWidth = 1;
+        for (let gx = 0; gx < W; gx += 60) { ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
+        for (let gy = 0; gy < H; gy += 60) { ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
+        ctx.restore();
+      }
+
+      angle += spinSpeed;
+      const cosa = Math.cos(rotY), sina = Math.sin(rotY);
+      const cosb = Math.cos(rotX), sinb = Math.sin(rotX);
+
+      // Sort back-to-front
+      const projected = particles.map(p => {
+        const pos = p.getPos(angle);
+        // Apply mouse rotation
+        let x1 = pos.x * cosa - pos.z * sina;
+        let z1 = pos.x * sina + pos.z * cosa;
+        let y1 = pos.y * cosb - z1 * sinb;
+        let z2 = pos.y * sinb + z1 * cosb;
+
+        const fov = 420 * zoom;
+        const sc  = fov / (fov + z2 + 320);
+        return {
+          px: W/2 + x1 * sc,
+          py: H/2 + y1 * sc,
+          sc, z: z2,
+          bright: p.bright,
+          size: p.size
+        };
+      }).sort((a,b) => a.z - b.z);
+
+      // Draw core glow rings
+      [280, 180, 100, 55].forEach((r, i) => {
+        const a2 = angle * (i % 2 === 0 ? 1 : -1) * (i + 1) * 0.5;
+        ctx.save();
+        ctx.strokeStyle = hexToRgba(coreColor, 0.12 + i * 0.04);
+        ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 15 + i * 5;
+        ctx.shadowColor = coreColor;
+        ctx.beginPath();
+        ctx.arc(W/2, H/2, r * zoom, a2, a2 + Math.PI * (1.2 + i * 0.2));
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Core center glow
+      const grad = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, 40 * zoom);
+      grad.addColorStop(0, hexToRgba(coreColor, 0.6));
+      grad.addColorStop(0.4, hexToRgba(coreColor, 0.15));
+      grad.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.arc(W/2, H/2, 40 * zoom, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Draw particles
+      projected.forEach(p => {
+        ctx.save();
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = coreColor;
+        ctx.globalAlpha = (p.bright * 0.7 + 0.3) * Math.min(1, (p.z + 500) / 600);
+        ctx.fillStyle = coreColor;
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, p.size * p.sc * zoom, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+    render();
+
+    // ── Controls ───────────────────────────────────────────────────
+    function toggleExplode() {
+      isExploded = !isExploded;
+      document.getElementById('btnExplode').classList.toggle('active', isExploded);
+    }
+    function toggleSpin() {
+      spinSpeed = spinSpeed < 0.02 ? 0.045 : 0.008;
+      document.getElementById('btnSpin').classList.toggle('active', spinSpeed > 0.02);
+    }
+    function changeColor(c, btn) {
+      coreColor = c;
+      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active-color'));
+      if (btn) btn.classList.add('active-color');
+    }
+    function setMode(mode, btn) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      document.getElementById('hudMode').textContent = mode.toUpperCase();
+      buildParticles(particleCount);
+    }
+    function addParticles() {
+      buildParticles(Math.min(particleCount + 200, 3000));
+    }
+    function resetParticles() {
+      buildParticles(1000);
+      isExploded = false; spinSpeed = 0.008; zoom = 1; rotX = 0; rotY = 0;
+      currentMode = 'sphere'; coreColor = '#00D4FF';
+      document.querySelectorAll('.mode-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+      document.querySelectorAll('.color-btn').forEach((b,i) => b.classList.toggle('active-color', i===0));
+      document.getElementById('hudMode').textContent = 'SPHERE';
+    }
+    function toggleGrid() { showGrid = !showGrid; }
+
+    // ── Mouse Drag (rotate) ────────────────────────────────────────
+    canvas.addEventListener('mousedown', e => { isDragging=true; dragX=e.clientX; dragY=e.clientY; });
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      rotY += (e.clientX - dragX) * 0.005;
+      rotX += (e.clientY - dragY) * 0.005;
+      dragX = e.clientX; dragY = e.clientY;
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    // Touch drag
+    canvas.addEventListener('touchstart', e => { isDragging=true; dragX=e.touches[0].clientX; dragY=e.touches[0].clientY; });
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (!isDragging) return;
+      rotY += (e.touches[0].clientX - dragX) * 0.005;
+      rotX += (e.touches[0].clientY - dragY) * 0.005;
+      dragX = e.touches[0].clientX; dragY = e.touches[0].clientY;
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => isDragging = false);
+
+    // ── Scroll Zoom ────────────────────────────────────────────────
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      zoom = Math.max(0.4, Math.min(2.5, zoom - e.deltaY * 0.001));
+    }, { passive: false });
+  </script>
+</body>
+</html>

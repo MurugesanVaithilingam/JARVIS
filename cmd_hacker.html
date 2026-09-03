@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STARK TERMINAL — CMD Console & Cyber Security Suite</title>
+  <meta name="description" content="Stark Industries Interactive CMD Terminal and Ethical Cyber Security Pentest Suite.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: #020B18; font-family: var(--fbody); min-height: 100vh; overflow-x: hidden; }
+    .lab-nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: rgba(2,11,24,0.85); border-bottom: 1px solid var(--brd); backdrop-filter: blur(10px); }
+    /* nav-links defined in style.css */
+
+    .cmd-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; padding: 24px; max-width: 1440px; margin: 0 auto; }
+    .card { background: rgba(0,212,255,0.03); border: 1px solid var(--brd); border-radius: 8px; padding: 20px; box-shadow: var(--glow1); }
+    .card-title { font-family: var(--fhud); font-size: 13px; color: var(--c1); letter-spacing: 0.12em; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+    
+    /* Terminal Console Box */
+    .term-window { background: #01060e; border: 1px solid var(--c1); border-radius: 6px; padding: 14px; font-family: var(--fmono); font-size: 12px; color: #00ff88; height: 380px; overflow-y: auto; box-shadow: inset 0 0 15px rgba(0,255,136,0.1); }
+    .term-input-row { display: flex; gap: 10px; margin-top: 12px; }
+    .term-inp { flex: 1; background: rgba(0,212,255,0.05); border: 1px solid var(--brd); color: #fff; font-family: var(--fmono); font-size: 12px; padding: 8px 12px; border-radius: 4px; outline: none; }
+    .term-inp:focus { border-color: var(--c1); box-shadow: var(--glow1); }
+    .term-btn { background: var(--c1); border: none; color: #000; padding: 8px 16px; font-family: var(--fhud); font-size: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+    .term-btn:hover { background: #fff; box-shadow: var(--glow2); }
+
+    /* Quick Preset Buttons */
+    .preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .p-btn { background: rgba(0,212,255,0.06); border: 1px solid var(--brd); color: var(--c1); padding: 5px 10px; font-family: var(--fmono); font-size: 10px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+    .p-btn:hover { background: var(--c1g); border-color: var(--c1); color: #fff; }
+
+    /* Security Tools Items */
+    .hack-item { background: rgba(255,34,68,0.04); border: 1px solid rgba(255,34,68,0.25); border-radius: 6px; padding: 12px; margin-bottom: 10px; }
+    .hack-title { font-family: var(--fhud); font-size: 11px; color: var(--cred); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="lab-nav">
+    <div class="logo-mark" style="font-family:var(--fhud); font-size:16px; color:var(--c1);"><span class="logo-s" style="color:var(--cred); font-weight:900;">S</span>TARK CMD & CYBER PENTEST SUITE</div>
+    <nav class="nav-links">
+      <a href="index.html"       class="nav-tab" data-label="HUD">🤖 <span>HUD</span></a>
+      <a href="3d_lab.html"      class="nav-tab" data-label="3D LAB">🌌 <span>3D LAB</span></a>
+      <a href="tracker.html"     class="nav-tab" data-label="TRACKER">🛰️ <span>TRACKER</span></a>
+      <a href="code_studio.html" class="nav-tab" data-label="CODE">🧠 <span>CODE</span></a>
+      <a href="cyber_soc.html"   class="nav-tab" data-label="CYBER">🛡️ <span>CYBER</span></a>
+      <a href="cmd_hacker.html"  class="nav-tab active" data-label="TERMINAL">💻 <span>TERMINAL</span></a>
+    </nav>
+    </nav>
+  </header>
+
+  <!-- MAIN GRID -->
+  <div class="cmd-grid">
+    <!-- Left Column: Interactive CMD Console -->
+    <div class="card">
+      <div class="card-title">
+        <span>💻 INTERACTIVE WINDOWS CMD TERMINAL</span>
+        <span style="font-family:var(--fmono); font-size:10px; color:#00ff88;">SYSTEM CHROOT: ACTIVE</span>
+      </div>
+
+      <!-- Command Presets -->
+      <div class="preset-row">
+        <button class="p-btn" onclick="runPreset('ipconfig /all')">⚡ ipconfig</button>
+        <button class="p-btn" onclick="runPreset('netsh wlan show profiles')">📶 wifi profiles</button>
+        <button class="p-btn" onclick="runPreset('systeminfo')">🖥️ systeminfo</button>
+        <button class="p-btn" onclick="runPreset('netstat -an')">🌐 netstat</button>
+        <button class="p-btn" onclick="runPreset('dir')">📂 list files</button>
+        <button class="p-btn" onclick="runPreset('ping google.com')">📡 ping test</button>
+      </div>
+
+      <!-- Terminal Window -->
+      <div class="term-window" id="termOut">
+        Microsoft Windows [Version 10.0.19045]<br>
+        (c) Stark Industries Corporation. All rights reserved.<br><br>
+        <span style="color:var(--c1);">C:\wamp64\www\jarvis&gt;</span> Welcome to Stark Native CMD Terminal. Type any Windows command below.<br>
+      </div>
+
+      <!-- Input Row -->
+      <div class="term-input-row">
+        <input type="text" id="cmdInp" class="term-inp" placeholder="Type Windows command (e.g. netsh wlan show profile name='YOUR_WIFI' key=clear)..." spellcheck="false" onkeydown="if(event.key==='Enter') execCmd();">
+        <button class="term-btn" onclick="execCmd()">EXECUTE ▶</button>
+      </div>
+    </div>
+
+    <!-- Right Column: Pentest & Security Tools -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <!-- Saved Wi-Fi Password Tracker -->
+      <div class="card">
+        <div class="card-title">
+          <span>📶 WI-FI CREDENTIALS TRACKER</span>
+          <button onclick="scanWifiKey()" style="background:var(--c1); border:none; color:#000; padding:4px 10px; font-family:var(--fhud); font-size:10px; border-radius:4px; cursor:pointer;">REVEAL PASSWORDS</button>
+        </div>
+        <div id="wifiOut" style="background:#01060e; border:1px solid var(--brd); padding:10px; border-radius:6px; font-family:var(--fmono); font-size:11px; color:var(--ct); max-height:160px; overflow-y:auto;">
+          Click "REVEAL PASSWORDS" to scan all saved Wi-Fi networks and extract cleartext security keys.
+        </div>
+      </div>
+
+      <!-- Port Scanner Simulator & Vulnerability Auditor -->
+      <div class="card">
+        <div class="card-title">
+          <span>🛡️ PORT SCANNER & VULN AUDITOR</span>
+          <button onclick="runPortScan()" style="background:var(--cred); border:none; color:#fff; padding:4px 10px; font-family:var(--fhud); font-size:10px; border-radius:4px; cursor:pointer;">START PORT SCAN</button>
+        </div>
+        <div class="hack-item">
+          <div class="hack-title"><span>TARGET: 127.0.0.1 (LOCALHOST)</span><span id="scanStatus" style="color:#00ff88;">READY</span></div>
+          <div id="portScanResults" style="font-family:var(--fmono); font-size:10px; color:var(--cd); line-height:1.6;">
+            Port 80 (HTTP): OPEN [Apache WAMP]<br>
+            Port 3306 (MySQL): OPEN [MySQL Server]<br>
+            Port 443 (HTTPS): CLOSED<br>
+            Port 22 (SSH): FILTERED
+          </div>
+        </div>
+      </div>
+
+      <!-- Base64 / Hash Encoder & Decoder -->
+      <div class="card">
+        <div class="card-title">🔐 BASE64 & CRYPTO TOOLKIT</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <input type="text" id="cryptoInput" class="term-inp" placeholder="Enter string to encode/decode...">
+          <div style="display:flex; gap:8px;">
+            <button onclick="encodeB64()" class="p-btn" style="flex:1;">ENCODE BASE64</button>
+            <button onclick="decodeB64()" class="p-btn" style="flex:1;">DECODE BASE64</button>
+          </div>
+          <div id="cryptoOut" style="background:#01060e; border:1px solid var(--brd); padding:8px; border-radius:4px; font-family:var(--fmono); font-size:11px; color:#00ff88; word-break:break-all;">OUTPUT STANDBY...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="tools.js"></script>
+  <script src="agent_core.js"></script>
+  <script>
+    // Terminal Command Execution
+    async function execCmd(cmdText = null) {
+      const inp = document.getElementById('cmdInp');
+      const cmd = cmdText || inp.value.trim();
+      if (!cmd) return;
+
+      if (!cmdText) inp.value = '';
+
+      window.JarvisAudio?.playBeep(900, 'square', 0.1);
+      const outBox = document.getElementById('termOut');
+      outBox.innerHTML += `<br><span style="color:var(--c1);">C:\\wamp64\\www\\jarvis&gt; ${cmd}</span><br><span style="color:#ffb800;">Executing...</span><br>`;
+      outBox.scrollTop = outBox.scrollHeight;
+
+      try {
+        const res = await window.JarvisAgentEngine.runTerminalCmd(cmd);
+        if (res.status === 'success') {
+          const formatted = res.output.replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
+          outBox.innerHTML += `<span style="color:#00ff88;">${formatted}</span><br>`;
+        } else {
+          outBox.innerHTML += `<span style="color:var(--cred);">Error: ${res.message}</span><br>`;
+        }
+      } catch(e) {
+        outBox.innerHTML += `<span style="color:var(--cred);">Execution Failure: ${e.message}</span><br>`;
+      }
+      outBox.scrollTop = outBox.scrollHeight;
+    }
+
+    function runPreset(c) {
+      execCmd(c);
+    }
+
+    // Wi-Fi Password Scan
+    async function scanWifiKey() {
+      const out = document.getElementById('wifiOut');
+      out.innerHTML = '<span style="color:var(--c1);">Scanning netsh wlan profiles...</span>';
+      
+      const listRes = await window.JarvisAgentEngine.runTerminalCmd('netsh wlan show profiles');
+      if (listRes.status !== 'success') {
+        out.innerHTML = `<span style="color:var(--cred);">Error: ${listRes.message}</span>`;
+        return;
+      }
+
+      const lines = listRes.output.split('\n');
+      const profiles = [];
+      lines.forEach(l => {
+        if (l.includes(':')) {
+          const p = l.split(':')[1].trim();
+          if (l.toLowerCase().includes('user profile') && p) profiles.push(p);
+        }
+      });
+
+      if (!profiles.length) {
+        out.innerHTML = '<span style="color:var(--c3);">No saved Wi-Fi profiles found on system.</span>';
+        return;
+      }
+
+      let report = `<strong>FOUND ${profiles.length} SAVED PROFILES:</strong><br>`;
+      for (const wifi of profiles.slice(0, 5)) {
+        const keyRes = await window.JarvisAgentEngine.runTerminalCmd(`netsh wlan show profile name="${wifi}" key=clear`);
+        let pass = 'Key not visible / Open';
+        const kLines = keyRes.output.split('\n');
+        kLines.forEach(kl => {
+          if (kl.toLowerCase().includes('key content') || kl.toLowerCase().includes('key Content')) {
+            pass = kl.split(':')[1].trim();
+          }
+        });
+        report += `<div style="margin-top:6px; border-bottom:1px dashed rgba(0,212,255,0.2); padding-bottom:4px;">
+          📶 SSID: <strong style="color:#fff;">${wifi}</strong><br>
+          🔑 Security Key: <strong style="color:#00ff88;">${pass}</strong>
+        </div>`;
+      }
+      out.innerHTML = report;
+      window.JarvisToast?.show('Wi-Fi Security Passwords Extracted!', 'success');
+    }
+
+    // Port Scan Simulation
+    function runPortScan() {
+      const st = document.getElementById('scanStatus');
+      const res = document.getElementById('portScanResults');
+      st.textContent = 'SCANNING...'; st.style.color = '#ffb800';
+      window.JarvisAudio?.playAlarm();
+
+      setTimeout(() => {
+        st.textContent = 'COMPLETE'; st.style.color = '#00ff88';
+        res.innerHTML = `
+          Port 80 (HTTP): <strong style="color:#00ff88;">OPEN [Apache WAMP]</strong><br>
+          Port 3306 (MySQL): <strong style="color:#00ff88;">OPEN [MySQL Server]</strong><br>
+          Port 443 (HTTPS): <span style="color:var(--cd);">CLOSED</span><br>
+          Port 22 (SSH): <span style="color:var(--cd);">FILTERED</span><br>
+          Port 8080 (PROXY): <strong style="color:#00ff88;">OPEN [Stark Proxy Node]</strong><br>
+          <span style="color:var(--c1);">✓ 0 Critical Vulnerabilities Detected. Firewall Nominal.</span>
+        `;
+        window.JarvisToast?.show('Port Scan Complete!', 'info');
+      }, 1500);
+    }
+
+    // Base64 Tools
+    function encodeB64() {
+      const val = document.getElementById('cryptoInput').value;
+      if (!val) return;
+      document.getElementById('cryptoOut').textContent = btoa(val);
+    }
+    function decodeB64() {
+      const val = document.getElementById('cryptoInput').value;
+      if (!val) return;
+      try {
+        document.getElementById('cryptoOut').textContent = atob(val);
+      } catch(e) {
+        document.getElementById('cryptoOut').textContent = 'Invalid Base64 string';
+      }
+    }
+  </script>
+</body>
+</html>

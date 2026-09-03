@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STARK SATELLITE — Live Tactical Device & Geolocation Tracker</title>
+  <meta name="description" content="Live Global Device Telemetry, Geolocation Tracker, Battery Monitor, and Tactical Radar Uplink.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: #020B18; font-family: var(--fbody); min-height: 100vh; overflow-x: hidden; }
+
+    
+    .tracker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px; max-width: 1200px; margin: 0 auto; }
+    .card { background: rgba(0,212,255,0.03); border: 1px solid var(--brd); border-radius: 8px; padding: 20px; box-shadow: var(--glow1); }
+    .card-title { font-family: var(--fhud); font-size: 14px; color: var(--c1); letter-spacing: 0.12em; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .trow { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed rgba(0,212,255,0.15); font-family: var(--fmono); font-size: 11px; }
+    .tlabel { color: var(--ct); }
+    .tval { color: var(--cg); font-weight: bold; }
+    .radar-box { text-align: center; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="lab-nav">
+    <div class="logo-mark" style="font-family:var(--fhud); font-size:16px; color:var(--c1);"><span class="logo-s" style="color:var(--cg); font-weight:900;">S</span>TARK SATELLITE UPLINK</div>
+    <nav class="nav-links">
+      <a href="index.html"       class="nav-tab" data-label="HUD">🤖 <span>HUD</span></a>
+      <a href="3d_lab.html"      class="nav-tab" data-label="3D LAB">🌌 <span>3D LAB</span></a>
+      <a href="tracker.html"     class="nav-tab active" data-label="TRACKER">🛰️ <span>TRACKER</span></a>
+      <a href="code_studio.html" class="nav-tab" data-label="CODE">🧠 <span>CODE</span></a>
+      <a href="cyber_soc.html"   class="nav-tab" data-label="CYBER">🛡️ <span>CYBER</span></a>
+      <a href="cmd_hacker.html"  class="nav-tab" data-label="TERMINAL">💻 <span>TERMINAL</span></a>
+    </nav>
+  </header>
+
+  <!-- TRACKER GRID -->
+  <div class="tracker-grid">
+    <!-- Geolocation & GPS Telemetry -->
+    <div class="card">
+      <div class="card-title">
+        <span>📍 LIVE GPS & GEOLOCATION TRACKER</span>
+        <button onclick="requestGPS()" style="background:var(--c1); border:none; color:#000; padding:4px 10px; font-family:var(--fhud); font-size:10px; border-radius:4px; cursor:pointer;">REFRESH GPS</button>
+      </div>
+
+      <div class="trow"><span class="tlabel">LATITUDE:</span><span class="tval" id="gpsLat">SCANNING...</span></div>
+      <div class="trow"><span class="tlabel">LONGITUDE:</span><span class="tval" id="gpsLng">SCANNING...</span></div>
+      <div class="trow"><span class="tlabel">ACCURACY:</span><span class="tval" id="gpsAcc">SCANNING...</span></div>
+      <div class="trow"><span class="tlabel">ALTITUDE:</span><span class="tval" id="gpsAlt">N/A</span></div>
+      <div class="trow"><span class="tlabel">TIME ZONE:</span><span class="tval" id="gpsTz">SCANNING...</span></div>
+      <div class="trow"><span class="tlabel">STATUS:</span><span class="tval" style="color:#00ff88;" id="gpsStatus">SATELLITE LOCK ACTIVE</span></div>
+    </div>
+
+    <!-- Device Telemetry Scanner -->
+    <div class="card">
+      <div class="card-title">
+        <span>📱 HARDWARE & DEVICE TELEMETRY</span>
+        <span style="font-family:var(--fmono); font-size:10px; color:var(--cg);">ONLINE</span>
+      </div>
+
+      <div class="trow"><span class="tlabel">OPERATING SYSTEM:</span><span class="tval" id="devOS">SCANNING...</span></div>
+      <div class="trow"><span class="tlabel">BROWSER USER-AGENT:</span><span class="tval" id="devBrowser">SCANNING...</span></div>
+      <div class="trow"><span class="tlabel">SCREEN RESOLUTION:</span><span class="tval" id="devRes">SCANNING...</span></div>
+      <div class="trow"><span class="tlabel">CPU CORES:</span><span class="tval" id="devCores">SCANNING...</span></div>
+      <div class="trow"><span class="tlabel">DEVICE MEMORY:</span><span class="tval" id="devRam">SCANNING...</span></div>
+      <div class="trow"><span class="tlabel">BATTERY LEVEL:</span><span class="tval" id="devBattery">CHECKING...</span></div>
+      <div class="trow"><span class="tlabel">NETWORK CONNECTION:</span><span class="tval" id="devNet">4G / HIGH SPEED</span></div>
+    </div>
+
+    <!-- Satellite Radar Sweeper Target Map -->
+    <div class="card" style="grid-column: span 2;">
+      <div class="card-title">
+        <span>🛰️ TACTICAL SATELLITE RADAR SWEEP</span>
+        <button onclick="pingTarget()" style="background:var(--cr); border:none; color:#fff; padding:4px 10px; font-family:var(--fhud); font-size:10px; border-radius:4px; cursor:pointer;">PING TARGET TARGETING LOCK</button>
+      </div>
+
+      <div class="radar-box">
+        <canvas id="satRadarCanvas" width="700" height="280" style="width:100%; max-height:280px; background:rgba(0,0,0,0.4); border:1px solid var(--brd); border-radius:6px; box-shadow:var(--glow1);"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="tools.js"></script>
+  <script>
+    // Live Device Telemetry Inspector
+    document.getElementById('devOS').textContent = navigator.platform;
+    document.getElementById('devBrowser').textContent = navigator.userAgent.split(' ')[0];
+    document.getElementById('devRes').textContent = `${window.screen.width} x ${window.screen.height} px`;
+    document.getElementById('devCores').textContent = `${navigator.hardwareConcurrency || 8} Logical Cores`;
+    document.getElementById('devRam').textContent = `${navigator.deviceMemory || 16} GB RAM`;
+    document.getElementById('gpsTz').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (navigator.getBattery) {
+      navigator.getBattery().then(b => {
+        const pct = Math.round(b.level * 100);
+        document.getElementById('devBattery').textContent = `${pct}% (${b.charging ? 'CHARGING ⚡' : 'DISCHARGING'})`;
+      });
+    } else {
+      document.getElementById('devBattery').textContent = '100% (AC POWER)';
+    }
+
+    // Geolocation API
+    function requestGPS() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          document.getElementById('gpsLat').textContent = pos.coords.latitude.toFixed(5);
+          document.getElementById('gpsLng').textContent = pos.coords.longitude.toFixed(5);
+          document.getElementById('gpsAcc').textContent = `±${pos.coords.accuracy.toFixed(1)} meters`;
+          document.getElementById('gpsAlt').textContent = pos.coords.altitude ? `${pos.coords.altitude} m` : 'Sea Level';
+          window.JarvisToast?.show('GPS Satellite Uplink Synchronized!', 'success');
+        }, err => {
+          document.getElementById('gpsStatus').textContent = 'SIMULATED GPS (PERMIT REQUIRED)';
+          document.getElementById('gpsLat').textContent = '13.0827° N';
+          document.getElementById('gpsLng').textContent = '80.2707° E';
+          document.getElementById('gpsAcc').textContent = '±5 meters (Chennai Core)';
+        });
+      }
+    }
+    requestGPS();
+
+    // Satellite Radar Canvas Sweep
+    const rCanvas = document.getElementById('satRadarCanvas');
+    const rCtx = rCanvas.getContext('2d');
+    let rAngle = 0;
+    let targets = [
+      { x: 250, y: 120, label: 'DRONE ALFA-1' },
+      { x: 480, y: 180, label: 'SUIT MARK L' },
+      { x: 340, y: 80,  label: 'CHITTI SWARM' }
+    ];
+
+    function drawRadar() {
+      rCtx.clearRect(0, 0, rCanvas.width, rCanvas.height);
+      const cx = rCanvas.width / 2;
+      const cy = rCanvas.height / 2;
+
+      // Concentric circles
+      rCtx.strokeStyle = 'rgba(0,212,255,0.2)';
+      rCtx.lineWidth = 1;
+      for (let r = 40; r <= 130; r += 30) {
+        rCtx.beginPath();
+        rCtx.arc(cx, cy, r, 0, Math.PI * 2);
+        rCtx.stroke();
+      }
+
+      // Crosshair lines
+      rCtx.beginPath();
+      rCtx.moveTo(cx - 140, cy); rCtx.lineTo(cx + 140, cy);
+      rCtx.moveTo(cx, cy - 140); rCtx.lineTo(cx, cy + 140);
+      rCtx.stroke();
+
+      // Sweeper Beam
+      rCtx.save();
+      rCtx.translate(cx, cy);
+      rCtx.rotate(rAngle);
+      rCtx.beginPath();
+      rCtx.moveTo(0, 0);
+      rCtx.arc(0, 0, 130, 0, 0.4);
+      rCtx.closePath();
+      rCtx.fillStyle = 'rgba(0,212,255,0.15)';
+      rCtx.fill();
+      rCtx.restore();
+
+      // Target Markers
+      targets.forEach(t => {
+        rCtx.fillStyle = '#00ff88';
+        rCtx.shadowBlur = 8; rCtx.shadowColor = '#00ff88';
+        rCtx.beginPath();
+        rCtx.arc(t.x, t.y, 4, 0, Math.PI * 2);
+        rCtx.fill();
+        rCtx.font = '9px Share Tech Mono';
+        rCtx.fillText(t.label, t.x + 8, t.y + 3);
+      });
+
+      rAngle += 0.03;
+      requestAnimationFrame(drawRadar);
+    }
+    drawRadar();
+
+    function pingTarget() {
+      window.JarvisAudio?.playAlarm();
+      targets.push({
+        x: Math.floor(100 + Math.random() * 500),
+        y: Math.floor(50 + Math.random() * 180),
+        label: `NEW TARGET #${targets.length + 1}`
+      });
+      window.JarvisToast?.show('Target Pinned on Tactical Satellite Radar!', 'warning');
+    }
+  </script>
+</body>
+</html>

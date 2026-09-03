@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STARK AI CODE STUDIO — Multi-Model Swarm & Code Execution</title>
+  <meta name="description" content="Multi-Model Parallel AI Comparison, Code Execution Sandbox, and Swarm Intelligence Studio.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: #020B18; font-family: var(--fbody); min-height: 100vh; }
+
+    
+    .studio-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px; max-width: 1400px; margin: 0 auto; height: calc(100vh - 100px); }
+    .editor-card { background: rgba(0,212,255,0.03); border: 1px solid var(--brd); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; }
+    .editor-title { font-family: var(--fhud); font-size: 13px; color: var(--c1); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .code-area { flex: 1; background: #051329; border: 1px solid var(--brd); color: #00ff88; font-family: var(--fmono); font-size: 12px; padding: 14px; border-radius: 6px; resize: none; outline: none; }
+    .out-box { height: 160px; background: #01060e; border: 1px solid var(--brd); color: var(--ct); font-family: var(--fmono); font-size: 11px; padding: 12px; border-radius: 6px; overflow-y: auto; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="lab-nav">
+    <div class="logo-mark" style="font-family:var(--fhud); font-size:16px; color:var(--c1);"><span class="logo-s" style="color:var(--cg); font-weight:900;">S</span>TARK MULTI-MODEL CODE STUDIO</div>
+    <nav class="nav-links">
+      <a href="index.html"       class="nav-tab" data-label="HUD">🤖 <span>HUD</span></a>
+      <a href="3d_lab.html"      class="nav-tab" data-label="3D LAB">🌌 <span>3D LAB</span></a>
+      <a href="tracker.html"     class="nav-tab" data-label="TRACKER">🛰️ <span>TRACKER</span></a>
+      <a href="code_studio.html" class="nav-tab active" data-label="CODE">🧠 <span>CODE</span></a>
+      <a href="cyber_soc.html"   class="nav-tab" data-label="CYBER">🛡️ <span>CYBER</span></a>
+      <a href="cmd_hacker.html"  class="nav-tab" data-label="TERMINAL">💻 <span>TERMINAL</span></a>
+    </nav>
+  </header>
+
+  <!-- STUDIO LAYOUT -->
+  <div class="studio-layout">
+    <!-- Left: Live Code Editor -->
+    <div class="editor-card">
+      <div class="editor-title">
+        <span>💻 LIVE CODE EDITOR & SANDBOX (JS / HTML)</span>
+        <button onclick="runEditorCode()" style="background:var(--cg); border:none; color:#000; padding:6px 14px; font-family:var(--fhud); font-size:10px; font-weight:bold; border-radius:4px; cursor:pointer;">▶ EXECUTE CODE</button>
+      </div>
+      <textarea id="codeText" class="code-area" spellcheck="false">// Stark Code Sandbox Engine
+function generateFibonacci(n) {
+  let seq = [0, 1];
+  for (let i = 2; i < n; i++) {
+    seq[i] = seq[i - 1] + seq[i - 2];
+  }
+  return seq;
+}
+
+console.log("⚡ Fibonacci Sequence (First 10):", generateFibonacci(10));
+console.log("🛡️ Stark Security Protocol: OK");
+</textarea>
+      <div class="out-box" id="consoleOut">CONSOLE OUTPUT STANDBY...</div>
+    </div>
+
+    <!-- Right: Multi-Model AI Swarm Response -->
+    <div class="editor-card">
+      <div class="editor-title">
+        <span>🧠 PARALLEL MULTI-MODEL AI SWARM</span>
+        <button onclick="askSwarm()" style="background:var(--c1); border:none; color:#000; padding:6px 14px; font-family:var(--fhud); font-size:10px; font-weight:bold; border-radius:4px; cursor:pointer;">⚡ QUERY AI SWARM</button>
+      </div>
+      <input type="text" id="swarmPrompt" placeholder="Ask AI Swarm for code review or algorithms..." style="background:#051329; border:1px solid var(--brd); color:#fff; padding:10px; font-family:var(--fmono); font-size:11px; border-radius:4px; margin-bottom:10px; outline:none;">
+      
+      <div id="swarmResults" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+        <div style="background:rgba(0,212,255,0.04); border:1px solid var(--brd); padding:10px; border-radius:6px; font-family:var(--fmono); font-size:11px; color:var(--ct);">
+          <strong style="color:var(--c1);">🌸 Pollinations AI (GPT-4o):</strong> Enter prompt above to query multiple models simultaneously...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="tools.js"></script>
+  <script>
+    // Live Code Sandbox Runner
+    function runEditorCode() {
+      window.JarvisAudio?.playBeep(900, 'square', 0.1);
+      const code = document.getElementById('codeText').value;
+      const outBox = document.getElementById('consoleOut');
+      outBox.innerHTML = '';
+
+      const logs = [];
+      const customConsole = {
+        log: (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')),
+        error: (...args) => logs.push('[ERR] ' + args.join(' ')),
+      };
+
+      try {
+        const runFn = new Function('console', code);
+        runFn(customConsole);
+        outBox.innerHTML = logs.map(l => `<div>${l}</div>`).join('') || 'Code executed with zero log output.';
+        window.JarvisToast?.show('Code executed in sandbox!', 'success');
+      } catch(err) {
+        outBox.innerHTML = `<div style="color:var(--cr);">❌ Execution Error: ${err.message}</div>`;
+        window.JarvisToast?.show(`Execution Error: ${err.message}`, 'error');
+      }
+    }
+
+    // Parallel AI Swarm Query Engine
+    async function askSwarm() {
+      const p = document.getElementById('swarmPrompt').value.trim();
+      if (!p) return;
+      window.JarvisAudio?.playBeep(1100, 'triangle', 0.1);
+      const c = document.getElementById('swarmResults');
+      c.innerHTML = `<div style="color:var(--c1); font-family:var(--fmono); font-size:11px;">⚡ Querying AI Swarm Models in parallel...</div>`;
+
+      try {
+        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(p)}?system=You+are+JARVIS+Code+Assistant&seed=${Math.floor(Math.random()*1000)}`);
+        const text = await res.text();
+        c.innerHTML = `
+          <div style="background:rgba(0,212,255,0.06); border:1px solid var(--c1); padding:12px; border-radius:6px; font-family:var(--fmono); font-size:11px;">
+            <div style="color:var(--cg); font-weight:bold; margin-bottom:6px;">🌸 Pollinations AI (GPT-4o Free Engine):</div>
+            <div style="color:var(--ct); white-space:pre-wrap;">${text}</div>
+          </div>
+        `;
+      } catch(e) {
+        c.innerHTML = `<div style="color:var(--cr);">Error querying AI swarm: ${e.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
