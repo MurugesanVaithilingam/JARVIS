@@ -1,24 +1,25 @@
 /* ================================================================
-   J.A.R.V.I.S. CROSS-DEVICE MOBILE & DESKTOP VOICE MATRIX v10.0
+   J.A.R.V.I.S. QUANTUM ENGINE v11.0 (Zero-Repeat & Native Close Command)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ✅ Universal Mobile & Desktop Speech Recognition (iOS Safari / Android Chrome / Windows / Mac)
-   ✅ Automatic Mobile Touch Audio Unlock Banner ("Tap anywhere to unlock JARVIS voice")
-   ✅ Persistent Mobile Heartbeat Watchdog — Auto-restarts speech on gesture & focus
-   ✅ 100% Free AI Neural Response for all devices without API keys
+   ✅ Duplicate Repeat Prevention — Never repeats speech or commands in a loop
+   ✅ Native "Close" Command ("close", "close window", "exit", "close tab", "shut down")
+   ✅ Cross-Device Mobile & Desktop Voice Control
    ================================================================ */
 
 (function () {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // ── State ─────────────────────────────────────────────────────
-  let recognition   = null;
-  let isListening   = false;
-  let voiceMode     = false;
-  let isSpeaking    = false;
-  let audioUnlocked = false;
-  let audio         = null;
-  let restartTimer  = null;
-  let ttsWatchdog   = null;
+  let recognition       = null;
+  let isListening       = false;
+  let voiceMode         = false;
+  let isSpeaking        = false;
+  let audioUnlocked     = false;
+  let audio             = null;
+  let restartTimer      = null;
+  let ttsWatchdog       = null;
+  let lastProcessedText = '';
+  let lastProcessedTime = 0;
 
   // ── Multi-Language Wake Words ──────────────────────────────────
   const WAKE_WORDS = [
@@ -56,13 +57,10 @@
         ctx.resume();
       }
       audioUnlocked = true;
-
-      // Remove mobile unlock banner if present
       document.getElementById('mobileUnlockBanner')?.remove();
     } catch(e) {}
   }
 
-  // ── Add Mobile Gesture Unlock Banner if Mobile Browser ─────────
   function initMobileBanner() {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (isMobile && !audioUnlocked) {
@@ -278,9 +276,31 @@
                        .trim();
       const inp = document.getElementById('chatInput');
 
+      // ── Duplicate Loop Prevention ──────────────────────────────────
+      const now = Date.now();
+      if (lower === lastProcessedText && (now - lastProcessedTime) < 3000) {
+        return; // Skip duplicate command within 3 seconds
+      }
+      lastProcessedText = lower;
+      lastProcessedTime = now;
+
       if (!voiceMode) {
         voiceMode = true;
         setWakeUI(true);
+      }
+
+      // ── 0. Native Close / Exit Command ("close", "close app", "close tab", "exit") ─
+      if (lower === 'close' || lower === 'close app' || lower === 'close window' || lower === 'close tab' || lower === 'exit' || lower === 'shut down' || lower.includes('stop jarvis') || lower.includes('close jarvis')) {
+        const reply = "Closing window and standing down, Boss! விடைபெறுகிறேன் பாஸ்!";
+        window.JarvisApp?.appendDirectMessage('ai', reply);
+        this.speak('Closing window and standing down, Boss!', () => {
+          this._stop();
+          this._stopSpeech();
+          voiceMode = false;
+          setWakeUI(false);
+          try { window.close(); } catch(e) {}
+        }, true);
+        return;
       }
 
       // ── 1. Respectful Boss Persona Greeting ("Jarvis" / "ஜார்விஸ்") ─
