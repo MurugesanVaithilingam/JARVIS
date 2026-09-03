@@ -34,6 +34,7 @@
   let lastSpokenText  = '';     // dedup guard
   let wakeGateActive  = false;  // Alexa-style: only process after wake word
   let wakeGateTimer   = null;
+  let wakeTimeout     = null;   // buffer for pure wake word greeting
 
   // ── Wake words (primary: "hello boss" | "jarvis") ────────────────
   const WAKE_WORDS = [
@@ -278,12 +279,12 @@
       clearTimeout(ttsWatchdog);
       clearInterval(ttsKeepAlive);
       isSpeaking = false;
-      // Extend wake gate — follow-up question window
-      extendWakeGate();
-      setWakeUI(wakeGateActive);
-      // 🎙️ Restart mic AFTER JARVIS finishes speaking (500ms safety gap)
+      setVoiceUI(voiceMode);
+      // 🎙️ Immediately restart 24/7 mic listening after JARVIS finishes speaking
       if (voiceMode && window.JarvisVoice) {
-        setTimeout(() => { if (voiceMode) window.JarvisVoice._boot(); }, 500);
+        setTimeout(() => {
+          if (voiceMode) window.JarvisVoice._boot();
+        }, 150);
       }
       if (onDone) onDone();
     };
@@ -409,14 +410,21 @@
       });
     }
 
-    // ── 3b. Wake Word Only ────────────────────────────────────────────
+    // ── 3b. Wake Word Only (400ms buffer so 'Jarvis open whatsapp' isn't interrupted) ──
     if (isWakeOnly(t)) {
-      return debounced('wake', () => {
-        const r = nextWakeResponse();
-        window.JarvisApp?.appendDirectMessage('ai', `🎙️ ${r.text}`);
-        speak(r.speech);
-      });
+      clearTimeout(wakeTimeout);
+      wakeTimeout = setTimeout(() => {
+        debounced('wake', () => {
+          const r = nextWakeResponse();
+          window.JarvisApp?.appendDirectMessage('ai', `🎙️ ${r.text}`);
+          speak(r.speech);
+        });
+      }, 400);
+      return;
     }
+
+    // Cancel pending wake greeting when a real command arrives
+    clearTimeout(wakeTimeout);
 
     // ── 4. Open Commands (instant, open URL/app via browser & desktop) ───────
     const openApp = (key, label, url, speech) => {
@@ -577,7 +585,7 @@
       }
 
       const rec = new SR();
-      rec.lang             = 'en-US';
+      rec.lang             = 'en-IN'; // Optimized for Indian accent & command recognition
       rec.continuous       = true;   // stays on forever, no restart loops
       rec.interimResults   = false;  // only fires on complete sentences
       rec.maxAlternatives  = 1;
@@ -606,30 +614,32 @@
 
 
       rec.onend = () => {
-        // Auto-restart if voice mode is still active (handles browser auto-stop after 60s silence)
-        if (voiceMode) {
+        // 24/7 persistent mic auto-restart (handles browser silence timeouts)
+        if (voiceMode && !isSpeaking) {
           setTimeout(() => {
-            if (voiceMode && recognition === rec) this._boot();
-          }, 300);
+            if (voiceMode && !isSpeaking && recognition === rec) this._boot();
+          }, 100);
         }
       };
 
       rec.onerror = (e) => {
         if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
           window.JarvisToast?.show('🚫 Microphone blocked! Allow microphone access in browser settings.', 'error', 8000);
-          this.stop();
           return;
         }
-        if (e.error === 'no-speech') return; // normal — just silence, keep going
-        // For other errors, restart
-        if (voiceMode) setTimeout(() => { if (voiceMode) this._boot(); }, 500);
+        // Auto-reboot mic immediately on silence or network glitch
+        if (voiceMode && !isSpeaking) {
+          setTimeout(() => {
+            if (voiceMode && !isSpeaking) this._boot();
+          }, 200);
+        }
       };
 
       try {
         rec.start();
         setVoiceUI(true);
       } catch (er) {
-        if (voiceMode) setTimeout(() => this._boot(), 400);
+        if (voiceMode && !isSpeaking) setTimeout(() => this._boot(), 300);
       }
     },
   };
@@ -637,6 +647,13 @@
   // ── Boot on DOM ready ─────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
     showVoiceUnlockBanner();
+
+    const startGlobalVoice = () => {
+      unlockAudio();
+      if (!voiceMode && window.JarvisVoice) {
+        window.JarvisVoice.start();
+      }
+    };
 
     document.getElementById('voiceBtn')?.addEventListener('click', () => {
       unlockAudio();
@@ -647,19 +664,13 @@
       window.JarvisVoice.start();
     });
 
-    // Auto-start after 700ms
-    setTimeout(() => {
-      if (!voiceMode) window.JarvisVoice.start();
-    }, 700);
+    // Universal gesture listeners: start 24/7 mic on ANY click/tap/keypress
+    window.addEventListener('click',     startGlobalVoice, { passive: true });
+    window.addEventListener('touchstart',startGlobalVoice, { passive: true });
+    window.addEventListener('keydown',   startGlobalVoice, { passive: true });
 
-    // One-time gesture unlock + greeting start
-    const onGesture = () => {
-      unlockAudio();
-      if (!voiceMode) window.JarvisVoice.start();
-      speak('Hello Boss, eppadi irukkeenga? Jarvis systems 100 percent online-il ullathu!', null, true);
-    };
-    window.addEventListener('click',      onGesture, { once: true, passive: true });
-    window.addEventListener('touchstart', onGesture, { once: true, passive: true });
+    // Auto-start attempt on load
+    setTimeout(startGlobalVoice, 500);
   });
 
 })();
