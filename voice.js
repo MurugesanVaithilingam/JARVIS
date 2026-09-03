@@ -477,6 +477,15 @@
     if (/open task manager|^(task manager|taskmgr)$/.test(t))
       return openApp('taskmgr','Task Manager', '', 'Open pannitten Boss! Opening Task Manager.');
 
+    if (/open (cmd|command prompt|terminal)|^(cmd|command prompt|terminal)$/.test(t))
+      return openApp('cmd','Command Prompt', '', 'Open pannitten Boss! Opening Command Prompt.');
+
+    if (/open powershell|^(powershell)$/.test(t))
+      return openApp('powershell','PowerShell', '', 'Open pannitten Boss! Opening PowerShell.');
+
+    if (/open (control panel|control)|^(control panel|control)$/.test(t))
+      return openApp('control','Control Panel', '', 'Open pannitten Boss! Opening Control Panel.');
+
     // ── 5. System info / conversational ──────────────────────────────
     if (/how are you|eppadi irukke|how r u/.test(t))
       return debounced('howru', () => {

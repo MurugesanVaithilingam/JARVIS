@@ -52,6 +52,16 @@ class JarvisDaemonHandler(BaseHTTPRequestHandler):
                     subprocess.Popen(f'powershell -ExecutionPolicy Bypass -File "{ps_script}"', shell=True)
             response = {'status': 'success', 'message': 'Bluetooth activated and panel opened on PC desktop!'}
 
+        elif cmd in ['cmd', 'command_prompt', 'terminal', 'command prompt']:
+            if sys.platform == 'win32':
+                subprocess.Popen('cmd.exe /c start cmd.exe', shell=True)
+            response = {'status': 'success', 'message': 'Command Prompt opened!'}
+
+        elif cmd in ['powershell', 'ps']:
+            if sys.platform == 'win32':
+                subprocess.Popen('powershell.exe', shell=True)
+            response = {'status': 'success', 'message': 'PowerShell opened!'}
+
         elif cmd in ['taskmgr', 'task_manager', 'task manager']:
             if sys.platform == 'win32':
                 subprocess.Popen('taskmgr.exe')
