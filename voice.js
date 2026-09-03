@@ -159,11 +159,19 @@
 
   // ── UI helpers ─────────────────────────────────────────────────────
   function setVoiceUI(on) {
-    document.getElementById('voiceBtn')?.classList.toggle('active', on);
+    const btn = document.getElementById('voiceBtn');
     const val = document.getElementById('voiceVal');
     const bar = document.getElementById('voiceBar');
-    if (val) val.textContent = on ? 'LISTENING...' : 'OFF';
-    if (bar) bar.style.width = on ? '100%' : '0%';
+    if (btn) {
+      btn.classList.toggle('active', on);
+      btn.classList.toggle('wake-active', on);
+    }
+    if (val) val.textContent = on ? '🎙️ LISTENING...' : 'OFF';
+    if (bar) {
+      bar.style.width = on ? '100%' : '0%';
+      if (on) bar.style.background = 'linear-gradient(90deg,#00D4FF,#FF007F)';
+      else bar.style.background = '';
+    }
   }
 
   // ── Ping sound ────────────────────────────────────────────────────
@@ -582,34 +590,18 @@
         if (!text || text.length < 2) return;
 
         // Mic is hard-stopped during TTS so this should never fire while speaking
-        // Extra safety: if somehow still firing while speaking, drop it
         if (isSpeaking) return;
 
-        const t = text.toLowerCase().trim();
-
-        // ── ALEXA-STYLE WAKE GATE ──────────────────────────────────────
-        if (hasWakeWord(t)) {
-          activateWakeGate();
-          // Strip wake word prefix: "Hello Boss open youtube" → "open youtube"
-          const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
-          const stripped = text.replace(wakePrefixRe, '').trim();
-
-          if (stripped.length >= 2) {
-            // "Hello Boss open youtube" → process "open youtube" directly
-            handleCommand(stripped);
-          } else {
-            // Just wake word alone → respond and wait
-            handleCommand(text);
-          }
-          return;
+        // Strip optional wake word prefix ("Jarvis open whatsapp" -> "open whatsapp")
+        let cmd = text;
+        const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
+        if (wakePrefixRe.test(cmd)) {
+          const stripped = cmd.replace(wakePrefixRe, '').trim();
+          if (stripped.length >= 2) cmd = stripped;
         }
 
-        // ── Gate closed → ignore all background speech ─────────────────
-        if (!wakeGateActive) return;
-
-        // Gate open → process follow-up command (no wake word needed for 12s)
-        extendWakeGate();
-        handleCommand(text);
+        // Execute command IMMEDIATELY — 100% active, zero blocking gates!
+        handleCommand(cmd);
       };
 
 
