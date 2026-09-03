@@ -32,6 +32,7 @@
 
   // ── State ────────────────────────────────────────────────────────
   let lastSpokenText  = '';     // dedup guard
+  let lastSpokenTime  = 0;      // timestamp to expire dedup after 4s
   let wakeGateActive  = false;  // Alexa-style: only process after wake word
   let wakeGateTimer   = null;
   let wakeTimeout     = null;   // buffer for pure wake word greeting
@@ -229,6 +230,7 @@
     [/[\u0B80-\u0BFF]+/g, ''],
   ];
 
+
   // ── Speech Sanitizer for TTS ─────────────────────────────────────
   function sanitizeForSpeech(text) {
     if (!text) return '';
@@ -241,17 +243,28 @@
         clean = clean.replace(pattern, replacement);
       }
     }
-    return clean.replace(/\s+/g, ' ').trim().slice(0, 400);
+    clean = clean.replace(/\s+/g, ' ').trim().slice(0, 400);
+
+    // 🛡️ Fallback: if sanitization stripped everything, keep original text so speech ALWAYS works!
+    if (!clean || clean.length < 2) {
+      clean = text.replace(/<[^>]*>/g, '').replace(/[`*#_~\[\]]/g, '').trim().slice(0, 400);
+    }
+    return clean;
   }
 
   // ── TTS speak with dedup guard ──────────────────────────────────
   function speak(text, onDone, forceGirl) {
     if (!text || !window.speechSynthesis) { if (onDone) onDone(); return; }
 
-    // ❌ Dedup guard: don’t repeat the exact same phrase back-to-back
+    // ❌ Dedup guard: don’t repeat the exact same phrase within 4 seconds
+    const now = Date.now();
     const dedupKey = text.trim().slice(0, 80);
-    if (dedupKey === lastSpokenText) { if (onDone) onDone(); return; }
+    if (dedupKey === lastSpokenText && (now - lastSpokenTime) < 4000) {
+      if (onDone) onDone();
+      return;
+    }
     lastSpokenText = dedupKey;
+    lastSpokenTime = now;
 
     unlockAudio();
     isSpeaking = true;
