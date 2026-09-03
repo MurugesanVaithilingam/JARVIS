@@ -27,8 +27,8 @@ $baseDir = __DIR__;
 
 function runWinCmd($cmd) {
     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-        @exec("cmd.exe /c start " . $cmd);
-        @exec($cmd);
+        @pclose(@popen("start \"\" " . $cmd, "r"));
+        @exec("powershell -Command \"Start-Process {$cmd}\"");
     } else {
         @exec($cmd . " > /dev/null 2>&1 &");
     }

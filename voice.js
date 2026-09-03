@@ -59,11 +59,11 @@
     const val = document.getElementById('voiceVal');
     if (active) {
       btn?.classList.add('wake-active');
-      if (val) val.textContent = '🎙️ LISTENING...';
+      if (val) val.textContent = '🎙️ LISTENING SIR...';
       if (bar) { bar.style.width = '100%'; bar.style.background = 'linear-gradient(90deg,#00D4FF,#FF007F)'; }
     } else {
       btn?.classList.remove('wake-active');
-      if (val) val.textContent = voiceMode ? 'STANDBY...' : 'OFF';
+      if (val) val.textContent = voiceMode ? 'LISTENING SIR...' : 'OFF';
       if (bar) { bar.style.width = voiceMode ? '20%' : '0%'; bar.style.background = ''; }
     }
   }
@@ -167,7 +167,7 @@
       btn.classList.toggle('active', on);
       btn.classList.toggle('wake-active', on);
     }
-    if (val) val.textContent = on ? '🎙️ LISTENING...' : 'OFF';
+    if (val) val.textContent = on ? '🎙️ LISTENING SIR...' : 'OFF';
     if (bar) {
       bar.style.width = on ? '100%' : '0%';
       if (on) bar.style.background = 'linear-gradient(90deg,#00D4FF,#FF007F)';
@@ -382,6 +382,7 @@
 
     // Close specific apps (guaranteed return so it never triggers open)
     if (t.includes('close')) {
+      window.JarvisApp?.closeMultitaskWindow();
       if (t.includes('explorer') || t.includes('file')) {
         return debounced('close-explorer', () => {
           desktop('close_explorer');
@@ -430,9 +431,15 @@
     const openApp = (key, label, url, speech) => {
       return debounced('open-' + key, () => {
         window.JarvisApp?.appendDirectMessage('ai', `✅ **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening ${label}...**`);
-        // 1. Try window.open
-        try { openedWindows[key] = window.open(url, '_blank'); } catch(e){}
-        // 2. Trigger native OS app launcher fallback
+        // 1. Open on-screen split window in JARVIS UI if URL exists
+        if (url && !url.startsWith('c:')) {
+          window.JarvisApp?.openMultitaskWindow(url, label);
+        }
+        // 2. Open external browser window/tab
+        if (url) {
+          try { openedWindows[key] = window.open(url, '_blank'); } catch(e){}
+        }
+        // 3. Trigger native OS app launcher fallback
         desktop(key);
         speak(speech || `Open pannitten Boss! Opening ${label}.`);
       });
