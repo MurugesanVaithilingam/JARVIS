@@ -72,6 +72,33 @@ class JarvisDaemonHandler(BaseHTTPRequestHandler):
                 subprocess.Popen('calc.exe')
             response = {'status': 'success', 'message': 'Calculator opened!'}
 
+        elif cmd in ['chatgpt', 'whatsapp', 'instagram', 'facebook', 'youtube', 'gmail', 'maps', 'google']:
+            url_map = {
+                'chatgpt': 'https://chatgpt.com',
+                'whatsapp': 'https://web.whatsapp.com',
+                'instagram': 'https://www.instagram.com',
+                'facebook': 'https://www.facebook.com',
+                'youtube': 'https://www.youtube.com',
+                'gmail': 'https://mail.google.com',
+                'maps': 'https://maps.google.com',
+                'google': 'https://www.google.com'
+            }
+            target_url = url_map.get(cmd, 'https://google.com')
+            if sys.platform == 'win32':
+                subprocess.Popen(f'start {target_url}', shell=True)
+            response = {'status': 'success', 'message': f'{cmd.capitalize()} opened on PC desktop!'}
+
+        elif cmd.startswith('close_'):
+            target = cmd.replace('close_', '').strip()
+            if target in ['explorer', 'file_explorer', 'file explorer', 'files', 'fileexplorer']:
+                if sys.platform == 'win32':
+                    subprocess.Popen('taskkill /f /im explorer.exe & start explorer.exe', shell=True)
+                response = {'status': 'success', 'message': 'Windows File Explorer closed!'}
+            else:
+                if sys.platform == 'win32':
+                    subprocess.Popen(f'taskkill /f /im {target}.exe', shell=True)
+                response = {'status': 'success', 'message': f'Closed {target}'}
+
         self.wfile.write(json.dumps(response).encode('utf-8'))
 
 def run_server(port=8765):

@@ -65,12 +65,37 @@ switch ($action) {
         } elseif ($app === 'powershell') {
             runWinCmd('powershell.exe');
             echo json_encode(['status' => 'success', 'message' => 'PowerShell opened']);
+        } elseif ($app === 'chatgpt') {
+            runWinCmd('https://chatgpt.com');
+            echo json_encode(['status' => 'success', 'message' => 'ChatGPT opened on Windows']);
+        } elseif ($app === 'whatsapp') {
+            runWinCmd('https://web.whatsapp.com');
+            echo json_encode(['status' => 'success', 'message' => 'WhatsApp opened on Windows']);
+        } elseif ($app === 'instagram') {
+            runWinCmd('https://instagram.com');
+            echo json_encode(['status' => 'success', 'message' => 'Instagram opened on Windows']);
+        } elseif ($app === 'facebook') {
+            runWinCmd('https://facebook.com');
+            echo json_encode(['status' => 'success', 'message' => 'Facebook opened on Windows']);
+        } elseif ($app === 'gmail') {
+            runWinCmd('https://mail.google.com');
+            echo json_encode(['status' => 'success', 'message' => 'Gmail opened on Windows']);
+        } elseif ($app === 'maps') {
+            runWinCmd('https://maps.google.com');
+            echo json_encode(['status' => 'success', 'message' => 'Google Maps opened on Windows']);
         } elseif ($app === 'youtube') {
             runWinCmd('https://www.youtube.com');
             echo json_encode(['status' => 'success', 'message' => 'YouTube opened in browser']);
         } elseif ($app === 'google' || $app === 'chrome' || $app === 'browser') {
             runWinCmd('https://www.google.com');
             echo json_encode(['status' => 'success', 'message' => 'Google Chrome opened']);
+        } elseif (in_array($app, ['close_explorer', 'close_file_explorer', 'close_files', 'close_fileexplorer'])) {
+            runWinCmd('taskkill /f /im explorer.exe & start explorer.exe');
+            echo json_encode(['status' => 'success', 'message' => 'Windows File Explorer closed/reset']);
+        } elseif (strpos($app, 'close_') === 0) {
+            $target = str_replace('close_', '', $app);
+            runWinCmd("taskkill /f /im {$target}.exe");
+            echo json_encode(['status' => 'success', 'message' => "Closed {$target}"]);
         } else {
             runWinCmd(escapeshellcmd($app));
             echo json_encode(['status' => 'success', 'message' => "Application '$app' launch signal sent."]);

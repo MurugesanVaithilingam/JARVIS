@@ -147,10 +147,16 @@ window.JarvisApp = (function() {
       selectProvider(window.JarvisProviders[0].id);
     }
 
-    // Greet
+    // Greet on Startup
     setTimeout(() => {
       const p = window.JarvisActivePersona;
-      window.JarvisVoice?.speak(p?.greeting || 'All systems online. Ready for your command.');
+      const greetText = p?.greeting || 'ஹலோ பாஸ், எப்படி இருக்கீங்க? ஜார்விஸ் சிஸ்டம்ஸ் 100% ஆன்லைனில் உள்ளது!';
+      window.JarvisApp?.appendDirectMessage('ai', `👋 **${greetText}**`);
+      window.JarvisVoice?.speak('Hello Boss, eppadi irukkeenga? Jarvis systems 100 percent online-il ullathu!', () => {
+        if (window.JarvisVoice && window.JarvisVoice.isEnabled()) {
+          window.JarvisVoice.start();
+        }
+      }, true);
       updatePersonaUI(p);
     }, 400);
   }
@@ -434,7 +440,7 @@ window.JarvisApp = (function() {
     const selEl = document.getElementById('modelSel');
     const model = selEl?.value || targetProvider.models[0]?.id || 'openai';
 
-    const memoryContext = window.JarvisMemoryEngine?.getSystemPromptContext() || '';
+    const memoryContext = window.JarvisMemoryEngine?.getSystemPromptContext(txt) || '';
     const messages = [
       { role:'system', content: (persona?.systemPrompt || 'You are J.A.R.V.I.S., Tony Stark\'s AI assistant. Be helpful, precise, and slightly witty.') + memoryContext },
       ...convos[pid],
@@ -481,8 +487,10 @@ window.JarvisApp = (function() {
       const plain = full.replace(/[#*`\[\]>_~]/g, '').replace(/\n+/g, ' ').trim();
       const speakText = plain.length > 350 ? plain.slice(0, 350) + "..." : plain;
 
-      // Always speak AI response out loud
-      window.JarvisVoice?.speak(speakText, null, true);
+      // Always speak AI response out loud and resume continuous listening
+      window.JarvisVoice?.speak(speakText, () => {
+        if (window.JarvisVoice && window.JarvisVoice.isEnabled()) window.JarvisVoice.start();
+      }, true);
 
     } catch(err) {
       console.error('AI Error:', err);
@@ -504,7 +512,9 @@ window.JarvisApp = (function() {
           convos[pid].push({ role:'assistant', content:full });
           const plain = full.replace(/[#*`\[\]>_~]/g, '').replace(/\n+/g, ' ').trim();
           const speakText = plain.length > 350 ? plain.slice(0, 350) + "..." : plain;
-          window.JarvisVoice?.speak(speakText, null, true);
+          window.JarvisVoice?.speak(speakText, () => {
+            if (window.JarvisVoice && window.JarvisVoice.isEnabled()) window.JarvisVoice.start();
+          }, true);
         } else {
           throw err;
         }
@@ -515,7 +525,9 @@ window.JarvisApp = (function() {
           bubble.innerHTML = md(offlineReply);
         }
         convos[pid].push({ role:'assistant', content: offlineReply });
-        window.JarvisVoice?.speak(offlineReply, null, true);
+        window.JarvisVoice?.speak(offlineReply, () => {
+          if (window.JarvisVoice && window.JarvisVoice.isEnabled()) window.JarvisVoice.start();
+        }, true);
       }
     }
 
@@ -653,6 +665,47 @@ window.JarvisApp = (function() {
       if (provider) renderMsgs(provider.id);
       window.JarvisVoice?.speak(p.greeting);
     },
+    toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          window.JarvisToast?.show('Fullscreen request denied or not supported', 'warning');
+        });
+        window.JarvisToast?.show('🖥️ STARK HUD: FULLSCREEN MULTITASKING MODE ACTIVATED', 'success');
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        window.JarvisToast?.show('🖥️ Exited Fullscreen Mode', 'info');
+      }
+    },
+    openMultitaskWindow(url, title) {
+      const hud = document.getElementById('multitaskHUD');
+      const iframe = document.getElementById('multitaskIframe');
+      const t = document.getElementById('mhudTitle');
+      if (hud && iframe) {
+        iframe.src = url;
+        if (t) t.textContent = `🖥️ MULTITASKING — ${title || 'APP WINDOW'}`;
+        hud.classList.remove('hidden');
+        window.JarvisToast?.show(`🖥️ Split-screen multitasking opened: ${title}`, 'success');
+      }
+    },
+    closeMultitaskWindow() {
+      const hud = document.getElementById('multitaskHUD');
+      const iframe = document.getElementById('multitaskIframe');
+      if (hud) hud.classList.add('hidden');
+      if (iframe) iframe.src = 'about:blank';
+    },
+    toggleMultitaskMaximize() {
+      const hud = document.getElementById('multitaskHUD');
+      if (hud) {
+        hud.classList.toggle('maximized');
+      }
+    },
+    popoutMultitaskWindow() {
+      const iframe = document.getElementById('multitaskIframe');
+      if (iframe && iframe.src && iframe.src !== 'about:blank') {
+        window.open(iframe.src, '_blank');
+        this.closeMultitaskWindow();
+      }
+    }
   };
 })();
 

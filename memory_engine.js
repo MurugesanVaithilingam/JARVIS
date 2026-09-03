@@ -46,10 +46,38 @@ window.JarvisMemoryEngine = {
     this.renderUI();
   },
 
-  getSystemPromptContext() {
+  getSystemPromptContext(userQuery = '') {
     const memories = this.getMemories();
     if (!memories.length) return '';
-    return "\n\n[PERSISTENT MEMORY CONTEXT]:\n" + memories.map(m => `- [${m.category}]: ${m.fact}`).join("\n");
+    let baseCtx = "\n\n[PERSISTENT MEMORY CONTEXT]:\n" + memories.map(m => `- [${m.category}]: ${m.fact}`).join("\n");
+    
+    if (userQuery) {
+      const ragCtx = this.retrieveRAGContext(userQuery);
+      if (ragCtx) baseCtx += ragCtx;
+    }
+    return baseCtx;
+  },
+
+  retrieveRAGContext(query) {
+    if (!query) return '';
+    const qLower = query.toLowerCase();
+    const tokens = qLower.split(/\W+/).filter(t => t.length > 2);
+    const memories = this.getMemories();
+    
+    const scored = memories.map(m => {
+      const text = `${m.category} ${m.fact}`.toLowerCase();
+      let score = 0;
+      tokens.forEach(tok => {
+        if (text.includes(tok)) score += 1;
+      });
+      return { memory: m, score };
+    }).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
+
+    if (scored.length > 0) {
+      const topContext = scored.slice(0, 5).map(x => `- [RAG ${x.memory.category}]: ${x.memory.fact}`).join("\n");
+      return `\n\n[RAG RETRIEVED CONTEXT]:\n${topContext}`;
+    }
+    return '';
   },
 
   renderUI() {

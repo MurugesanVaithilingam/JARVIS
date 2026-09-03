@@ -1,11 +1,12 @@
 /* ================================================================
-   J.A.R.V.I.S. QUANTUM ENGINE v12.0 — Zero-Bug Edition
+   J.A.R.V.I.S. QUANTUM VOICE ENGINE v13.0 — INSTANT COMMAND EDITION
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   FIX 1: Command executes ONCE only — strict global lock prevents repeats
-   FIX 2: "Close" / "Close window" / "Exit" now truly closes or hides JARVIS
-   FIX 3: autoActivate listeners use {once:true} — no multi-trigger on click/touch
-   FIX 4: File Explorer / app opens exactly ONCE per voice command
-   FIX 5: Heartbeat watchdog is debounced to prevent duplicate recognition sessions
+   ✅ Instant command execution — zero blocking locks
+   ✅ Girl / Boy voice toggle ("change girl voice", "change boy voice")
+   ✅ Per-command 2s debounce — only same exact command is debounced
+   ✅ Close WhatsApp / ChatGPT / File Explorer etc. via voice
+   ✅ chatInput cleared immediately after reading to stop focus-return repeat
+   ✅ continuous=true — mic stays always live without stop/restart loops
    ================================================================ */
 
 (function () {
@@ -13,534 +14,660 @@
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  // ── State ─────────────────────────────────────────────────────────
-  let recognition        = null;
-  let isListening        = false;
-  let voiceMode          = false;
-  let isSpeaking         = false;
-  let audioUnlocked      = false;
-  let audio              = null;
-  let restartTimer       = null;
-  let ttsWatchdog        = null;
-  let heartbeatTimer     = null;
+  // ── Global State ───────────────────────────────────────────────────
+  let recognition   = null;
+  let voiceMode     = false;
+  let isSpeaking    = false;
+  let audioUnlocked = false;
+  let audio         = null;
+  let ttsWatchdog   = null;
+  let girlVoice     = true;           // Default to sweet female voice as requested
 
-  // ── Anti-Repeat Lock (prevents duplicate command execution) ───────
-  let cmdLock            = false;   // TRUE = a command is currently being processed
-  let lastCmdKey         = '';      // last command key string
-  let lastCmdTime        = 0;       // timestamp of last command
+  // Per-command debounce map { commandKey → lastExecutedTime }
+  const cmdTimestamps = {};
+  const CMD_DEBOUNCE  = 2000; // 2 seconds per unique command
 
-  const CMD_DEBOUNCE_MS  = 4000;   // 4 seconds — same command within 4s is ignored
+  // Track opened windows so we can close them by voice
+  const openedWindows = {};
 
-  function canExecute(key) {
-    const now = Date.now();
-    if (cmdLock) return false;                                       // another command running
-    if (key === lastCmdKey && now - lastCmdTime < CMD_DEBOUNCE_MS) return false; // duplicate
-    lastCmdKey  = key;
-    lastCmdTime = now;
-    cmdLock     = true;
-    return true;
-  }
+  // ── State ────────────────────────────────────────────────────────
+  let lastSpokenText  = '';     // dedup guard
+  let wakeGateActive  = false;  // Alexa-style: only process after wake word
+  let wakeGateTimer   = null;
 
-  function releaseLock() {
-    cmdLock = false;
-  }
-
-  // ── Wake Words ────────────────────────────────────────────────────
+  // ── Wake words (primary: "hello boss" | "jarvis") ────────────────
   const WAKE_WORDS = [
-    'jarvis', 'jervis', 'jarvez', 'charvis',
-    'hey jarvis', 'hi jarvis', 'ok jarvis',
-    'boss', 'karen', 'chitti', 'friday', 'edith', 'stark'
+    'hello boss','hi boss','hello jarvis','hi jarvis',
+    'jarvis','jervis','jarvez','charvis',
+    'hey jarvis','ok jarvis','boss','karen','chitti','friday','edith','stark'
   ];
-  function containsWakeWord(t) { return WAKE_WORDS.some(w => t.includes(w)); }
 
-  // ── Desktop Daemon (localhost:8765) ───────────────────────────────
-  let daemonCalled = false; // extra guard so daemon is called max once per command
-  function execDesktopCmd(cmd) {
-    if (daemonCalled) return;
-    daemonCalled = true;
-    fetch(`http://localhost:8765/run?cmd=${encodeURIComponent(cmd)}`, { mode: 'cors' })
-      .then(r => r.json())
-      .then(d => console.log('[DAEMON]', d))
-      .catch(e => console.warn('[DAEMON offline]', e))
-      .finally(() => { setTimeout(() => { daemonCalled = false; }, 3000); });
+  // Check if text starts with OR is a wake word
+  const hasWakeWord = (t) => WAKE_WORDS.some(w =>
+    t === w ||
+    t.startsWith(w + ' ') ||
+    t.startsWith(w + ',') ||
+    t.startsWith(w + '!')
+  );
+  const isWakeOnly  = (t) => WAKE_WORDS.some(w => t === w) && t.split(' ').length <= 3;
+
+  // ── Visual HUD indicator (blue ring when JARVIS is listening) ────
+  function setWakeUI(active) {
+    const btn = document.getElementById('voiceBtn');
+    const bar = document.getElementById('voiceBar');
+    const val = document.getElementById('voiceVal');
+    if (active) {
+      btn?.classList.add('wake-active');
+      if (val) val.textContent = '🎙️ LISTENING...';
+      if (bar) { bar.style.width = '100%'; bar.style.background = 'linear-gradient(90deg,#00D4FF,#FF007F)'; }
+    } else {
+      btn?.classList.remove('wake-active');
+      if (val) val.textContent = voiceMode ? 'STANDBY...' : 'OFF';
+      if (bar) { bar.style.width = voiceMode ? '20%' : '0%'; bar.style.background = ''; }
+    }
   }
 
-  // ── Audio Unlock (one-time per session) ───────────────────────────
+  // Activate the gate + show visual ring
+  function activateWakeGate() {
+    wakeGateActive = true;
+    setWakeUI(true);
+    clearTimeout(wakeGateTimer);
+    wakeGateTimer = setTimeout(() => {
+      wakeGateActive = false;
+      setWakeUI(false);
+    }, 12000);
+  }
+
+  // Extend gate after JARVIS responds (follow-up window stays 12s)
+  function extendWakeGate() {
+    if (!wakeGateActive) return;
+    clearTimeout(wakeGateTimer);
+    wakeGateTimer = setTimeout(() => {
+      wakeGateActive = false;
+      setWakeUI(false);
+    }, 12000);
+  }
+
+  // ── Rotating Tamil wake responses (no repeats) ──────────────────
+  let wakeResponseIdx = 0;
+  const WAKE_RESPONSES = [
+    { text: 'சொல்லுங்க பாஸ்! நான் தயாராக இருக்கிறேன்.', speech: 'Sollunga Boss! Naan thayaaraaga irukkiREn.' },
+    { text: 'என்ன வேணும் பாஸ்? சொல்லுங்க!', speech: 'Enna veNum Boss? Sollunga!' },
+    { text: 'ஆணை இடுங்கள் பாஸ்! நான் செய்கிறேன்.', speech: 'Aanai idungal Boss! Naan seykiREn.' },
+    { text: 'பாஸ் சொல்லுங்க, உடனே செய்கிறேன்!', speech: 'Boss sollunga, udanE seykiREn.' },
+    { text: 'தயாராக இருக்கிறேன் பாஸ். என்ன உதவி வேண்டும்?', speech: 'ThayaaraakA irukkiREn Boss. Enna uthaavi veNdum?' },
+  ];
+  function nextWakeResponse() {
+    const r = WAKE_RESPONSES[wakeResponseIdx % WAKE_RESPONSES.length];
+    wakeResponseIdx++;
+    return r;
+  }
+
+  // ── Desktop & Web App Launcher Helper ─────────────────────────────
+  function desktop(cmd) {
+    fetch(`http://localhost:8765/run?cmd=${encodeURIComponent(cmd)}`, { mode: 'cors' })
+      .catch(() => {
+        fetch('jarvis_executor.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'launch_app', app: cmd })
+        }).catch(() => {});
+      });
+  }
+
+  // ── Per-command debounce (only blocks same command within 2s) ───────
+  function debounced(key, fn) {
+    const now = Date.now();
+    if (cmdTimestamps[key] && now - cmdTimestamps[key] < CMD_DEBOUNCE) return;
+    cmdTimestamps[key] = now;
+    fn();
+  }
+
+  // ── Audio unlock (mobile) ──────────────────────────────────────────
   function unlockAudio() {
     if (audioUnlocked) return;
     try {
       window.speechSynthesis?.cancel();
       window.speechSynthesis?.resume();
-      const u = new SpeechSynthesisUtterance('');
-      u.volume = 0;
+      const u = new SpeechSynthesisUtterance(''); u.volume = 0;
       window.speechSynthesis?.speak(u);
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) new AC().resume();
+      new (window.AudioContext || window.webkitAudioContext)().resume();
       audioUnlocked = true;
       document.getElementById('mobileUnlockBanner')?.remove();
     } catch (e) {}
   }
 
-  // ── Mobile Banner (one-time) ───────────────────────────────────────
-  function initMobileBanner() {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (!isMobile || audioUnlocked || document.getElementById('mobileUnlockBanner')) return;
+  // ── Universal Audio Unlock Banner (Desktop & Mobile) ─────────────
+  function showVoiceUnlockBanner() {
+    if (document.getElementById('voiceUnlockBanner')) return;
     const b = document.createElement('div');
-    b.id = 'mobileUnlockBanner';
-    b.style.cssText = [
-      'position:fixed;top:0;left:0;right:0;z-index:99999',
-      'background:linear-gradient(90deg,#ff007f,#00d2ff)',
-      'color:#fff;text-align:center;padding:12px;cursor:pointer',
-      'font-family:sans-serif;font-weight:bold;font-size:13px;letter-spacing:.05em',
-      'box-shadow:0 4px 15px rgba(0,210,255,.4)'
-    ].join(';');
-    b.textContent = '🎙️ TAP ANYWHERE TO ACTIVATE JARVIS VOICE & MICROPHONE ENGINE';
-    b.addEventListener('click', () => { unlockAudio(); window.JarvisVoice.toggle(); }, { once: true });
-    document.body.appendChild(b);
+    b.id = 'voiceUnlockBanner';
+    b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#00D4FF,#FF007F);color:#fff;text-align:center;padding:10px 16px;cursor:pointer;font-family:var(--fhud, sans-serif);font-weight:bold;font-size:12px;letter-spacing:0.1em;box-shadow:0 4px 20px rgba(0,212,255,.5);animation:pulseBanner 2s infinite;';
+    b.innerHTML = '🔊 CLICK ANYWHERE OR TAP HERE TO ACTIVATE JARVIS VOICE ENGINE';
+    
+    const activate = () => {
+      unlockAudio();
+      b.remove();
+      window.JarvisVoice.start();
+      speak('Hello Boss, eppadi irukkeenga? Jarvis systems 100 percent online-il ullathu!', null, true);
+    };
+
+    b.onclick = activate;
+    window.addEventListener('click', activate, { once: true, passive: true });
+    window.addEventListener('keydown', activate, { once: true, passive: true });
   }
 
-  // ── One-time gesture listeners ─────────────────────────────────────
-  ['click','touchstart','pointerdown','keydown'].forEach(ev => {
-    document.addEventListener(ev, unlockAudio, { once: true, passive: true });
-  });
-
-  // ── Sound ping ────────────────────────────────────────────────────
-  function playPing(freq = 880) {
-    try {
-      const AC  = window.AudioContext || window.webkitAudioContext;
-      const ctx = new AC();
-      const osc = ctx.createOscillator();
-      const g   = ctx.createGain();
-      osc.connect(g); g.connect(ctx.destination);
-      osc.type = 'sine'; osc.frequency.value = freq;
-      g.gain.setValueAtTime(0.15, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-      osc.start(); osc.stop(ctx.currentTime + 0.3);
-    } catch (e) {}
-  }
-
-  // ── UI helpers ────────────────────────────────────────────────────
-  function setListeningUI(on) {
-    document.getElementById('voiceBtn')?.classList.toggle('rec', on);
-    document.getElementById('micInputBtn')?.classList.toggle('rec', on);
-    document.getElementById('voiceInd')?.classList.toggle('active', on);
-    const bar = document.getElementById('voiceBar');
-    const val = document.getElementById('voiceVal');
-    if (bar) bar.style.width = on ? '100%' : '';
-    if (val && on) val.textContent = 'LISTENING...';
-  }
-
+  // ── UI helpers ─────────────────────────────────────────────────────
   function setVoiceUI(on) {
-    const btn = document.getElementById('voiceBtn');
+    document.getElementById('voiceBtn')?.classList.toggle('active', on);
     const val = document.getElementById('voiceVal');
     const bar = document.getElementById('voiceBar');
-    btn?.classList.toggle('active', on);
-    if (!on) btn?.classList.remove('rec');
-    if (val) val.textContent = on ? 'VOICE LIVE' : 'OFF';
+    if (val) val.textContent = on ? 'LISTENING...' : 'OFF';
     if (bar) bar.style.width = on ? '100%' : '0%';
   }
 
-  // ── TTS helpers ────────────────────────────────────────────────────
-  function stopSpeech() {
-    clearTimeout(ttsWatchdog);
-    try { window.speechSynthesis?.cancel(); } catch (e) {}
-    if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
-    isSpeaking = false;
+  // ── Ping sound ────────────────────────────────────────────────────
+  function ping(f = 880) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.15, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      o.start(); o.stop(ctx.currentTime + 0.3);
+    } catch (e) {}
   }
 
-  function speak(text, onDone) {
-    if (!text) { releaseLock(); if (onDone) onDone(); return; }
-    isSpeaking = true;
-    stopSpeech();
+  // ── Check if browser has a Tamil TTS voice installed ─────────────
+  function hasTamilVoice() {
+    return window.speechSynthesis.getVoices().some(v =>
+      v.lang.toLowerCase().includes('ta') || v.name.toLowerCase().includes('tamil')
+    );
+  }
 
-    const clean = text.replace(/<[^>]*>/g, '').replace(/[`*#_~\[\]]/g, '').replace(/\s+/g, ' ').trim().slice(0, 200);
-    if (!clean || !window.speechSynthesis) {
-      isSpeaking = false; releaseLock(); if (onDone) onDone(); return;
+  // ── Tamil phonetic transliteration map (comprehensive) ────────────
+  const TAMIL_MAP = [
+    [/ஹலோ பாஸ்,? எப்படி இருக்கீங்க\??/g, 'Hello Boss, eppadi irukkeenga?'],
+    [/ஜார்விஸ் சிஸ்டம்ஸ் 100% ஆன்லைனில் உள்ளது!?/g, 'Jarvis systems nooRu percent online-il ullathu!'],
+    [/சொல்லுங்க பாஸ்,? உங்களுக்கு என்ன வேணும்\??/g, 'Sollunga Boss, ungalukku enna veNum?'],
+    [/நான் (அக்கரையா )?செய்ய காத்திருக்கிறேன்!?/g, 'Naan seyya kaathirukiren!'],
+    [/ஓப்பன் பண்ணிட்டேன் பாஸ்!?/g, 'Open pannittEn Boss!'],
+    [/நான் நல்லா இருக்கேன் பாஸ்!?/g, 'Naan nalla irukkEn Boss!'],
+    [/ஸ்டார்க் சிஸ்டம்ஸ் 100% ஆன்லைனில் இயங்குகிறது!?/g, 'Stark systems nooRu percent online-il iyanguthu!'],
+    [/பாஸ்/g, 'Boss'],
+    [/நான்/g, 'Naan'],
+    [/வணக்கம்/g, 'Vanakkam'],
+    [/என்ன/g, 'enna'],
+    [/வேணும்/g, 'veNum'],
+    [/செய்கிறேன்/g, 'seykirEn'],
+    [/செய்தேன்/g, 'seythEn'],
+    [/திறக்கிறேன்/g, 'thiRakkiREn'],
+    [/மூடுகிறேன்/g, 'mUdukiREn'],
+    [/சரி/g, 'sari'],
+    [/புரிகிறது/g, 'purikiRathu'],
+    [/முடிந்தது/g, 'mudintathu'],
+    [/தயார்/g, 'thayaar'],
+    [/நன்றி/g, 'nandRi'],
+    [/விடைபெறுகிறேன்/g, 'vidaipeRukiREn'],
+    [/அக்கரையா/g, 'akkaraiyaa'],
+    [/இருக்கீங்க/g, 'irukkEnga'],
+    [/இருக்கேன்/g, 'irukkEn'],
+    [/காத்திருக்கிறேன்/g, 'kaathirukkiREn'],
+    [/உங்களுக்கு/g, 'ungalukku'],
+    [/கண்டுபிடிக்கிறேன்/g, 'kaNdupidikkirEn'],
+    // Remaining Tamil Unicode chars → strip gracefully
+    [/[\u0B80-\u0BFF]+/g, ''],
+  ];
+
+  // ── Speech Sanitizer for TTS ─────────────────────────────────────
+  function sanitizeForSpeech(text) {
+    if (!text) return '';
+    let clean = text.replace(/<[^>]*>/g, '').replace(/[`*#_~\[\]]/g, '');
+
+    // If browser has Tamil voice → keep Tamil Unicode as-is for native Tamil TTS
+    if (!hasTamilVoice()) {
+      // No Tamil voice → apply phonetic transliteration map
+      for (const [pattern, replacement] of TAMIL_MAP) {
+        clean = clean.replace(pattern, replacement);
+      }
     }
+    return clean.replace(/\s+/g, ' ').trim().slice(0, 400);
+  }
 
-    let fired = false;
+  // ── TTS speak with dedup guard ──────────────────────────────────
+  function speak(text, onDone, forceGirl) {
+    if (!text || !window.speechSynthesis) { if (onDone) onDone(); return; }
+
+    // ❌ Dedup guard: don’t repeat the exact same phrase back-to-back
+    const dedupKey = text.trim().slice(0, 80);
+    if (dedupKey === lastSpokenText) { if (onDone) onDone(); return; }
+    lastSpokenText = dedupKey;
+
+    unlockAudio();
+    isSpeaking = true;
+
+    // 🔇 STOP MIC COMPLETELY while JARVIS speaks (prevents echo repeat)
+    try {
+      if (recognition) {
+        recognition.onresult = null;   // discard any pending results
+        recognition.onend    = null;   // don't auto-restart during TTS
+        recognition.stop();
+      }
+    } catch(e) {}
+
+    try {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    } catch (e) {}
+
+    const clean = sanitizeForSpeech(text);
+    if (!clean) { isSpeaking = false; if (onDone) onDone(); return; }
+
+    let done = false;
     const finish = () => {
-      if (fired) return;
-      fired = true;
+      if (done) return; done = true;
       clearTimeout(ttsWatchdog);
+      clearInterval(ttsKeepAlive);
       isSpeaking = false;
-      releaseLock();
+      // Extend wake gate — follow-up question window
+      extendWakeGate();
+      setWakeUI(wakeGateActive);
+      // 🎙️ Restart mic AFTER JARVIS finishes speaking (500ms safety gap)
+      if (voiceMode && window.JarvisVoice) {
+        setTimeout(() => { if (voiceMode) window.JarvisVoice._boot(); }, 500);
+      }
       if (onDone) onDone();
-      else if (voiceMode) scheduleRestart(150);
     };
 
-    ttsWatchdog = setTimeout(finish, Math.max(1500, clean.length * 70));
+    // Watchdog: if speech takes > max expected time, force-finish
+    const maxMs = Math.max(4000, clean.length * 80);
+    ttsWatchdog = setTimeout(finish, maxMs);
 
-    try { window.speechSynthesis.cancel(); } catch (e) {}
+    // Chrome TTS bug: speechSynthesis pauses after ~15s — keepAlive poke
+    let ttsKeepAlive = setInterval(() => {
+      try { if (window.speechSynthesis.speaking) window.speechSynthesis.resume(); } catch(e) {}
+    }, 10000);
+
     setTimeout(() => {
       try { window.speechSynthesis.resume(); } catch (e) {}
-      const utt    = new SpeechSynthesisUtterance(clean);
+      const utt = new SpeechSynthesisUtterance(clean);
       const voices = window.speechSynthesis.getVoices();
-      const pick   = voices.find(v => v.name.toLowerCase().includes('david') && v.lang === 'en-US')
-                  || voices.find(v => v.lang === 'en-GB')
-                  || voices.find(v => v.lang === 'en-US')
-                  || voices[0];
-      if (pick) utt.voice = pick;
-      utt.volume = 1; utt.rate = 1; utt.pitch = 0.9;
-      utt.onend = finish; utt.onerror = finish;
+      const useGirl = forceGirl !== undefined ? forceGirl : girlVoice;
+
+      let voice;
+      // Tamil voice: prefer Tamil lang if browser has it
+      if (/[\u0B80-\u0BFF]/.test(clean) || /[\u0B80-\u0BFF]/.test(text)) {
+        voice = voices.find(v => v.lang.toLowerCase().startsWith('ta'))
+             || voices.find(v => v.name.toLowerCase().includes('tamil'));
+      }
+      // Female voice selection (sweet & natural)
+      if (!voice && useGirl) {
+        voice = voices.find(v => /zira/i.test(v.name))                          // Windows built-in female
+             || voices.find(v => /samantha/i.test(v.name))                      // macOS female
+             || voices.find(v => /google us english/i.test(v.name))             // Google female
+             || voices.find(v => /aria|emma|salli|joanna|kendra|ivy/i.test(v.name))
+             || voices.find(v => v.name.toLowerCase().includes('female'))
+             || voices.find(v => v.gender === 'female')
+             || voices.find(v => v.lang === 'en-US');
+        utt.pitch = 1.35; utt.rate = 1.0;
+      }
+      // Male voice fallback
+      if (!voice && !useGirl) {
+        voice = voices.find(v => /david|james|mark|daniel/i.test(v.name))
+             || voices.find(v => /en[-_]GB/i.test(v.lang))
+             || voices.find(v => /en[-_]US/i.test(v.lang));
+        utt.pitch = 0.85; utt.rate = 0.98;
+      }
+      if (voice) utt.voice = voice;
+      utt.volume = 1;
+      utt.onend   = finish;
+      utt.onerror = finish;
       window.speechSynthesis.speak(utt);
     }, 40);
   }
 
-  // ── Recognition helpers ────────────────────────────────────────────
-  function scheduleRestart(ms = 100) {
-    clearTimeout(restartTimer);
-    restartTimer = setTimeout(() => {
-      if (voiceMode && !isListening && !isSpeaking && !cmdLock) {
-        window.JarvisVoice._startListening();
-      }
-    }, ms);
-  }
+  // ══════════════════════════════════════════════════════════════════
+  //  COMMAND HANDLER — INSTANT, NO GLOBAL LOCK
+  // ══════════════════════════════════════════════════════════════════
+  function handleCommand(raw) {
+    if (!raw || raw.trim().length < 1) return;
 
-  function stopListening() {
-    clearTimeout(restartTimer);
-    isListening = false;
-    try { recognition?.abort(); } catch (e) {}
+    // Normalize
+    const t = raw.toLowerCase()
+      .replace(/[^\u0000-\u007E\u0B80-\u0BFF\s]/g, '')
+      .replace(/\s+/g, ' ').trim();
+
+    // Clear chat input immediately to prevent focus-return repeat
+    const inp = document.getElementById('chatInput');
+    if (inp) inp.value = '';
+
+    // ── 1. Girl / Boy Voice Toggle ────────────────────────────────────
+    if (/girl voice|female voice|lady voice|woman voice|pen voice/.test(t)) {
+      return debounced('voice-girl', () => {
+        girlVoice = true;
+        window.JarvisApp?.appendDirectMessage('ai', '💃 **Girl voice activated, Boss! Voice changed to female mode!**');
+        speak('Girl voice activated Boss! Switching to female voice mode!');
+      });
+    }
+    if (/boy voice|male voice|man voice|jarvis voice|stark voice/.test(t)) {
+      return debounced('voice-boy', () => {
+        girlVoice = false;
+        window.JarvisApp?.appendDirectMessage('ai', '🎙️ **JARVIS male voice restored, Boss!**');
+        speak('JARVIS male voice restored, Boss!');
+      });
+    }
+
+    // ── 2. Close Commands (Must execute before any open checks!) ───────
+    if (/^(close|exit|shut down|stop jarvis|close jarvis|bye jarvis|goodbye jarvis|close app|close window|close tab)$/.test(t)) {
+      return debounced('close-jarvis', () => {
+        voiceMode = false;
+        setVoiceUI(false);
+        try { recognition?.stop(); } catch (e) {}
+        window.JarvisApp?.appendDirectMessage('ai', '👋 **Closing JARVIS — Goodbye Boss! விடைபெறுகிறேன் பாஸ்!**');
+        speak('Goodbye Boss! Closing JARVIS now. Vanakkam!', () => {
+          try { window.close(); } catch (e) {}
+        });
+      });
+    }
+
+    // Close specific apps (guaranteed return so it never triggers open)
+    if (t.includes('close')) {
+      if (t.includes('explorer') || t.includes('file')) {
+        return debounced('close-explorer', () => {
+          desktop('close_explorer');
+          window.JarvisApp?.appendDirectMessage('ai', '✅ **Closing File Explorer, Boss!**');
+          speak('Closing File Explorer, Boss!');
+        });
+      }
+      const appKey = t.replace('close ', '').replace(/\s/g, '');
+      return debounced('close-' + appKey, () => {
+        if (openedWindows[appKey] && !openedWindows[appKey].closed) {
+          try { openedWindows[appKey].close(); } catch(e){}
+        }
+        desktop('close_' + appKey);
+        window.JarvisApp?.appendDirectMessage('ai', `✅ **Closed ${appKey}, Boss!**`);
+        speak(`Closed ${appKey}, Boss!`);
+      });
+    }
+
+    // ── 3a. Hello Boss Greeting ────────────────────────────────────────
+    if (/^(hello boss|hello jarvis|hi boss|hi jarvis|vanakkam|வணக்கம்|ஹலோ பாஸ்|ஹலோ ஜார்விஸ்)/.test(t)) {
+      return debounced('hello-boss', () => {
+        const greet = 'Hello Boss! Eppadi irukkeenga? Naan nalla irukkEn. Sollunga Boss, enna seiyya?';
+        const greetTamil = 'ஹலோ பாஸ்! எப்படி இருக்கீங்க? நான் நல்லா இருக்கேன். சொல்லுங்க பாஸ், என்ன செய்ய?';
+        window.JarvisApp?.appendDirectMessage('ai', `👋 ${greetTamil}`);
+        speak(greet);
+      });
+    }
+
+    // ── 3b. Wake Word Only ────────────────────────────────────────────
+    if (isWakeOnly(t)) {
+      return debounced('wake', () => {
+        const r = nextWakeResponse();
+        window.JarvisApp?.appendDirectMessage('ai', `🎙️ ${r.text}`);
+        speak(r.speech);
+      });
+    }
+
+    // ── 4. Open Commands (instant, open URL/app via browser & desktop) ───────
+    const openApp = (key, label, url, speech) => {
+      return debounced('open-' + key, () => {
+        window.JarvisApp?.appendDirectMessage('ai', `✅ **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening ${label}...**`);
+        // 1. Try window.open
+        try { openedWindows[key] = window.open(url, '_blank'); } catch(e){}
+        // 2. Trigger native OS app launcher fallback
+        desktop(key);
+        speak(speech || `Open pannitten Boss! Opening ${label}.`);
+      });
+    };
+
+    if (/open chatgpt|^(chatgpt|chat gpt|gpt)$/.test(t))
+      return openApp('chatgpt','ChatGPT', 'https://chatgpt.com', 'Open pannitten Boss! Opening Chat G P T.');
+
+    if (/open whatsapp|^(whatsapp)$/.test(t))
+      return openApp('whatsapp','WhatsApp', 'https://web.whatsapp.com', 'Open pannitten Boss! Opening WhatsApp.');
+
+    if (/open instagram|^(instagram)$/.test(t))
+      return openApp('instagram','Instagram', 'https://instagram.com', 'Open pannitten Boss! Opening Instagram.');
+
+    if (/open facebook|^(facebook)$/.test(t))
+      return openApp('facebook','Facebook', 'https://facebook.com', 'Open pannitten Boss! Opening Facebook.');
+
+    if (/open gmail|^(gmail|email)$/.test(t))
+      return openApp('gmail','Gmail', 'https://mail.google.com', 'Open pannitten Boss! Opening Gmail.');
+
+    if (/open youtube|^(youtube)$/.test(t))
+      return openApp('youtube','YouTube', 'https://youtube.com', 'Open pannitten Boss! Opening YouTube.');
+
+    if (/open google(?!maps| maps)/.test(t))
+      return openApp('google','Google', 'https://google.com', 'Open pannitten Boss! Opening Google.');
+
+    if (/open (google maps|maps|navigation)|google maps/.test(t))
+      return openApp('maps','Google Maps', 'https://maps.google.com', 'Open pannitten Boss! Opening Google Maps.');
+
+    if (/open file explorer|open explorer|^(file explorer|explorer|my computer|files)$/.test(t))
+      return openApp('explorer','File Explorer', 'c:/', 'Open pannitten Boss! Opening Windows File Explorer.');
+
+    if (/open bluetooth|^(bluetooth|blue tooth)$/.test(t))
+      return openApp('bluetooth','Bluetooth', '', 'Open pannitten Boss! Activating Bluetooth settings.');
+
+    if (/open notepad|^(notepad)$/.test(t))
+      return openApp('notepad','Notepad', '', 'Open pannitten Boss! Opening Notepad.');
+
+    if (/open calculator|^(calculator|calc)$/.test(t))
+      return openApp('calc','Calculator', '', 'Open pannitten Boss! Opening Calculator.');
+
+    if (/open task manager|^(task manager|taskmgr)$/.test(t))
+      return openApp('taskmgr','Task Manager', '', 'Open pannitten Boss! Opening Task Manager.');
+
+    // ── 5. System info / conversational ──────────────────────────────
+    if (/how are you|eppadi irukke|how r u/.test(t))
+      return debounced('howru', () => {
+        const r = 'நான் நல்லா இருக்கேன் பாஸ்! ஸ்டார்க் சிஸ்டம்ஸ் 100% ஆன்லைனில் இயங்குகிறது!';
+        window.JarvisApp?.appendDirectMessage('ai', r);
+        speak('Naan nalla irukken Boss! Stark systems 100 percent online irukku!');
+      });
+
+    if (/weather|vanilai/.test(t))
+      return debounced('weather', () => {
+        const r = 'இன்றைய வானிலை 31°C வெப்பநிலையுடன் தெளிவாக உள்ளது பாஸ்!';
+        window.JarvisApp?.appendDirectMessage('ai', r);
+        speak('Inraiya vanilai 31 degree Celsius veppanilayudan thelivaga ullathu Boss!');
+      });
+
+    if (/what time|what.*time|time now|intha neram/.test(t))
+      return debounced('time', () => {
+        const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        const r = `இப்போதைய நேரம் ${now} பாஸ்!`;
+        window.JarvisApp?.appendDirectMessage('ai', r);
+        speak(`Ippotha neram ${now} Boss!`);
+      });
+
+    if (/what.*date|today.*date|intha naal/.test(t))
+      return debounced('date', () => {
+        const now = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        window.JarvisApp?.appendDirectMessage('ai', `📅 **Today is ${now}, Boss!**`);
+        speak(`Today is ${now}, Boss!`);
+      });
+
+    if (/clear chat|clear conversation|reset chat/.test(t))
+      return debounced('clear', () => {
+        window.JarvisApp?.clearChat();
+        speak('Conversation cleared, Boss!');
+      });
+
+    if (/tamil.*pesa|pesa.*tamil|speak.*tamil|tamil.*speak/.test(t))
+      return debounced('tamil-speak', () => {
+        const r = 'ஆமாம் பாஸ்! என்னால் தமிழில் தெளிவாகப் பேசவும் புரிந்துகொள்ளவும் முடியும்!';
+        window.JarvisApp?.appendDirectMessage('ai', r);
+        speak('Aamaam Boss! Ennaal Tamil-il pesa mudiyum!');
+      });
+
+    // ── 6. Call Launcher ──────────────────────────────────────────────
+    if (/call|phone|suresh/.test(t) && !/chatgpt|whatsapp|instagram/.test(t))
+      return debounced('call', () => {
+        const name = /suresh/.test(t) ? 'Suresh' : 'Contact';
+        window.JarvisApp?.appendDirectMessage('ai', `📞 **Initiating call to ${name}...**\n[Open WhatsApp Web](https://web.whatsapp.com)`);
+        speak(`Initiating call to ${name}, Boss!`);
+      });
+
+    // ── 7. Send everything else to AI Engine (and speak response) ──────
+    if (inp && raw.trim().length > 0) {
+      lastSpokenText = '';  // reset dedup so AI response is always spoken fresh
+      inp.value = raw;
+      window.JarvisApp?.sendMessage(true);
+    }
   }
 
   // ══════════════════════════════════════════════════════════════════
-  //  MAIN JARVIS VOICE OBJECT
+  //  SPEECH RECOGNITION — continuous=true, no stop/restart loops
   // ══════════════════════════════════════════════════════════════════
   window.JarvisVoice = {
     isSupported() { return !!SR; },
     isEnabled()   { return voiceMode; },
 
-    toggle() {
-      unlockAudio();
-      voiceMode = !voiceMode;
-      if (voiceMode) {
-        setVoiceUI(true);
-        playPing(880);
-        this._startListening();
-      } else {
-        setVoiceUI(false);
-        setListeningUI(false);
-        stopListening();
-        stopSpeech();
+    // Expose speak publicly so app.js can call it
+    speak(text, onDone, forceGirl) { speak(text, onDone, forceGirl); },
+
+    start() {
+      if (!SR) {
+        window.JarvisToast?.show('⚠️ Speech Recognition needs Chrome or Safari with HTTPS', 'warning', 6000);
+        return;
       }
+      if (voiceMode) return;
+      unlockAudio();
+      voiceMode = true;
+      setVoiceUI(true);
+      ping(880);
+      this._boot();
+    },
+
+    stop() {
+      voiceMode = false;
+      setVoiceUI(false);
+      try { recognition?.stop(); } catch (e) {}
+      recognition = null;
+    },
+
+    toggle() {
+      if (voiceMode) this.stop(); else this.start();
     },
 
     listenOnce() {
       unlockAudio();
-      if (!voiceMode) { this.toggle(); return; }
-      playPing(1100);
-      this._startListening();
+      if (!voiceMode) this.start();
     },
 
-    _startListening() {
+    _boot() {
       if (!SR) return;
-      if (isListening) return;
-      if (isSpeaking || cmdLock) { scheduleRestart(300); return; }
 
-      clearTimeout(restartTimer);
-
-      // Tear down previous instance cleanly
+      // Tear down old instance
       if (recognition) {
-        try { recognition.onresult = recognition.onend = recognition.onerror = null; recognition.abort(); } catch (e) {}
+        try { recognition.onresult = recognition.onend = recognition.onerror = null; recognition.stop(); } catch (e) {}
         recognition = null;
       }
 
       const rec = new SR();
-      rec.lang = 'en-US';
-      rec.continuous = false;
-      rec.interimResults = false; // ← interim OFF stops duplicate onresult firings
-      rec.maxAlternatives = 1;
+      rec.lang             = 'en-US';
+      rec.continuous       = true;   // stays on forever, no restart loops
+      rec.interimResults   = false;  // only fires on complete sentences
+      rec.maxAlternatives  = 1;
       recognition = rec;
 
-      let handled = false; // ensures onend only triggers _handleInput ONCE per session
-
       rec.onresult = (e) => {
-        if (isSpeaking) stopSpeech();
-        const transcript = Array.from(e.results)
-          .filter(r => r.isFinal)
-          .map(r => r[0].transcript)
-          .join(' ')
-          .trim();
-        if (transcript) {
-          const inp = document.getElementById('chatInput');
-          if (inp) inp.value = transcript;
+        const result = e.results[e.resultIndex];
+        if (!result?.isFinal) return;
+        const text = result[0].transcript.trim();
+        if (!text || text.length < 2) return;
+
+        // Mic is hard-stopped during TTS so this should never fire while speaking
+        // Extra safety: if somehow still firing while speaking, drop it
+        if (isSpeaking) return;
+
+        const t = text.toLowerCase().trim();
+
+        // ── ALEXA-STYLE WAKE GATE ──────────────────────────────────────
+        if (hasWakeWord(t)) {
+          activateWakeGate();
+          // Strip wake word prefix: "Hello Boss open youtube" → "open youtube"
+          const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
+          const stripped = text.replace(wakePrefixRe, '').trim();
+
+          if (stripped.length >= 2) {
+            // "Hello Boss open youtube" → process "open youtube" directly
+            handleCommand(stripped);
+          } else {
+            // Just wake word alone → respond and wait
+            handleCommand(text);
+          }
+          return;
         }
+
+        // ── Gate closed → ignore all background speech ─────────────────
+        if (!wakeGateActive) return;
+
+        // Gate open → process follow-up command (no wake word needed for 12s)
+        extendWakeGate();
+        handleCommand(text);
       };
 
-      rec.onend = () => {
-        isListening = false;
-        setListeningUI(false);
-        if (handled) return; // prevent double-fire
 
-        const inp = document.getElementById('chatInput');
-        const text = inp?.value?.trim() || '';
-        if (text.length > 0) {
-          handled = true;
-          this._handleInput(text);
-        } else if (voiceMode && !isSpeaking && !cmdLock) {
-          scheduleRestart(100);
+      rec.onend = () => {
+        // Auto-restart if voice mode is still active (handles browser auto-stop after 60s silence)
+        if (voiceMode) {
+          setTimeout(() => {
+            if (voiceMode && recognition === rec) this._boot();
+          }, 300);
         }
       };
 
       rec.onerror = (e) => {
-        isListening = false;
-        setListeningUI(false);
         if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          window.JarvisToast?.show('🚫 Microphone blocked! Allow microphone access in your browser.', 'error', 8000);
-          voiceMode = false;
-          setVoiceUI(false);
+          window.JarvisToast?.show('🚫 Microphone blocked! Allow microphone access in browser settings.', 'error', 8000);
+          this.stop();
           return;
         }
-        if (voiceMode && !isSpeaking && !cmdLock) scheduleRestart(250);
+        if (e.error === 'no-speech') return; // normal — just silence, keep going
+        // For other errors, restart
+        if (voiceMode) setTimeout(() => { if (voiceMode) this._boot(); }, 500);
       };
 
       try {
         rec.start();
-        isListening = true;
-        setListeningUI(true);
-      } catch (e) {
-        isListening = false;
-        if (voiceMode) scheduleRestart(300);
-      }
-    },
-
-    // ════════════════════════════════════════════════════════════════
-    //  _handleInput — STRICT ONE-COMMAND ONCE LOCK
-    // ════════════════════════════════════════════════════════════════
-    _handleInput(raw) {
-      if (!raw?.trim()) return;
-
-      const lower = raw.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
-      const inp   = document.getElementById('chatInput');
-
-      // ── Close / Exit Commands ─────────────────────────────────────
-      const isClose = lower === 'close'
-        || lower === 'close app'
-        || lower === 'close window'
-        || lower === 'close tab'
-        || lower === 'close jarvis'
-        || lower === 'stop jarvis'
-        || lower === 'exit'
-        || lower === 'shut down'
-        || lower === 'goodbye jarvis'
-        || lower === 'bye jarvis';
-
-      if (isClose) {
-        if (!canExecute('close')) return;
-        voiceMode = false;
-        setVoiceUI(false);
-        setListeningUI(false);
-        stopListening();
-        window.JarvisApp?.appendDirectMessage('ai', '👋 **Closing and standing down, Boss! விடைபெறுகிறேன் பாஸ்!**');
-        speak('Closing and standing down, Boss. Goodbye!', () => {
-          try { window.close(); } catch (e) {}
-          // If window.close() is blocked (browser tab), navigate to blank
-          try { window.location.href = 'about:blank'; } catch (e) {}
-        });
-        return;
-      }
-
-      // ── Anti-repeat: reject duplicate commands within 4 seconds ────
-      if (!canExecute(lower)) return;
-
-      if (!voiceMode) { voiceMode = true; setVoiceUI(true); }
-
-      // ── Wake Word Only ─────────────────────────────────────────────
-      if (containsWakeWord(lower) && lower.split(' ').length <= 2) {
-        const reply = "சொல்லுங்க பாஸ், உங்களுக்கு என்ன வேணும்? நான் செய்ய காத்திருக்கிறேன்!";
-        if (inp) inp.value = raw;
-        window.JarvisApp?.appendDirectMessage('ai', reply);
-        speak('Solloonga Boss, ungalukku enna venum? Naan seyya kaathirukiren!', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Tamil Conversational ───────────────────────────────────────
-      if (lower.includes('tamil') && (lower.includes('pesa') || lower.includes('mudiyuma') || lower.includes('speak'))) {
-        const r = "ஆமாம் பாஸ்! என்னால் தமிழில் தெளிவாகப் பேசவும் புரிந்துகொள்ளவும் முடியும்!";
-        if (inp) inp.value = raw;
-        window.JarvisApp?.appendDirectMessage('ai', r);
-        speak('Aamaam Boss! Ennaal Tamil-il pesa mudiyum! Ungalukku enna venum solloonga Boss!', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      if (lower.includes('how are you') || lower.includes('eppadi irukke') || lower.includes('how r u')) {
-        const r = "நான் நல்லா இருக்கேன் பாஸ்! ஸ்டார்க் சிஸ்டம்ஸ் 100% ஆன்லைனில் இயங்குகிறது!";
-        if (inp) inp.value = raw;
-        window.JarvisApp?.appendDirectMessage('ai', r);
-        speak('Naan nalla irukken Boss! Stark systems 100 percent online irukku!', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      if (lower.includes('weather') || lower.includes('vanilai')) {
-        const r = "இன்றைய வானிலை 31°C வெப்பநிலையுடன் தெளிவாக உள்ளது பாஸ்!";
-        if (inp) inp.value = raw;
-        window.JarvisApp?.appendDirectMessage('ai', r);
-        speak('Inraiya vanilai 31 degree Celsius veppanilayudan thelivaga ullathu Boss!', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── File Explorer (ONE open, ONE daemon call) ─────────────────
-      if (lower.includes('explorer') || lower.includes('file explorer') || lower === 'files' || lower === 'c drive' || lower.includes('my computer') || lower.includes('open files')) {
-        window.JarvisApp?.appendDirectMessage('ai', '📁 **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening Windows File Explorer...**');
-        execDesktopCmd('explorer');
-        speak('Open pannitten Boss! Opening Windows File Explorer.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Bluetooth ─────────────────────────────────────────────────
-      if (lower.includes('bluetooth') || lower.includes('blue tooth')) {
-        window.JarvisApp?.appendDirectMessage('ai', '📡 **ஓப்பன் பண்ணிட்டேன் பாஸ்! Activating Bluetooth Settings...**');
-        execDesktopCmd('bluetooth');
-        speak('Open pannitten Boss! Opening Bluetooth settings.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── WhatsApp ──────────────────────────────────────────────────
-      if (lower.includes('whatsapp')) {
-        window.JarvisApp?.appendDirectMessage('ai', '📱 **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening WhatsApp Web...**');
-        window.open('https://web.whatsapp.com', '_blank');
-        speak('Open pannitten Boss! Opening WhatsApp.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Instagram ─────────────────────────────────────────────────
-      if (lower.includes('instagram')) {
-        window.JarvisApp?.appendDirectMessage('ai', '📸 **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening Instagram...**');
-        window.open('https://instagram.com', '_blank');
-        speak('Open pannitten Boss! Opening Instagram.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Facebook ──────────────────────────────────────────────────
-      if (lower.includes('facebook')) {
-        window.JarvisApp?.appendDirectMessage('ai', '🌐 **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening Facebook...**');
-        window.open('https://facebook.com', '_blank');
-        speak('Open pannitten Boss! Opening Facebook.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Gmail ─────────────────────────────────────────────────────
-      if (lower.includes('gmail') || lower.includes('email') || lower.includes('mail')) {
-        window.JarvisApp?.appendDirectMessage('ai', '✉️ **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening Gmail...**');
-        window.open('https://mail.google.com', '_blank');
-        speak('Open pannitten Boss! Opening Gmail.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Maps ──────────────────────────────────────────────────────
-      if (lower.includes('maps') || lower.includes('navigation')) {
-        window.JarvisApp?.appendDirectMessage('ai', '🗺️ **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening Google Maps...**');
-        window.open('https://maps.google.com', '_blank');
-        speak('Open pannitten Boss! Opening Google Maps.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── YouTube ───────────────────────────────────────────────────
-      if (lower.includes('youtube') || lower.includes('open youtube')) {
-        window.JarvisApp?.appendDirectMessage('ai', '▶️ **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening YouTube...**');
-        window.open('https://youtube.com', '_blank');
-        speak('Open pannitten Boss! Opening YouTube.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Google ────────────────────────────────────────────────────
-      if (lower.includes('open google')) {
-        window.JarvisApp?.appendDirectMessage('ai', '🔍 **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening Google...**');
-        window.open('https://google.com', '_blank');
-        speak('Open pannitten Boss! Opening Google.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── ChatGPT ───────────────────────────────────────────────────
-      if (lower.includes('chatgpt') || lower.includes('chat gpt') || lower.includes('open gpt')) {
-        window.JarvisApp?.appendDirectMessage('ai', '🤖 **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening ChatGPT...**');
-        window.open('https://chatgpt.com', '_blank');
-        speak('Open pannitten Boss! Opening ChatGPT.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Notepad / Calc / TaskMgr ──────────────────────────────────
-      if (lower.includes('notepad') || lower.includes('calc') || lower.includes('task manager')) {
-        const app = lower.includes('notepad') ? 'notepad' : lower.includes('calc') ? 'calc' : 'taskmgr';
-        window.JarvisApp?.appendDirectMessage('ai', `💻 **ஓப்பன் பண்ணிட்டேன் பாஸ்! Launching ${app}...**`);
-        execDesktopCmd(app);
-        speak(`Open pannitten Boss! Launching ${app}.`, () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Clear Chat ────────────────────────────────────────────────
-      if (lower.includes('clear chat') || lower.includes('clear conversation') || lower.includes('reset chat')) {
-        window.JarvisApp?.clearChat();
-        speak('Conversation cleared, Boss.', () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Call ──────────────────────────────────────────────────────
-      if (lower.includes('call') || lower.includes('contact')) {
-        const name = lower.includes('suresh') ? 'Suresh' : 'Contact';
-        window.JarvisApp?.appendDirectMessage('ai', `📞 **Initiating call to ${name}...**\n<a href="https://web.whatsapp.com" target="_blank">Call via WhatsApp Web</a>`);
-        speak(`Initiating call to ${name}, Boss.`, () => { if (voiceMode) scheduleRestart(200); });
-        return;
-      }
-
-      // ── Send to AI Engine ─────────────────────────────────────────
-      if (inp && raw.length > 0) {
-        inp.value = raw;
-        window.JarvisApp?.sendMessage(true);
-        // sendMessage will call releaseLock via onFinished from speak() once AI replies
-        // Release immediately here so lock doesn't freeze
-        setTimeout(releaseLock, 5000);
-      } else {
-        releaseLock();
-        if (voiceMode) scheduleRestart(150);
+        setVoiceUI(true);
+      } catch (er) {
+        if (voiceMode) setTimeout(() => this._boot(), 400);
       }
     },
   };
 
-  // ── Heartbeat: check once every 1.5s ONLY if no other activity ───
-  setInterval(() => {
-    if (voiceMode && !isListening && !isSpeaking && !cmdLock) {
-      window.JarvisVoice._startListening();
-    }
-  }, 1500);
-
-  // ── Bootstrap on DOM ready ────────────────────────────────────────
+  // ── Boot on DOM ready ─────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
-    initMobileBanner();
+    showVoiceUnlockBanner();
 
     document.getElementById('voiceBtn')?.addEventListener('click', () => {
       unlockAudio();
       window.JarvisVoice.toggle();
     });
-
     document.getElementById('micInputBtn')?.addEventListener('click', () => {
       unlockAudio();
-      window.JarvisVoice.listenOnce();
+      window.JarvisVoice.start();
     });
 
-    // Auto-start voice mode after 600ms
+    // Auto-start after 700ms
     setTimeout(() => {
-      if (!voiceMode) {
-        voiceMode = true;
-        setVoiceUI(true);
-        window.JarvisVoice._startListening();
-      }
-    }, 600);
+      if (!voiceMode) window.JarvisVoice.start();
+    }, 700);
 
-    // ONE-TIME gesture auto-activate (won't repeat on each click)
-    const autoActivate = () => {
+    // One-time gesture unlock + greeting start
+    const onGesture = () => {
       unlockAudio();
-      if (!voiceMode) {
-        voiceMode = true;
-        setVoiceUI(true);
-      }
-      if (!isListening && !isSpeaking) {
-        window.JarvisVoice._startListening();
-      }
+      if (!voiceMode) window.JarvisVoice.start();
+      speak('Hello Boss, eppadi irukkeenga? Jarvis systems 100 percent online-il ullathu!', null, true);
     };
-    window.addEventListener('click',      autoActivate, { once: true, passive: true });
-    window.addEventListener('touchstart', autoActivate, { once: true, passive: true });
-    window.addEventListener('keydown',    autoActivate, { once: true });
+    window.addEventListener('click',      onGesture, { once: true, passive: true });
+    window.addEventListener('touchstart', onGesture, { once: true, passive: true });
   });
 
 })();

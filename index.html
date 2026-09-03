@@ -67,7 +67,7 @@
         <div class="sys-status">
           <div class="sdot pulse" id="sysDot"></div>
           <span class="slabel" id="sysLabel">ONLINE</span>
-        </div>
+        <button class="hbtn" id="fullscreenBtn" title="Toggle Fullscreen Multitasking Mode" onclick="window.JarvisApp?.toggleFullscreen();">🖥️</button>
         <button class="hbtn" id="agentLauncherBtn" title="Launch Native Background Agent (Always-Listening)" onclick="alert('🤖 STARK BACKGROUND AGENT LAUNCHER\n\nTo run the native always-listening Python background agent on your PC:\n\n1. Open your Command Prompt / Terminal\n2. Navigate to: c:\\wamp64\\www\\jarvis\n3. Run: python jarvis_agent.py\n(Or double-click start_jarvis.bat)');">🤖</button>
         <button class="hbtn" id="suitStudioBtn" title="Iron Man AI Suit-Up Studio">🚀</button>
         <button class="hbtn" id="personaBtn" title="Switch AI Persona (JARVIS, KAREN, CHITTI, FRIDAY, EDITH)">🎭</button>
@@ -430,6 +430,19 @@
           </div>
         </div>
       </div>
+    </div>
+  <!-- MULTITASKING EMBEDDED HUD WINDOW -->
+  <div id="multitaskHUD" class="multitask-hud hidden">
+    <div class="mhud-hdr">
+      <span class="mhud-title" id="mhudTitle">🖥️ MULTITASKING SPLIT HUD — APP WINDOW</span>
+      <div class="mhud-actions">
+        <button class="hbtn sm" onclick="window.JarvisApp?.popoutMultitaskWindow()" title="Open in External Windows Desktop Tab">↗️ POP OUT</button>
+        <button class="hbtn sm" onclick="window.JarvisApp?.toggleMultitaskMaximize()" title="Maximize / Full Screen">🗖 MAXIMIZE</button>
+        <button class="hbtn sm" onclick="window.JarvisApp?.closeMultitaskWindow()" title="Close Window">✕ CLOSE</button>
+      </div>
+    </div>
+    <div class="mhud-body">
+      <iframe id="multitaskIframe" src="about:blank" frameborder="0"></iframe>
     </div>
   </div>
 
