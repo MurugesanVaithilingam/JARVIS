@@ -550,12 +550,23 @@
       });
 
     // ── 6. Call Launcher ──────────────────────────────────────────────
-    if (/call|phone|suresh/.test(t) && !/chatgpt|whatsapp|instagram/.test(t))
+    if (/call|phone|mobile|dial|make a call|call suresh|call mom|call dad|call boss/i.test(t) && !/chatgpt|instagram/i.test(t)) {
       return debounced('call', () => {
-        const name = /suresh/.test(t) ? 'Suresh' : 'Contact';
-        window.JarvisApp?.appendDirectMessage('ai', `📞 **Initiating call to ${name}...**\n[Open WhatsApp Web](https://web.whatsapp.com)`);
-        speak(`Initiating call to ${name}, Boss!`);
+        let name = 'Contact';
+        if (/suresh/i.test(t)) name = 'Suresh';
+        else if (/mom|mother|amma/i.test(t)) name = 'Amma';
+        else if (/dad|father|appa/i.test(t)) name = 'Appa';
+        else if (/boss/i.test(t)) name = 'Boss';
+
+        // 1. Open WhatsApp Web tab & split window
+        window.JarvisApp?.openMultitaskWindow('https://web.whatsapp.com', `Call ${name}`);
+        try { openedWindows['whatsapp'] = window.open('https://web.whatsapp.com', '_blank'); } catch(e){}
+        desktop('whatsapp');
+
+        window.JarvisApp?.appendDirectMessage('ai', `📞 **Initiating call to ${name}, Boss! Opening WhatsApp Web...**\n👉 [Open WhatsApp Web](https://web.whatsapp.com)`);
+        speak(`Initiating call to ${name}, Boss! Opening WhatsApp Web.`);
       });
+    }
 
     // ── 7. Send everything else to AI Engine (and speak response) ──────
     if (inp && raw.trim().length > 0) {
