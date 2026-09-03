@@ -458,40 +458,40 @@
       });
     };
 
-    if (/open chatgpt|^(chatgpt|chat gpt|gpt)$/.test(t))
+    if (/open (chatgpt|chat gpt|gpt)|^(chatgpt|chat gpt|gpt)$/i.test(t))
       return openApp('chatgpt','ChatGPT', 'https://chatgpt.com', 'Open pannitten Boss! Opening Chat G P T.');
 
-    if (/open whatsapp|^(whatsapp)$/.test(t))
+    if (/open (whatsapp|whats app|whatapp|what's app|what app)|^(whatsapp|whats app|whatapp|what's app)$/i.test(t))
       return openApp('whatsapp','WhatsApp', 'https://web.whatsapp.com', 'Open pannitten Boss! Opening WhatsApp.');
 
-    if (/open instagram|^(instagram)$/.test(t))
+    if (/open (instagram|insta)|^(instagram|insta)$/i.test(t))
       return openApp('instagram','Instagram', 'https://instagram.com', 'Open pannitten Boss! Opening Instagram.');
 
-    if (/open facebook|^(facebook)$/.test(t))
+    if (/open (facebook|face book|fb)|^(facebook|fb)$/i.test(t))
       return openApp('facebook','Facebook', 'https://facebook.com', 'Open pannitten Boss! Opening Facebook.');
 
-    if (/open gmail|^(gmail|email)$/.test(t))
+    if (/open (gmail|g mail|email|e mail)|^(gmail|email)$/i.test(t))
       return openApp('gmail','Gmail', 'https://mail.google.com', 'Open pannitten Boss! Opening Gmail.');
 
-    if (/open youtube|^(youtube)$/.test(t))
+    if (/open (youtube|you tube|yt)|^(youtube|you tube)$/i.test(t))
       return openApp('youtube','YouTube', 'https://youtube.com', 'Open pannitten Boss! Opening YouTube.');
 
-    if (/open google(?!maps| maps)/.test(t))
+    if (/open google(?!maps| maps)/i.test(t))
       return openApp('google','Google', 'https://google.com', 'Open pannitten Boss! Opening Google.');
 
-    if (/open (google maps|maps|navigation)|google maps/.test(t))
+    if (/open (google maps|maps|navigation)|google maps/i.test(t))
       return openApp('maps','Google Maps', 'https://maps.google.com', 'Open pannitten Boss! Opening Google Maps.');
 
-    if (/open file explorer|open explorer|^(file explorer|explorer|my computer|files)$/.test(t))
+    if (/open (file explorer|explorer|files|file manager|my computer)|^(file explorer|explorer|files)$/i.test(t))
       return openApp('explorer','File Explorer', 'c:/', 'Open pannitten Boss! Opening Windows File Explorer.');
 
-    if (/open bluetooth|^(bluetooth|blue tooth)$/.test(t))
+    if (/open (bluetooth|blue tooth)|^(bluetooth|blue tooth)$/i.test(t))
       return openApp('bluetooth','Bluetooth', '', 'Open pannitten Boss! Activating Bluetooth settings.');
 
-    if (/open notepad|^(notepad)$/.test(t))
+    if (/open (notepad|note pad)|^(notepad|note pad)$/i.test(t))
       return openApp('notepad','Notepad', '', 'Open pannitten Boss! Opening Notepad.');
 
-    if (/open calculator|^(calculator|calc)$/.test(t))
+    if (/open (calculator|calc)|^(calculator|calc)$/i.test(t))
       return openApp('calc','Calculator', '', 'Open pannitten Boss! Opening Calculator.');
 
     if (/open task manager|^(task manager|taskmgr)$/.test(t))
