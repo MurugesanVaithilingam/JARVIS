@@ -722,7 +722,7 @@
         const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|garvis|service|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
         const cleanedHeard = lowerHeard.replace(wakePrefixRe, '').trim();
 
-        const isDirectCmd = /open (whatsapp|whats app|whatapp|chatgpt|youtube|file explorer|explorer|cmd|powershell|notepad|calc|instagram|facebook|gmail|maps|google)|close|hello boss|hi boss|vanakkam|how are you/i.test(cleanedHeard || lowerHeard);
+        const isDirectCmd = /open|close|hello boss|hi boss|vanakkam|how are you|jarvis|jervis|jarvez|boss|chitti|friday|edith|stark/i.test(cleanedHeard || lowerHeard);
 
         if (finalText.trim().length >= 2 || isDirectCmd) {
           let cmd = (finalText.trim() || heard);
