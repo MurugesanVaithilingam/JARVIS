@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ECOSYSTEM — Stark Industries Intelligence Network</title>
+  <meta name="description" content="J.A.R.V.I.S. AI Ecosystem — AI Models, Architectures, Assistants, Real-World Applications & Future of AI.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ═══════════════════════════════════════════
+       AI ECOSYSTEM PAGE — FULL PREMIUM DESIGN
+    ═══════════════════════════════════════════ */
+    :root {
+      --red:   #FF2244;
+      --red2:  #FF6B6B;
+      --blue:  #00D4FF;
+      --blue2: #0066CC;
+      --green: #00FF88;
+      --gold:  #FFD21E;
+      --purple:#A855F7;
+      --bg:    #020B18;
+      --brd:   rgba(0,212,255,0.2);
+    }
+
+    html, body {
+      width: 100%; min-height: 100%;
+      background: #020B18;
+      font-family: 'Rajdhani', sans-serif;
+      color: #C8E8FF;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* ── SCANLINE OVERLAY ── */
+    .scanlines {
+      position: fixed; inset: 0; z-index: 1000; pointer-events: none;
+      background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
+    }
+
+    /* ══ TOP NAV BAR ══════════════════════════════════════════ */
+    .eco-nav {
+      position: sticky; top: 0; z-index: 500;
+      height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(1,8,20,0.97);
+      border-bottom: 1px solid rgba(0,212,255,0.25);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 2px 30px rgba(0,212,255,0.1);
+    }
+    .eco-nav::after {
+      content: '';
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 300px; height: 2px;
+      background: linear-gradient(90deg, transparent, #00D4FF, transparent);
+      box-shadow: 0 0 15px #00D4FF;
+    }
+    .nav-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px; font-weight: 900;
+      color: #fff; letter-spacing: .25em;
+    }
+    .nav-logo span { color: #FF2244; text-shadow: 0 0 10px #FF2244; }
+
+    /* Scrollable nav strip */
+    .nav-strip {
+      display: flex; gap: 6px; align-items: center;
+      padding: 4px 8px;
+      background: rgba(2,11,24,0.8);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 8px;
+      backdrop-filter: blur(12px);
+      overflow-x: auto;
+      scrollbar-width: none;
+      max-width: calc(100vw - 280px);
+    }
+    .nav-strip::-webkit-scrollbar { display: none; }
+    .nav-strip a {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; height: 30px;
+      border-radius: 5px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px; font-weight: 700; letter-spacing: .1em;
+      text-decoration: none; white-space: nowrap;
+      color: #00D4FF;
+      background: rgba(0,212,255,.07);
+      border: 1px solid rgba(0,212,255,.25);
+      transition: all .22s;
+    }
+    .nav-strip a:hover {
+      color: #fff; background: rgba(0,212,255,.22);
+      border-color: rgba(0,212,255,.7);
+      box-shadow: 0 0 14px rgba(0,212,255,.4);
+      transform: translateY(-1px);
+    }
+    .nav-strip a.active {
+      color: #000; font-weight: 900;
+      background: linear-gradient(135deg,#00D4FF,#0088AA);
+      border-color: #00D4FF;
+      box-shadow: 0 0 18px rgba(0,212,255,.6);
+    }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .live-clock {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: #00D4FF; letter-spacing: .1em;
+      text-shadow: 0 0 10px rgba(0,212,255,.6);
+    }
+    .sys-badge {
+      display: flex; align-items: center; gap: 5px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px; color: #00FF88; letter-spacing: .1em;
+    }
+    .sys-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #00FF88; box-shadow: 0 0 8px #00FF88;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+
+    /* ══ PAGE WRAPPER ══════════════════════════════════════════ */
+    .eco-page {
+      padding: 14px 14px 30px;
+      max-width: 1920px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    /* ══ TITLE BANNER ═════════════════════════════════════════ */
+    .eco-banner {
+      text-align: center; padding: 18px 20px 10px;
+      position: relative;
+    }
+    .eco-banner-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(22px, 4vw, 40px);
+      font-weight: 900; letter-spacing: .3em;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(0,212,255,.8), 0 0 60px rgba(0,212,255,.3);
+    }
+    .eco-banner-title .hi { color: #00D4FF; }
+    .eco-banner-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: #5A7B98; letter-spacing: .25em; margin-top: 4px;
+    }
+    .banner-line {
+      height: 1px; margin: 10px auto 0;
+      background: linear-gradient(90deg, transparent, #00D4FF, #FF2244, #00D4FF, transparent);
+      box-shadow: 0 0 12px rgba(0,212,255,.5);
+    }
+
+    /* ══ GENERIC CARD ═════════════════════════════════════════ */
+    .card {
+      background: rgba(2,14,30,0.8);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 8px;
+      padding: 12px 14px;
+      position: relative;
+      backdrop-filter: blur(10px);
+      box-shadow: inset 0 0 20px rgba(0,212,255,.04), 0 4px 20px rgba(0,0,0,.5);
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .card:hover {
+      border-color: rgba(0,212,255,.5);
+      box-shadow: inset 0 0 25px rgba(0,212,255,.08), 0 0 20px rgba(0,212,255,.15);
+    }
+    .card::before, .card::after {
+      content: ''; position: absolute;
+      width: 10px; height: 10px;
+      border-color: #00D4FF; border-style: solid; pointer-events: none;
+    }
+    .card::before { top:-1px; left:-1px; border-width:2px 0 0 2px; }
+    .card::after  { bottom:-1px; right:-1px; border-width:0 2px 2px 0; }
+
+    .card-red::before, .card-red::after { border-color: #FF2244; }
+    .card-red { border-color: rgba(255,34,68,.3); }
+    .card-red:hover { border-color: rgba(255,34,68,.7); box-shadow: inset 0 0 25px rgba(255,34,68,.08), 0 0 20px rgba(255,34,68,.15); }
+
+    .card-purple::before, .card-purple::after { border-color: #A855F7; }
+    .card-purple { border-color: rgba(168,85,247,.3); }
+
+    .card-gold::before, .card-gold::after { border-color: #FFD21E; }
+    .card-gold { border-color: rgba(255,210,30,.3); }
+
+    .card-green::before, .card-green::after { border-color: #00FF88; }
+    .card-green { border-color: rgba(0,255,136,.3); }
+
+    .card-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px; font-weight: 700;
+      color: #00D4FF; letter-spacing: .2em;
+      text-shadow: 0 0 8px rgba(0,212,255,.5);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+      text-transform: uppercase;
+    }
+    .card-title.red { color: #FF2244; text-shadow: 0 0 8px rgba(255,34,68,.5); }
+    .card-title.green { color: #00FF88; text-shadow: 0 0 8px rgba(0,255,136,.5); }
+    .card-title.gold { color: #FFD21E; text-shadow: 0 0 8px rgba(255,210,30,.5); }
+    .card-title.purple { color: #A855F7; text-shadow: 0 0 8px rgba(168,85,247,.5); }
+
+    /* ── Metric Bar ── */
+    .met-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+    .met-lbl { font-family:'Share Tech Mono',monospace; font-size:9px; color:#5A7B98; letter-spacing:.08em; width:70px; flex-shrink:0; }
+    .met-bar-w { flex:1; height:4px; background:rgba(0,212,255,.1); border-radius:2px; overflow:hidden; }
+    .met-bar-f { height:100%; border-radius:2px; transition:width .6s ease; }
+    .met-val { font-family:'Share Tech Mono',monospace; font-size:10px; font-weight:bold; color:#00D4FF; width:38px; text-align:right; }
+    .f-blue  { background:linear-gradient(90deg,#0088AA,#00D4FF); box-shadow:0 0 6px #00D4FF; }
+    .f-red   { background:linear-gradient(90deg,#880022,#FF2244); box-shadow:0 0 6px #FF2244; }
+    .f-green { background:linear-gradient(90deg,#006633,#00FF88); box-shadow:0 0 6px #00FF88; }
+    .f-gold  { background:linear-gradient(90deg,#886600,#FFD21E); box-shadow:0 0 6px #FFD21E; }
+    .f-purple{ background:linear-gradient(90deg,#6622BB,#A855F7); box-shadow:0 0 6px #A855F7; }
+
+    /* ── Status Pill ── */
+    .spill {
+      display:inline-block; padding:2px 8px; border-radius:20px;
+      font-family:'Share Tech Mono',monospace; font-size:9px;
+      border:1px solid; letter-spacing:.08em;
+    }
+    .spill.ok  { color:#00FF88; border-color:rgba(0,255,136,.4); background:rgba(0,255,136,.08); }
+    .spill.warn{ color:#FFD21E; border-color:rgba(255,210,30,.4); background:rgba(255,210,30,.08); }
+    .spill.red { color:#FF2244; border-color:rgba(255,34,68,.4);  background:rgba(255,34,68,.08); }
+    .spill.blue{ color:#00D4FF; border-color:rgba(0,212,255,.4);  background:rgba(0,212,255,.08); }
+
+    /* ══ ROW 1: MAIN 3-COLUMN LAYOUT ═════════════════════════ */
+    .row-main {
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      gap: 14px;
+    }
+    @media(max-width:1300px) { .row-main { grid-template-columns: 220px 1fr 260px; } }
+    @media(max-width:1000px) { .row-main { grid-template-columns: 1fr; } }
+
+    /* ══ LEFT: SPIDER-MAN AI ══════════════════════════════════ */
+    .spidey-panel { display:flex; flex-direction:column; gap:10px; }
+
+    .spidey-hero {
+      background: radial-gradient(ellipse at center bottom, rgba(255,34,68,.25) 0%, rgba(0,0,0,0) 70%),
+                  linear-gradient(180deg, rgba(2,14,30,.9) 0%, rgba(20,5,5,.95) 100%);
+      border: 1px solid rgba(255,34,68,.4);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .spidey-hero::before {
+      content: ''; position:absolute; inset:0;
+      background: radial-gradient(circle at 50% 30%, rgba(255,34,68,.15), transparent 60%);
+      pointer-events:none;
+    }
+    .spidey-web-lines {
+      position:absolute; inset:0; pointer-events:none; opacity:.08;
+    }
+    .spidey-name {
+      font-family:'Orbitron',sans-serif; font-size:16px; font-weight:900;
+      color:#FF2244; letter-spacing:.2em;
+      text-shadow: 0 0 20px rgba(255,34,68,.8), 0 0 40px rgba(255,34,68,.4);
+      margin-bottom:2px;
+    }
+    .spidey-sub {
+      font-family:'Share Tech Mono',monospace; font-size:8px;
+      color:#FF6B6B; letter-spacing:.15em; opacity:.8; margin-bottom:10px;
+    }
+    .spidey-figure {
+      width:100%; height:130px; display:flex; align-items:center; justify-content:center;
+      position: relative;
+    }
+    .feature-list { display:flex; flex-direction:column; gap:6px; text-align:left; }
+    .feature-item {
+      display:flex; align-items:flex-start; gap:8px;
+      padding:6px 8px;
+      background:rgba(255,34,68,.05);
+      border:1px solid rgba(255,34,68,.15);
+      border-radius:4px;
+      transition:all .2s;
+    }
+    .feature-item:hover { background:rgba(255,34,68,.12); border-color:rgba(255,34,68,.4); }
+    .fi-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+    .fi-title { font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; color:#FF6B6B; letter-spacing:.1em; }
+    .fi-desc  { font-size:9px; color:#7A9BB8; line-height:1.4; margin-top:1px; }
+
+    .spidey-dash {
+      background: linear-gradient(135deg, rgba(255,34,68,.08), rgba(2,14,30,.9));
+      border:1px solid rgba(255,34,68,.3); border-radius:8px; padding:12px;
+    }
+    .spidey-dash-title {
+      font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700;
+      color:#FF2244; letter-spacing:.2em; margin-bottom:8px;
+      text-shadow:0 0 8px rgba(255,34,68,.5);
+    }
+    .dash-stat { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; }
+    .dash-stat-label { font-family:'Share Tech Mono',monospace; font-size:9px; color:#5A7B98; }
+    .dash-stat-val {
+      font-family:'Orbitron',sans-serif; font-size:18px; font-weight:900;
+      color:#FF2244; text-shadow:0 0 12px rgba(255,34,68,.6);
+    }
+    .stat-row { display:flex; justify-content:space-between; font-family:'Share Tech Mono',monospace; font-size:9px; padding:3px 0; border-bottom:1px solid rgba(255,34,68,.1); }
+    .stat-row-lbl { color:#5A7B98; }
+    .stat-row-val { color:#00FF88; font-weight:bold; }
+
+    /* ══ CENTER: AI ECOSYSTEM MAIN ════════════════════════════ */
+    .center-col { display:flex; flex-direction:column; gap:12px; }
+
+    /* Alexa section */
+    .alexa-section {
+      display:grid; grid-template-columns:1fr 200px 1fr;
+      gap:12px; align-items:center;
+    }
+    @media(max-width:900px) { .alexa-section { grid-template-columns:1fr; } }
+
+    .alexa-commands { display:flex; flex-direction:column; gap:6px; }
+    .cmd-bubble {
+      padding:8px 12px;
+      background:rgba(0,212,255,.05);
+      border:1px solid rgba(0,212,255,.2);
+      border-radius:20px 20px 20px 4px;
+      font-size:12px; color:#C8E8FF;
+      transition:all .2s; cursor:default;
+    }
+    .cmd-bubble:hover { background:rgba(0,212,255,.15); border-color:rgba(0,212,255,.5); }
+
+    .alexa-device {
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+    }
+    .alexa-graphic {
+      width:120px; height:160px;
+      position:relative; display:flex; align-items:center; justify-content:center;
+    }
+    .alexa-name {
+      font-family:'Orbitron',sans-serif; font-size:13px; font-weight:900;
+      color:#00D4FF; letter-spacing:.15em;
+      text-shadow:0 0 12px rgba(0,212,255,.7);
+      text-align:center;
+    }
+    .alexa-tag {
+      font-family:'Share Tech Mono',monospace; font-size:8px;
+      color:#5A7B98; letter-spacing:.15em; text-align:center;
+    }
+
+    .alexa-features { display:flex; flex-direction:column; gap:7px; }
+    .af-item {
+      display:flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      background:rgba(0,212,255,.04); border:1px solid rgba(0,212,255,.15);
+      border-radius:5px; transition:all .2s;
+    }
+    .af-item:hover { background:rgba(0,212,255,.12); border-color:rgba(0,212,255,.4); }
+    .af-icon { font-size:16px; flex-shrink:0; }
+    .af-title { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; color:#00D4FF; }
+    .af-desc  { font-size:10px; color:#7A9BB8; }
+
+    /* AI Models Grid */
+    .models-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+    }
+    @media(max-width:800px) { .models-grid { grid-template-columns:repeat(2,1fr); } }
+
+    .model-card {
+      background:rgba(2,14,30,.9); border-radius:8px; padding:12px;
+      border:1px solid rgba(0,212,255,.18);
+      position:relative; overflow:hidden;
+      transition:all .25s;
+    }
+    .model-card:hover {
+      transform:translateY(-3px);
+      border-color:rgba(0,212,255,.6);
+      box-shadow:0 8px 25px rgba(0,212,255,.2);
+    }
+    .model-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, var(--mc,#00D4FF), transparent);
+    }
+    .model-abbr {
+      font-family:'Orbitron',sans-serif; font-size:18px; font-weight:900;
+      color:var(--mc,#00D4FF); letter-spacing:.05em;
+      text-shadow:0 0 12px var(--mc,#00D4FF);
+    }
+    .model-full { font-family:'Share Tech Mono',monospace; font-size:8px; color:#5A7B98; letter-spacing:.1em; margin-bottom:4px; }
+    .model-desc { font-size:10px; color:#8AAABB; line-height:1.4; margin-bottom:6px; }
+    .model-features { display:flex; flex-direction:column; gap:2px; }
+    .model-feat { font-size:9px; color:#7A9BB8; display:flex; align-items:center; gap:4px; }
+    .model-feat::before { content:'▸'; color:var(--mc,#00D4FF); font-size:8px; }
+
+    /* ══ RIGHT: AI ASSISTANTS ═════════════════════════════════ */
+    .right-col { display:flex; flex-direction:column; gap:10px; }
+
+    .assistant-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .asst-card {
+      background:rgba(2,14,30,.9); border-radius:6px; padding:10px;
+      border:1px solid rgba(0,212,255,.15); transition:all .2s;
+    }
+    .asst-card:hover { border-color:rgba(0,212,255,.5); background:rgba(0,212,255,.05); transform:translateY(-1px); }
+    .asst-icon { font-size:20px; margin-bottom:4px; }
+    .asst-name { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; color:#00D4FF; letter-spacing:.1em; margin-bottom:2px; }
+    .asst-desc { font-size:9px; color:#5A7B98; line-height:1.4; }
+    .asst-tag  { font-size:8px; color:#7A9BB8; margin-top:2px; display:flex; flex-direction:column; gap:1px; }
+    .asst-tag span::before { content:'• '; color:#00D4FF; }
+
+    /* Special J.A.R.V.I.S card */
+    .asst-card.jarvis { border-color:rgba(0,212,255,.4); background:rgba(0,212,255,.06); }
+    .asst-card.jarvis .asst-name { color:#00D4FF; text-shadow:0 0 8px rgba(0,212,255,.6); }
+
+    /* ══ ROW 2: MORE AI TECHNOLOGIES ════════════════════════════ */
+    .tech-grid {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+    }
+    @media(max-width:1200px) { .tech-grid { grid-template-columns:repeat(3,1fr); } }
+    @media(max-width:800px)  { .tech-grid { grid-template-columns:repeat(2,1fr); } }
+
+    .tech-card {
+      background:rgba(2,14,30,.85); border-radius:6px; padding:10px 12px;
+      border:1px solid rgba(0,212,255,.15);
+      display:flex; align-items:flex-start; gap:10px;
+      transition:all .22s;
+    }
+    .tech-card:hover {
+      border-color:rgba(0,212,255,.5); background:rgba(0,212,255,.06);
+      transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,212,255,.1);
+    }
+    .tech-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
+    .tech-name { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; color:#00D4FF; letter-spacing:.08em; margin-bottom:3px; }
+    .tech-desc { font-size:10px; color:#7A9BB8; line-height:1.4; }
+
+    /* ══ ROW 3: AI APPLICATIONS ═══════════════════════════════ */
+    .apps-grid {
+      display:grid;
+      grid-template-columns:repeat(8,1fr);
+      gap:8px;
+    }
+    @media(max-width:1400px) { .apps-grid { grid-template-columns:repeat(4,1fr); } }
+    @media(max-width:800px)  { .apps-grid { grid-template-columns:repeat(2,1fr); } }
+
+    .app-card {
+      background:rgba(2,14,30,.85); border:1px solid rgba(0,212,255,.15); border-radius:6px;
+      padding:10px; text-align:center; transition:all .22s; cursor:pointer;
+    }
+    .app-card:hover {
+      border-color:rgba(0,212,255,.6); background:rgba(0,212,255,.1);
+      transform:translateY(-3px) scale(1.02); box-shadow:0 8px 25px rgba(0,212,255,.2);
+    }
+    .app-icon { font-size:26px; margin-bottom:6px; display:block; }
+    .app-name { font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; color:#00D4FF; letter-spacing:.08em; margin-bottom:3px; }
+    .app-desc { font-size:8px; color:#5A7B98; line-height:1.3; }
+
+    /* ══ BOTTOM ROW: FUTURE + STATS ═══════════════════════════ */
+    .bottom-row { display:grid; grid-template-columns:1fr 350px; gap:14px; }
+    @media(max-width:900px) { .bottom-row { grid-template-columns:1fr; } }
+
+    .future-list { display:flex; flex-direction:column; gap:5px; }
+    .future-item {
+      display:flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:4px;
+      background:rgba(168,85,247,.05); border:1px solid rgba(168,85,247,.15);
+      font-size:11px; color:#C8E8FF; transition:all .2s;
+    }
+    .future-item:hover { background:rgba(168,85,247,.15); border-color:rgba(168,85,247,.4); }
+    .future-item::before { content:'◆'; color:#A855F7; font-size:8px; flex-shrink:0; }
+
+    /* Live stats panel */
+    .live-stats { display:flex; flex-direction:column; gap:8px; }
+    .stat-counter {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:8px 12px;
+      background:rgba(0,212,255,.05); border:1px solid rgba(0,212,255,.15);
+      border-radius:4px;
+    }
+    .sc-label { font-family:'Share Tech Mono',monospace; font-size:9px; color:#5A7B98; letter-spacing:.1em; }
+    .sc-val { font-family:'Orbitron',sans-serif; font-size:18px; font-weight:900; color:#00D4FF; text-shadow:0 0 10px rgba(0,212,255,.6); }
+
+    /* CANVAS */
+    canvas { display:block; }
+
+    /* ── Voice wave ── */
+    .voice-wrap {
+      height:50px; position:relative; margin-bottom:4px;
+      border:1px solid rgba(0,212,255,.15); border-radius:4px;
+      background:rgba(0,5,15,.5); overflow:hidden;
+    }
+    .voice-wrap canvas { width:100%; height:100%; }
+
+    /* ── Section headers ── */
+    .section-hdr {
+      font-family:'Orbitron',sans-serif;
+      font-size:12px; font-weight:700;
+      color:#00D4FF; letter-spacing:.25em;
+      text-shadow:0 0 10px rgba(0,212,255,.5);
+      padding:0 0 4px;
+      border-bottom:1px solid rgba(0,212,255,.2);
+      margin-bottom:10px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .section-hdr::before, .section-hdr::after {
+      content:''; flex:1; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(0,212,255,.3));
+    }
+    .section-hdr::before { background:linear-gradient(90deg, rgba(0,212,255,.3), transparent); }
+
+    /* ── Ticker ── */
+    .ticker-wrap {
+      overflow:hidden; white-space:nowrap;
+      background:rgba(0,0,0,.4); border-top:1px solid rgba(0,212,255,.15); border-bottom:1px solid rgba(0,212,255,.15);
+      padding:6px 0;
+    }
+    .ticker-inner {
+      display:inline-block;
+      animation:tickerMove 40s linear infinite;
+      font-family:'Share Tech Mono',monospace; font-size:10px; color:#5A7B98; letter-spacing:.1em;
+    }
+    .ticker-inner span { color:#00D4FF; margin:0 4px; }
+    @keyframes tickerMove { 0%{transform:translateX(100vw)} 100%{transform:translateX(-100%)} }
+
+    /* ── Glow Pulse on Section ── */
+    @keyframes glowPulse { 0%,100%{box-shadow:0 0 5px rgba(0,212,255,.2)} 50%{box-shadow:0 0 20px rgba(0,212,255,.5)} }
+
+    /* ── Stock chart area ── */
+    .chart-box {
+      background:rgba(0,5,15,.5); border:1px solid rgba(0,212,255,.15);
+      border-radius:4px; padding:6px; height:70px; position:relative; overflow:hidden;
+    }
+    .chart-box canvas { width:100%; height:100%; }
+
+    /* Floating particles */
+    #bgCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+    .eco-page, .eco-nav { position:relative; z-index:2; }
+    .scanlines { z-index:1001; }
+  </style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+<canvas id="bgCanvas"></canvas>
+
+<!-- ══ TOP NAVIGATION ════════════════════════════════════════════ -->
+<nav class="eco-nav">
+  <div class="nav-logo"><span>S</span>TARK AI</div>
+
+  <div class="nav-strip">
+    <a href="index.html">🤖 HUD</a>
+    <a href="stark_hud.html">🌐 STARK HUD</a>
+    <a href="ai_ecosystem.html" class="active">🧬 AI ECOSYSTEM</a>
+    <a href="3d_lab.html">🌌 3D LAB</a>
+    <a href="tracker.html">🛰️ TRACKER</a>
+    <a href="code_studio.html">🧠 CODE</a>
+    <a href="cyber_soc.html">🛡️ CYBER</a>
+    <a href="cmd_hacker.html">💻 TERMINAL</a>
+  </div>
+
+  <div class="nav-right">
+    <div class="live-clock" id="navClock">00:00:00</div>
+    <div class="sys-badge"><div class="sys-dot"></div>ONLINE</div>
+  </div>
+</nav>
+
+<!-- ══ LIVE TICKER ════════════════════════════════════════════════ -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <span>●</span> J.A.R.V.I.S SYSTEM ACTIVE
+    <span>●</span> AI MODELS LOADED: GPT-4o · CLAUDE · GEMINI · LLAMA · DEEPSEEK
+    <span>●</span> NEURAL NETWORK UPTIME: 99.97%
+    <span>●</span> STARK INDUSTRIES STOCK: +4.2% TODAY
+    <span>●</span> ARC REACTOR MK-II: 85% COMPLETE
+    <span>●</span> GLOBAL AI MARKET: $2.4T BY 2030
+    <span>●</span> SPIDER-MAN SUIT: ALL SYSTEMS OPERATIONAL
+    <span>●</span> BIOMETRIC VERIFICATION: SUCCESS
+    <span>●</span> EDITH DRONE NETWORK: ACTIVE
+    <span>●</span> PROJECT PEGASUS REVIEW: SCHEDULED 3:30 PM
+    <span>●</span> NEW ELEMENT DISCOVERY: 75% PROGRESS
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </div>
+</div>
+
+<!-- ══ PAGE CONTENT ═══════════════════════════════════════════════ -->
+<div class="eco-page">
+
+  <!-- TITLE BANNER -->
+  <div class="eco-banner">
+    <div class="eco-banner-title"><span class="hi">AI</span> ECOSYSTEM</div>
+    <div class="eco-banner-sub">THE POWER OF ARTIFICIAL INTELLIGENCE — STARK INDUSTRIES INTELLIGENCE NETWORK</div>
+    <div class="banner-line"></div>
+  </div>
+
+  <!-- ══ ROW 1: SPIDER-MAN | ALEXA CENTER | AI ASSISTANTS ══════ -->
+  <div class="row-main">
+
+    <!-- LEFT: SPIDER-MAN AI PANEL -->
+    <div class="spidey-panel">
+
+      <!-- Hero Banner -->
+      <div class="spidey-hero card-red">
+        <div class="spidey-name">SPIDER-MAN AI</div>
+        <div class="spidey-sub">ADVANCED AI FEATURES</div>
+
+        <!-- Animated Spider-Man SVG Figure -->
+        <div class="spidey-figure">
+          <svg id="spideySvg" width="110" height="130" viewBox="0 0 110 130">
+            <!-- Web lines in background -->
+            <line x1="55" y1="0" x2="0" y2="65"  stroke="rgba(255,34,68,.15)" stroke-width="0.5"/>
+            <line x1="55" y1="0" x2="110" y2="65" stroke="rgba(255,34,68,.15)" stroke-width="0.5"/>
+            <line x1="0"  y1="40" x2="110" y2="90" stroke="rgba(255,34,68,.1)"  stroke-width="0.5"/>
+            <line x1="110" y1="40" x2="0" y2="90"  stroke="rgba(255,34,68,.1)"  stroke-width="0.5"/>
+            <!-- Body -->
+            <ellipse cx="55" cy="55" rx="20" ry="25" fill="rgba(180,0,30,.7)" stroke="#FF2244" stroke-width="1.5"/>
+            <!-- Head -->
+            <ellipse cx="55" cy="28" rx="14" ry="14" fill="rgba(180,0,30,.8)" stroke="#FF2244" stroke-width="1.5"/>
+            <!-- Eyes (glowing) -->
+            <ellipse cx="48" cy="26" rx="6" ry="4" fill="#00AAFF" filter="url(#eyeGlow)"/>
+            <ellipse cx="62" cy="26" rx="6" ry="4" fill="#00AAFF" filter="url(#eyeGlow)"/>
+            <!-- Arms -->
+            <path d="M35 50 Q10 40 5 60" stroke="#FF2244" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M75 50 Q100 40 105 60" stroke="#FF2244" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- Legs -->
+            <path d="M45 78 Q35 100 30 120" stroke="#FF2244" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M65 78 Q75 100 80 120" stroke="#FF2244" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Web pattern on chest -->
+            <path d="M40 45 Q55 35 70 45 Q55 55 40 45Z" stroke="rgba(255,255,255,.2)" stroke-width="0.5" fill="none"/>
+            <!-- Arc glow underneath -->
+            <ellipse cx="55" cy="120" rx="30" ry="6" fill="rgba(255,34,68,.2)"/>
+            <defs>
+              <filter id="eyeGlow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+          </svg>
+        </div>
+      </div>
+
+      <!-- AI Features List -->
+      <div class="card card-red">
+        <div class="card-title red">⚡ AI CAPABILITIES</div>
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="fi-icon">🌐</span>
+            <div><div class="fi-title">WEB PERCEPTION</div><div class="fi-desc">Real-time environment scanning, object detection and threat analysis.</div></div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon">⚡</span>
+            <div><div class="fi-title">DYNAMIC MOVEMENT</div><div class="fi-desc">AI-powered agility, path-switching optimization and acrobatic predictions.</div></div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon">🎯</span>
+            <div><div class="fi-title">THREAT DETECTION</div><div class="fi-desc">Predicts enemy behavior and identifies potential dangers.</div></div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon">🎙️</span>
+            <div><div class="fi-title">VOICE & COMMS</div><div class="fi-desc">Natural language production, encrypted communication and voice synthesis.</div></div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon">🗺️</span>
+            <div><div class="fi-title">MISSION ASSIST</div><div class="fi-desc">Strategic planning, route optimization and mission recommendations.</div></div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon">🦾</span>
+            <div><div class="fi-title">SUIT DIAGNOSTICS</div><div class="fi-desc">Real-time health monitoring, damage control and resource management.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spider-Man Dashboard -->
+      <div class="spidey-dash">
+        <div class="spidey-dash-title">🕷️ SPIDER-MAN AI DASHBOARD</div>
+
+        <div class="dash-stat">
+          <div class="dash-stat-label">HEALTH</div>
+          <div class="dash-stat-val">100%</div>
+          <div class="met-bar-w" style="height:5px;margin-top:2px;"><div class="met-bar-f f-green" style="width:100%;"></div></div>
+        </div>
+
+        <div class="dash-stat">
+          <div class="dash-stat-label">WEB ENERGY</div>
+          <div class="dash-stat-val" style="color:#00D4FF;">87%</div>
+          <div class="met-bar-w" style="height:5px;margin-top:2px;"><div class="met-bar-f f-blue" style="width:87%;"></div></div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <div class="stat-row"><span class="stat-row-lbl">FOCUS MODE</span><span class="stat-row-val">ACTIVE</span></div>
+          <div class="stat-row"><span class="stat-row-lbl">SYSTEM STATUS</span><span class="stat-row-val">ALL SYSTEMS OK</span></div>
+          <div class="stat-row"><span class="stat-row-lbl">AI LEVEL</span><span class="stat-row-val" style="color:#A855F7;">MAXIMUM</span></div>
+          <div class="stat-row"><span class="stat-row-lbl">RESPONSE TIME</span><span class="stat-row-val">0.03s</span></div>
+          <div class="stat-row"><span class="stat-row-lbl">THREAT LEVEL</span><span style="color:#FFD21E;font-weight:bold;">MODERATE</span></div>
+        </div>
+
+        <!-- Voice Wave Canvas -->
+        <div style="margin-top:8px; font-family:'Share Tech Mono',monospace; font-size:8px; color:#5A7B98; margin-bottom:3px;">VOICE RECOGNITION</div>
+        <div class="voice-wrap">
+          <canvas id="spideyVoiceCanvas"></canvas>
+        </div>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- CENTER: ALEXA + AI MODELS -->
+    <div class="center-col">
+
+      <!-- Alexa AI Section -->
+      <div class="card">
+        <div class="card-title">🔵 ALEXA AI — VOICE ASSISTANT INTEGRATION</div>
+        <div class="alexa-section">
+
+          <!-- Voice Commands -->
+          <div>
+            <div style="font-family:'Share Tech Mono',monospace; font-size:9px; color:#5A7B98; margin-bottom:8px; letter-spacing:.1em;">VOICE COMMANDS</div>
+            <div class="alexa-commands">
+              <div class="cmd-bubble">🎵 Play relaxing music</div>
+              <div class="cmd-bubble">🌤️ What's the weather?</div>
+              <div class="cmd-bubble">💡 Turn on the lights</div>
+              <div class="cmd-bubble">⏰ Set an alarm for 7 AM</div>
+              <div class="cmd-bubble">💧 Remind me to drink water</div>
+            </div>
+          </div>
+
+          <!-- Alexa Device -->
+          <div class="alexa-device">
+            <div class="alexa-graphic">
+              <canvas id="alexaCanvas" width="120" height="160"></canvas>
+            </div>
+            <div class="alexa-name">ALEXA AI</div>
+            <div class="alexa-tag">VOICE ASSISTANT</div>
+            <div class="voice-wrap" style="width:120px; margin-top:6px;">
+              <canvas id="alexaVoiceCanvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Features -->
+          <div>
+            <div style="font-family:'Share Tech Mono',monospace; font-size:9px; color:#5A7B98; margin-bottom:8px; letter-spacing:.1em;">CAPABILITIES</div>
+            <div class="alexa-features">
+              <div class="af-item"><span class="af-icon">🏠</span><div><div class="af-title">SMART HOME CONTROL</div><div class="af-desc">Integrated IoT device management</div></div></div>
+              <div class="af-item"><span class="af-icon">🎙️</span><div><div class="af-title">VOICE RECOGNITION</div><div class="af-desc">Multi-language NLP processing</div></div></div>
+              <div class="af-item"><span class="af-icon">🧠</span><div><div class="af-title">NATURAL LANGUAGE UNDERSTANDING</div><div class="af-desc">Context-aware comprehension</div></div></div>
+              <div class="af-item"><span class="af-icon">🔗</span><div><div class="af-title">SKILL INTEGRATION</div><div class="af-desc">10,000+ third-party skills</div></div></div>
+              <div class="af-item"><span class="af-icon">📅</span><div><div class="af-title">CALENDAR & REMINDERS</div><div class="af-desc">Intelligent scheduling assistant</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI MODELS & ARCHITECTURES -->
+      <div class="card">
+        <div class="section-hdr">AI MODELS & ARCHITECTURES</div>
+        <div class="models-grid">
+
+          <div class="model-card" style="--mc:#00D4FF;">
+            <div class="model-abbr">LLM</div>
+            <div class="model-full">LARGE LANGUAGE MODEL</div>
+            <div class="model-desc">Understands and generates human-like text using transformer architecture.</div>
+            <div class="model-features">
+              <div class="model-feat">GPT, LLaMA, PaLM</div>
+              <div class="model-feat">Text Generation</div>
+              <div class="model-feat">Summarization</div>
+              <div class="model-feat">Translation</div>
+            </div>
+          </div>
+
+          <div class="model-card" style="--mc:#00FF88;">
+            <div class="model-abbr">NLP</div>
+            <div class="model-full">NATURAL LANGUAGE PROCESSING</div>
+            <div class="model-desc">Enables machines to understand, interpret and generate human language.</div>
+            <div class="model-features">
+              <div class="model-feat">Tokenization</div>
+              <div class="model-feat">POS Tagging</div>
+              <div class="model-feat">Entity Recognition</div>
+              <div class="model-feat">Sentiment Analysis</div>
+            </div>
+          </div>
+
+          <div class="model-card" style="--mc:#FFD21E;">
+            <div class="model-abbr">VADER</div>
+            <div class="model-full">SENTIMENT ANALYSIS ENGINE</div>
+            <div class="model-desc">Lexicon and rule-based sentiment analysis tool optimized for social media.</div>
+            <div class="model-features">
+              <div class="model-feat">Positive / Negative</div>
+              <div class="model-feat">Neutral Scoring</div>
+              <div class="model-feat">Compound Score</div>
+            </div>
+          </div>
+
+          <div class="model-card" style="--mc:#A855F7;">
+            <div class="model-abbr">LSTM</div>
+            <div class="model-full">LONG SHORT-TERM MEMORY</div>
+            <div class="model-desc">Handles long-term dependencies in sequential data using gated memory cells.</div>
+            <div class="model-features">
+              <div class="model-feat">Time Series Prediction</div>
+              <div class="model-feat">Speech Recognition</div>
+              <div class="model-feat">Text Generation</div>
+              <div class="model-feat">Anomaly Detection</div>
+            </div>
+          </div>
+
+          <div class="model-card" style="--mc:#FF6B35;">
+            <div class="model-abbr">GRU</div>
+            <div class="model-full">GATED RECURRENT UNIT</div>
+            <div class="model-desc">Simplified version of LSTM with update and reset gates for faster training.</div>
+            <div class="model-features">
+              <div class="model-feat">Sequence Modeling</div>
+              <div class="model-feat">Forecasting</div>
+              <div class="model-feat">NLP Tasks</div>
+              <div class="model-feat">Speech Processing</div>
+            </div>
+          </div>
+
+          <div class="model-card" style="--mc:#FF2244;">
+            <div class="model-abbr">STM</div>
+            <div class="model-full">SPATIOTEMPORAL MEMORY</div>
+            <div class="model-desc">Captures spatial and temporal dependencies together for complex predictions.</div>
+            <div class="model-features">
+              <div class="model-feat">Video Analysis</div>
+              <div class="model-feat">Weather Forecasting</div>
+              <div class="model-feat">Traffic Prediction</div>
+              <div class="model-feat">Human Activity Recognition</div>
+            </div>
+          </div>
+
+        </div><!-- /models-grid -->
+      </div><!-- /card -->
+
+    </div><!-- /center-col -->
+
+    <!-- RIGHT: AI ASSISTANTS -->
+    <div class="right-col">
+
+      <div class="card">
+        <div class="section-hdr">AI ASSISTANTS & SYSTEMS</div>
+        <div class="assistant-grid">
+
+          <div class="asst-card">
+            <div class="asst-icon">👩‍💼</div>
+            <div class="asst-name">CLAIRE AI</div>
+            <div class="asst-desc">Advanced Assistant for Enterprises.</div>
+            <div class="asst-tag">
+              <span>Task Automation</span>
+              <span>Data Analysis</span>
+              <span>Email Management</span>
+              <span>Calendar Scheduling</span>
+            </div>
+          </div>
+
+          <div class="asst-card" style="--mc:#A855F7; border-color:rgba(168,85,247,.3);">
+            <div class="asst-icon">🤖</div>
+            <div class="asst-name" style="color:#A855F7;">EDITH AI</div>
+            <div class="asst-desc">Personal AI with Emotional Intelligence.</div>
+            <div class="asst-tag">
+              <span>Emotional Recognition</span>
+              <span>Personalized Responses</span>
+              <span>Behavior Adaptation</span>
+            </div>
+          </div>
+
+          <div class="asst-card" style="border-color:rgba(255,210,30,.3);">
+            <div class="asst-icon">📚</div>
+            <div class="asst-name" style="color:#FFD21E;">RAG SYSTEM</div>
+            <div class="asst-desc">Retrieval Augmented Generation System.</div>
+            <div class="asst-tag">
+              <span>External Knowledge Retrieval</span>
+              <span>Context-Aware Generation</span>
+              <span>Up-to-date Information</span>
+            </div>
+          </div>
+
+          <div class="asst-card jarvis">
+            <div class="asst-icon">⚙️</div>
+            <div class="asst-name">J.A.R.V.I.S</div>
+            <div class="asst-desc">Just A Rather Very Intelligent System.</div>
+            <div class="asst-tag">
+              <span>System Control</span>
+              <span>Data Processing</span>
+              <span>Advanced Analytics</span>
+              <span>Autonomous Actions</span>
+            </div>
+          </div>
+
+          <div class="asst-card" style="border-color:rgba(0,255,136,.3);">
+            <div class="asst-icon">👩‍🔬</div>
+            <div class="asst-name" style="color:#00FF88;">FRIDAY AI</div>
+            <div class="asst-desc">Friendly Reliable Intelligent Digital Assistant.</div>
+            <div class="asst-tag">
+              <span>Interface Control</span>
+              <span>Process Automation</span>
+              <span>Security Management</span>
+            </div>
+          </div>
+
+          <div class="asst-card" style="border-color:rgba(255,107,53,.3);">
+            <div class="asst-icon">👁️</div>
+            <div class="asst-name" style="color:#FF6B35;">VISION AI</div>
+            <div class="asst-desc">Computer Vision & Image Understanding.</div>
+            <div class="asst-tag">
+              <span>Image Recognition</span>
+              <span>Object Detection</span>
+              <span>Facial Recognition</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Live Performance Metrics -->
+      <div class="card">
+        <div class="card-title">📊 LIVE AI PERFORMANCE</div>
+        <div class="met-row"><span class="met-lbl">GPT-4o</span><div class="met-bar-w"><div class="met-bar-f f-blue" id="bar-gpt" style="width:94%"></div></div><span class="met-val" id="val-gpt">94%</span></div>
+        <div class="met-row"><span class="met-lbl">CLAUDE 3.5</span><div class="met-bar-w"><div class="met-bar-f f-purple" id="bar-claude" style="width:91%"></div></div><span class="met-val" id="val-claude">91%</span></div>
+        <div class="met-row"><span class="met-lbl">GEMINI</span><div class="met-bar-w"><div class="met-bar-f f-blue" id="bar-gemini" style="width:89%"></div></div><span class="met-val" id="val-gemini">89%</span></div>
+        <div class="met-row"><span class="met-lbl">LLAMA 3</span><div class="met-bar-w"><div class="met-bar-f f-green" id="bar-llama" style="width:85%"></div></div><span class="met-val" id="val-llama">85%</span></div>
+        <div class="met-row"><span class="met-lbl">DEEPSEEK</span><div class="met-bar-w"><div class="met-bar-f f-gold" id="bar-ds" style="width:87%"></div></div><span class="met-val" id="val-ds">87%</span></div>
+        <div class="met-row"><span class="met-lbl">MISTRAL</span><div class="met-bar-w"><div class="met-bar-f f-red" id="bar-mis" style="width:82%"></div></div><span class="met-val" id="val-mis">82%</span></div>
+
+        <!-- Live chart -->
+        <div style="margin-top:8px; font-family:'Share Tech Mono',monospace; font-size:8px; color:#5A7B98; margin-bottom:4px;">INFERENCE SPEED (TOKENS/SEC)</div>
+        <div class="chart-box"><canvas id="perfChartCanvas"></canvas></div>
+      </div>
+
+      <!-- Stark Industries Stock -->
+      <div class="card card-gold">
+        <div class="card-title gold">📈 STARK INDUSTRIES</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div>
+            <div style="font-family:'Orbitron',sans-serif; font-size:18px; font-weight:900; color:#FFD21E; text-shadow:0 0 10px rgba(255,210,30,.6);">$847.30</div>
+            <div style="font-family:'Share Tech Mono',monospace; font-size:9px; color:#00FF88;">▲ +4.2% TODAY</div>
+          </div>
+          <div style="text-align:right; font-family:'Share Tech Mono',monospace; font-size:9px; color:#5A7B98; line-height:1.6;">
+            <div>MKT CAP: <span style="color:#FFD21E;">$2.4T</span></div>
+            <div>P/E RATIO: <span style="color:#00D4FF;">42.8</span></div>
+          </div>
+        </div>
+        <div class="chart-box"><canvas id="stockCanvas"></canvas></div>
+        <div style="display:flex; justify-content:space-between; margin-top:4px; font-family:'Share Tech Mono',monospace; font-size:8px; color:#5A7B98;">
+          <span>AUG</span><span>SEP</span><span>OCT</span><span>NOV</span><span>DEC</span><span>JAN</span>
+        </div>
+      </div>
+
+    </div><!-- /right-col -->
+  </div><!-- /row-main -->
+
+  <!-- ══ MORE AI TECHNOLOGIES ════════════════════════════════════ -->
+  <div class="card">
+    <div class="section-hdr">MORE AI TECHNOLOGIES</div>
+    <div class="tech-grid">
+      <div class="tech-card"><span class="tech-icon">🧮</span><div><div class="tech-name">MACHINE LEARNING</div><div class="tech-desc">Algorithms that learn from data to make predictions and decisions autonomously.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">🕸️</span><div><div class="tech-name">DEEP LEARNING</div><div class="tech-desc">Neural networks with multiple layers for complex pattern recognition tasks.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">👁️</span><div><div class="tech-name">COMPUTER VISION</div><div class="tech-desc">Enables machines to see and understand visual information from the world.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">🎙️</span><div><div class="tech-name">SPEECH RECOGNITION</div><div class="tech-desc">Converts spoken language to text with high accuracy using acoustic models.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">🎮</span><div><div class="tech-name">REINFORCEMENT LEARNING</div><div class="tech-desc">AI learns via trial, error, rewards and feedback loops in environments.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">⭐</span><div><div class="tech-name">RECOMMENDER SYSTEMS</div><div class="tech-desc">Provides personalized suggestions based on user behavior and preferences.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">⚠️</span><div><div class="tech-name">ANOMALY DETECTION</div><div class="tech-desc">Identifies unusual patterns in data that don't conform to expected behavior.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">💬</span><div><div class="tech-name">CHATBOTS</div><div class="tech-desc">Conversational AI for automated user interaction, support and engagement.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">🤖</span><div><div class="tech-name">ROBOTIC PROCESS AUTOMATION</div><div class="tech-desc">Automates repetitive business tasks using software robots and AI agents.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">⛏️</span><div><div class="tech-name">DATA MINING</div><div class="tech-desc">Extracts valuable patterns and knowledge from large datasets automatically.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">🕸️</span><div><div class="tech-name">KNOWLEDGE GRAPHS</div><div class="tech-desc">Organizes information in graph structures to enable semantic reasoning.</div></div></div>
+      <div class="tech-card"><span class="tech-icon">📡</span><div><div class="tech-name">EDGE AI</div><div class="tech-desc">AI processing on local devices for real-time, low-latency inference at the edge.</div></div></div>
+    </div>
+  </div>
+
+  <!-- ══ AI APPLICATIONS IN REAL WORLD ═══════════════════════════ -->
+  <div class="card">
+    <div class="section-hdr">AI APPLICATIONS IN REAL WORLD</div>
+    <div class="apps-grid">
+      <div class="app-card" onclick="showAppInfo('Healthcare')">
+        <span class="app-icon">🏥</span>
+        <div class="app-name">HEALTHCARE</div>
+        <div class="app-desc">AI in diagnostics, algorithmic trading and drug discovery.</div>
+      </div>
+      <div class="app-card" onclick="showAppInfo('Finance')">
+        <span class="app-icon">💰</span>
+        <div class="app-name">FINANCE</div>
+        <div class="app-desc">Fraud detection, algorithmic trading and risk analysis.</div>
+      </div>
+      <div class="app-card" onclick="showAppInfo('Transportation')">
+        <span class="app-icon">🚗</span>
+        <div class="app-name">TRANSPORTATION</div>
+        <div class="app-desc">Autonomous vehicles, traffic prediction and optimization.</div>
+      </div>
+      <div class="app-card" onclick="showAppInfo('Education')">
+        <span class="app-icon">🎓</span>
+        <div class="app-name">EDUCATION</div>
+        <div class="app-desc">Personalized learning, automated grading and AI tutoring.</div>
+      </div>
+      <div class="app-card" onclick="showAppInfo('Entertainment')">
+        <span class="app-icon">🎬</span>
+        <div class="app-name">ENTERTAINMENT</div>
+        <div class="app-desc">Content recommendation, AI-generated content and gaming.</div>
+      </div>
+      <div class="app-card" onclick="showAppInfo('Cybersecurity')">
+        <span class="app-icon">🛡️</span>
+        <div class="app-name">CYBERSECURITY</div>
+        <div class="app-desc">Threat detection, network security and data protection.</div>
+      </div>
+      <div class="app-card" onclick="showAppInfo('Smart Home')">
+        <span class="app-icon">🏠</span>
+        <div class="app-name">SMART HOME</div>
+        <div class="app-desc">Home automation, energy management and IoT integration.</div>
+      </div>
+      <div class="app-card" onclick="showAppInfo('Industry 4.0')">
+        <span class="app-icon">🏭</span>
+        <div class="app-name">INDUSTRY 4.0</div>
+        <div class="app-desc">Predictive maintenance, quality control and automation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BOTTOM: FUTURE OF AI + LIVE STATS ══════════════════════ -->
+  <div class="bottom-row">
+
+    <div class="card card-purple">
+      <div class="section-hdr" style="color:#A855F7; text-shadow:0 0 10px rgba(168,85,247,.5);">THE FUTURE OF AI</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start;">
+        <div>
+          <div class="future-list">
+            <div class="future-item">More Human-like AI with Emotional Intelligence</div>
+            <div class="future-item">Autonomous Systems & Self-Improving Algorithms</div>
+            <div class="future-item">AI & IoT Integration — Seamless Smart Ecosystems</div>
+            <div class="future-item">Ethical & Safe AI — Aligned with Human Values</div>
+            <div class="future-item">AI for Better Tomorrow — Global Problem Solving</div>
+            <div class="future-item">Quantum AI — Exponential Computational Power</div>
+            <div class="future-item">Brain-Computer Interfaces & Neural Link AI</div>
+            <div class="future-item">AI Governance & International Regulation Frameworks</div>
+          </div>
+          <div style="margin-top:12px; padding:10px; background:rgba(168,85,247,.08); border:1px solid rgba(168,85,247,.3); border-radius:6px;">
+            <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:#A855F7; letter-spacing:.1em; margin-bottom:4px;">THE LIMIT IS NOT</div>
+            <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:#A855F7; letter-spacing:.1em; margin-bottom:4px;">IN THE AI, BUT IN</div>
+            <div style="font-family:'Orbitron',sans-serif; font-size:12px; font-weight:900; color:#fff; letter-spacing:.15em; text-shadow:0 0 10px rgba(168,85,247,.7);">OUR IMAGINATION.</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <!-- Future Robot Graphic -->
+          <div style="height:180px; display:flex; align-items:center; justify-content:center;">
+            <canvas id="futureRobotCanvas" width="200" height="180"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Global AI Stats -->
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="card card-green">
+        <div class="card-title green">📡 LIVE GLOBAL AI STATS</div>
+        <div class="live-stats">
+          <div class="stat-counter">
+            <div class="sc-label">AI MODELS ACTIVE</div>
+            <div class="sc-val" id="liveModels">247</div>
+          </div>
+          <div class="stat-counter">
+            <div class="sc-label">QUERIES/SECOND</div>
+            <div class="sc-val" id="liveQps" style="color:#00FF88;">1,847</div>
+          </div>
+          <div class="stat-counter">
+            <div class="sc-label">TOKENS PROCESSED</div>
+            <div class="sc-val" id="liveTok" style="color:#FFD21E; font-size:14px;">2.4T</div>
+          </div>
+          <div class="stat-counter">
+            <div class="sc-label">STARK AI UPTIME</div>
+            <div class="sc-val" style="color:#A855F7;">99.97%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Health -->
+      <div class="card">
+        <div class="card-title">⚡ SYSTEM HEALTH</div>
+        <div class="met-row"><span class="met-lbl">CPU CORES</span><div class="met-bar-w"><div class="met-bar-f f-blue" style="width:23%;"></div></div><span class="met-val">23%</span></div>
+        <div class="met-row"><span class="met-lbl">MEMORY</span><div class="met-bar-w"><div class="met-bar-f f-purple" style="width:42%;"></div></div><span class="met-val">42%</span></div>
+        <div class="met-row"><span class="met-lbl">GPU LOAD</span><div class="met-bar-w"><div class="met-bar-f f-gold" style="width:78%;"></div></div><span class="met-val">78%</span></div>
+        <div class="met-row"><span class="met-lbl">NETWORK</span><div class="met-bar-w"><div class="met-bar-f f-green" style="width:68%;"></div></div><span class="met-val">68%</span></div>
+        <div class="met-row"><span class="met-lbl">STORAGE</span><div class="met-bar-w"><div class="met-bar-f f-red" style="width:71%;"></div></div><span class="met-val">71%</span></div>
+        <div class="met-row"><span class="met-lbl">SECURITY</span><div class="met-bar-w"><div class="met-bar-f f-green" style="width:100%;"></div></div><span class="met-val" style="color:#00FF88;">100%</span></div>
+      </div>
+
+      <!-- Quick Links Back -->
+      <div class="card">
+        <div class="card-title">🔗 QUICK ACCESS</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+          <a href="index.html"       style="text-decoration:none; display:flex; align-items:center; gap:6px; padding:8px; background:rgba(0,212,255,.07); border:1px solid rgba(0,212,255,.2); border-radius:5px; font-family:'Orbitron',sans-serif; font-size:9px; color:#00D4FF; transition:all .2s;" onmouseover="this.style.background='rgba(0,212,255,.2)'" onmouseout="this.style.background='rgba(0,212,255,.07)'">🤖 HUD</a>
+          <a href="stark_hud.html"   style="text-decoration:none; display:flex; align-items:center; gap:6px; padding:8px; background:rgba(0,212,255,.07); border:1px solid rgba(0,212,255,.2); border-radius:5px; font-family:'Orbitron',sans-serif; font-size:9px; color:#00D4FF; transition:all .2s;" onmouseover="this.style.background='rgba(0,212,255,.2)'" onmouseout="this.style.background='rgba(0,212,255,.07)'">🌐 STARK HUD</a>
+          <a href="3d_lab.html"      style="text-decoration:none; display:flex; align-items:center; gap:6px; padding:8px; background:rgba(0,212,255,.07); border:1px solid rgba(0,212,255,.2); border-radius:5px; font-family:'Orbitron',sans-serif; font-size:9px; color:#00D4FF; transition:all .2s;" onmouseover="this.style.background='rgba(0,212,255,.2)'" onmouseout="this.style.background='rgba(0,212,255,.07)'">🌌 3D LAB</a>
+          <a href="tracker.html"     style="text-decoration:none; display:flex; align-items:center; gap:6px; padding:8px; background:rgba(0,212,255,.07); border:1px solid rgba(0,212,255,.2); border-radius:5px; font-family:'Orbitron',sans-serif; font-size:9px; color:#00D4FF; transition:all .2s;" onmouseover="this.style.background='rgba(0,212,255,.2)'" onmouseout="this.style.background='rgba(0,212,255,.07)'">🛰️ TRACKER</a>
+          <a href="cyber_soc.html"   style="text-decoration:none; display:flex; align-items:center; gap:6px; padding:8px; background:rgba(0,212,255,.07); border:1px solid rgba(0,212,255,.2); border-radius:5px; font-family:'Orbitron',sans-serif; font-size:9px; color:#00D4FF; transition:all .2s;" onmouseover="this.style.background='rgba(0,212,255,.2)'" onmouseout="this.style.background='rgba(0,212,255,.07)'">🛡️ CYBER</a>
+          <a href="cmd_hacker.html"  style="text-decoration:none; display:flex; align-items:center; gap:6px; padding:8px; background:rgba(0,212,255,.07); border:1px solid rgba(0,212,255,.2); border-radius:5px; font-family:'Orbitron',sans-serif; font-size:9px; color:#00D4FF; transition:all .2s;" onmouseover="this.style.background='rgba(0,212,255,.2)'" onmouseout="this.style.background='rgba(0,212,255,.07)'">💻 TERMINAL</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /bottom-row -->
+
+</div><!-- /eco-page -->
+
+<!-- ═══════════ APP INFO MODAL ════════════════════════════════════ -->
+<div id="appModal" style="display:none; position:fixed; inset:0; z-index:900; background:rgba(0,5,15,.85); backdrop-filter:blur(12px); align-items:center; justify-content:center; padding:20px;">
+  <div style="max-width:500px; width:100%; background:#020C1C; border:1px solid #00D4FF; border-radius:10px; padding:24px; box-shadow:0 0 50px rgba(0,212,255,.4); position:relative;">
+    <button onclick="document.getElementById('appModal').style.display='none'" style="position:absolute; top:12px; right:12px; background:none; border:1px solid rgba(0,212,255,.3); color:#00D4FF; padding:4px 10px; border-radius:4px; cursor:pointer; font-family:'Orbitron',sans-serif; font-size:9px;">✕ CLOSE</button>
+    <div id="appModalContent"></div>
+  </div>
+</div>
+
+<script>
+// ── 1. LIVE CLOCK ──────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('navClock').textContent = now.toLocaleTimeString('en-US',{hour12:false});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── 2. BG PARTICLE CANVAS ─────────────────────────────────────────
+const bgC = document.getElementById('bgCanvas');
+const bgX = bgC.getContext('2d');
+bgC.width = window.innerWidth; bgC.height = window.innerHeight;
+window.addEventListener('resize', () => { bgC.width=window.innerWidth; bgC.height=window.innerHeight; });
+
+const bgParts = Array.from({length:60}, () => ({
+  x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight,
+  r: Math.random()*1.5+0.3, vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
+  a: Math.random()
+}));
+function renderBg() {
+  bgC.width = bgC.width;
+  bgParts.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x<0) p.x=bgC.width; if (p.x>bgC.width) p.x=0;
+    if (p.y<0) p.y=bgC.height; if (p.y>bgC.height) p.y=0;
+    bgX.beginPath();
+    bgX.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    bgX.fillStyle = `rgba(0,212,255,${p.a*0.4})`;
+    bgX.fill();
+  });
+  // Connect nearby particles
+  for (let i=0; i<bgParts.length; i++) {
+    for (let j=i+1; j<bgParts.length; j++) {
+      const dx = bgParts[i].x - bgParts[j].x;
+      const dy = bgParts[i].y - bgParts[j].y;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      if (d < 120) {
+        bgX.beginPath();
+        bgX.strokeStyle = `rgba(0,212,255,${(1-d/120)*0.06})`;
+        bgX.lineWidth = 0.5;
+        bgX.moveTo(bgParts[i].x, bgParts[i].y);
+        bgX.lineTo(bgParts[j].x, bgParts[j].y);
+        bgX.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(renderBg);
+}
+renderBg();
+
+// ── 3. VOICE WAVE (SPIDEY) ────────────────────────────────────────
+const svCanvas = document.getElementById('spideyVoiceCanvas');
+const svCtx = svCanvas.getContext('2d');
+let svStep = 0;
+function renderSpideyVoice() {
+  const w = svCanvas.width = svCanvas.parentElement.clientWidth;
+  const h = svCanvas.height = svCanvas.parentElement.clientHeight;
+  svCtx.clearRect(0,0,w,h);
+  svStep += 0.12;
+  svCtx.beginPath();
+  svCtx.strokeStyle = '#FF2244';
+  svCtx.lineWidth = 2;
+  svCtx.shadowBlur = 8; svCtx.shadowColor = '#FF2244';
+  for (let x=0; x<w; x+=3) {
+    const y = h/2 + Math.sin(x*0.06+svStep)*10*Math.cos(svStep*0.4);
+    x===0 ? svCtx.moveTo(x,y) : svCtx.lineTo(x,y);
+  }
+  svCtx.stroke();
+  requestAnimationFrame(renderSpideyVoice);
+}
+renderSpideyVoice();
+
+// ── 4. ALEXA DEVICE CANVAS ────────────────────────────────────────
+const alC = document.getElementById('alexaCanvas');
+const alX = alC.getContext('2d');
+let alAngle = 0;
+function renderAlexa() {
+  alX.clearRect(0,0,120,160);
+  alAngle += 0.025;
+  // Cylinder body
+  alX.save();
+  alX.translate(60,90);
+  // glow rings
+  [48,36,24].forEach((r,i) => {
+    alX.beginPath();
+    alX.strokeStyle = `rgba(0,212,255,${0.15+i*0.1})`;
+    alX.lineWidth = 2;
+    alX.ellipse(0,0,r,r*0.3,0,alAngle+(i*Math.PI/3),alAngle+(i*Math.PI/3)+Math.PI*1.6);
+    alX.stroke();
+  });
+  // Core glow
+  const grad = alX.createRadialGradient(0,0,0,0,0,20);
+  grad.addColorStop(0,'rgba(0,212,255,.8)');
+  grad.addColorStop(1,'transparent');
+  alX.beginPath(); alX.arc(0,0,20,0,Math.PI*2);
+  alX.fillStyle = grad; alX.fill();
+  alX.restore();
+  // Speaker dots
+  for (let i=0; i<5; i++) {
+    for (let j=0; j<3; j++) {
+      alX.beginPath();
+      alX.arc(30+i*12, 50+j*8, 1.5, 0, Math.PI*2);
+      alX.fillStyle = 'rgba(0,212,255,.3)';
+      alX.fill();
+    }
+  }
+  requestAnimationFrame(renderAlexa);
+}
+renderAlexa();
+
+// ── 5. ALEXA VOICE WAVE ───────────────────────────────────────────
+const avC = document.getElementById('alexaVoiceCanvas');
+const avX = avC.getContext('2d');
+let avStep = 0;
+function renderAlexaVoice() {
+  const w = avC.width = avC.parentElement.clientWidth;
+  const h = avC.height = avC.parentElement.clientHeight;
+  avX.clearRect(0,0,w,h);
+  avStep += 0.1;
+  avX.beginPath();
+  avX.strokeStyle = '#00D4FF'; avX.lineWidth = 1.5;
+  avX.shadowBlur = 6; avX.shadowColor = '#00D4FF';
+  for (let x=0; x<w; x+=3) {
+    const y = h/2 + Math.sin(x*0.1+avStep)*8;
+    x===0 ? avX.moveTo(x,y) : avX.lineTo(x,y);
+  }
+  avX.stroke();
+  requestAnimationFrame(renderAlexaVoice);
+}
+renderAlexaVoice();
+
+// ── 6. PERFORMANCE CHART ──────────────────────────────────────────
+const pfC = document.getElementById('perfChartCanvas');
+const pfX = pfC.getContext('2d');
+let pfData = Array.from({length:40}, () => 40+Math.random()*50);
+function renderPerfChart() {
+  const w = pfC.width = pfC.parentElement.clientWidth;
+  const h = pfC.height = pfC.parentElement.clientHeight;
+  pfX.clearRect(0,0,w,h);
+  pfData.shift(); pfData.push(40+Math.random()*50);
+  const step = w/(pfData.length-1);
+  pfX.beginPath();
+  pfX.strokeStyle = '#00D4FF'; pfX.lineWidth = 2;
+  pfX.shadowBlur = 8; pfX.shadowColor = '#00D4FF';
+  pfData.forEach((v,i) => {
+    const x=i*step, y=h-(v/100)*h;
+    i===0 ? pfX.moveTo(x,y) : pfX.lineTo(x,y);
+  });
+  pfX.stroke();
+  // Fill under
+  pfX.beginPath();
+  pfData.forEach((v,i) => {
+    const x=i*step, y=h-(v/100)*h;
+    i===0 ? pfX.moveTo(x,y) : pfX.lineTo(x,y);
+  });
+  pfX.lineTo((pfData.length-1)*step, h);
+  pfX.lineTo(0,h); pfX.closePath();
+  pfX.fillStyle = 'rgba(0,212,255,.08)'; pfX.fill();
+}
+setInterval(renderPerfChart, 100);
+
+// ── 7. STOCK CHART ────────────────────────────────────────────────
+const stC = document.getElementById('stockCanvas');
+const stX = stC.getContext('2d');
+const stockData = [620,650,640,680,660,710,700,740,760,790,780,820,810,847];
+function renderStock() {
+  const w = stC.width = stC.parentElement.clientWidth;
+  const h = stC.height = stC.parentElement.clientHeight;
+  stX.clearRect(0,0,w,h);
+  const min=Math.min(...stockData)-20, max=Math.max(...stockData)+20;
+  const step = w/(stockData.length-1);
+  stX.beginPath();
+  stX.strokeStyle = '#FFD21E'; stX.lineWidth = 2;
+  stX.shadowBlur = 8; stX.shadowColor = '#FFD21E';
+  stockData.forEach((v,i) => {
+    const x=i*step, y=h-((v-min)/(max-min))*h;
+    i===0 ? stX.moveTo(x,y) : stX.lineTo(x,y);
+  });
+  stX.stroke();
+  stX.beginPath();
+  stockData.forEach((v,i) => {
+    const x=i*step, y=h-((v-min)/(max-min))*h;
+    i===0 ? stX.moveTo(x,y) : stX.lineTo(x,y);
+  });
+  stX.lineTo((stockData.length-1)*step, h);
+  stX.lineTo(0,h); stX.closePath();
+  stX.fillStyle = 'rgba(255,210,30,.08)'; stX.fill();
+}
+setInterval(renderStock, 200);
+renderStock();
+
+// ── 8. FUTURE ROBOT CANVAS ───────────────────────────────────────
+const frC = document.getElementById('futureRobotCanvas');
+const frX = frC.getContext('2d');
+let frAngle = 0;
+function renderRobot() {
+  frX.clearRect(0,0,200,180);
+  frAngle += 0.02;
+  const cx=100, cy=90;
+  // Orbital rings
+  [70,50,30].forEach((r,i) => {
+    frX.save();
+    frX.translate(cx,cy);
+    frX.rotate(frAngle*(i%2===0?1:-1)*(i+1)*0.5);
+    frX.beginPath();
+    frX.strokeStyle = `rgba(168,85,247,${0.2+i*0.15})`;
+    frX.lineWidth = 1.5;
+    frX.arc(0,0,r,0,Math.PI*1.6);
+    frX.stroke();
+    frX.restore();
+  });
+  // Core glow
+  const g = frX.createRadialGradient(cx,cy,0,cx,cy,25);
+  g.addColorStop(0,'rgba(168,85,247,.9)');
+  g.addColorStop(1,'transparent');
+  frX.beginPath(); frX.arc(cx,cy,25,0,Math.PI*2);
+  frX.fillStyle = g; frX.fill();
+  // Robot silhouette
+  frX.strokeStyle = 'rgba(168,85,247,.6)'; frX.lineWidth = 1.5;
+  frX.strokeRect(cx-18,cy-22,36,28); // head
+  frX.strokeRect(cx-22,cy+8,44,38); // body
+  frX.strokeRect(cx-38,cy+12,14,30); // left arm
+  frX.strokeRect(cx+24,cy+12,14,30); // right arm
+  frX.strokeRect(cx-18,cy+48,16,30); // left leg
+  frX.strokeRect(cx+2,cy+48,16,30); // right leg
+  // Eyes
+  frX.beginPath();
+  frX.arc(cx-7,cy-10,4,0,Math.PI*2);
+  frX.arc(cx+7,cy-10,4,0,Math.PI*2);
+  frX.fillStyle = '#A855F7';
+  frX.shadowBlur = 8; frX.shadowColor = '#A855F7';
+  frX.fill();
+  requestAnimationFrame(renderRobot);
+}
+renderRobot();
+
+// ── 9. LIVE COUNTER UPDATES ───────────────────────────────────────
+function updateLiveCounters() {
+  const qps = 1700 + Math.floor(Math.random()*300);
+  document.getElementById('liveQps').textContent = qps.toLocaleString();
+}
+setInterval(updateLiveCounters, 1500);
+
+// ── 10. AI BAR ANIMATIONS ─────────────────────────────────────────
+function animateBars() {
+  const bars = [
+    {bar:'bar-gpt',   val:'val-gpt',   base:88, range:8},
+    {bar:'bar-claude',val:'val-claude', base:85, range:8},
+    {bar:'bar-gemini',val:'val-gemini', base:83, range:8},
+    {bar:'bar-llama', val:'val-llama',  base:78, range:10},
+    {bar:'bar-ds',    val:'val-ds',     base:80, range:10},
+    {bar:'bar-mis',   val:'val-mis',    base:75, range:10},
+  ];
+  bars.forEach(b => {
+    const v = b.base + Math.floor(Math.random()*b.range);
+    document.getElementById(b.bar).style.width = v+'%';
+    document.getElementById(b.val).textContent = v+'%';
+  });
+}
+setInterval(animateBars, 2500);
+
+// ── 11. APP MODAL ─────────────────────────────────────────────────
+const appDetails = {
+  'Healthcare': {
+    icon:'🏥', color:'#00FF88',
+    desc:'AI is revolutionizing healthcare through early disease detection, drug discovery, personalized treatment plans, and robotic surgery assistance.',
+    items:['Radiology AI: Detecting tumors 40% faster','Drug Discovery: 10x acceleration with AI','Personalized Medicine: DNA-based treatment','Patient Risk Scoring: Predictive analytics','Robotic Surgery: Precision + minimal invasion']
+  },
+  'Finance': {
+    icon:'💰', color:'#FFD21E',
+    desc:'AI drives financial markets through algorithmic trading, real-time fraud detection, credit scoring, and risk management systems.',
+    items:['Fraud Detection: 99.7% accuracy rate','Algo Trading: Microsecond decision making','Credit Scoring: Alternative data analysis','Portfolio Management: AI-optimized returns','Regulatory Compliance: Automated reporting']
+  },
+  'Transportation': {
+    icon:'🚗', color:'#00D4FF',
+    desc:'Autonomous vehicles, smart traffic systems, and AI-powered logistics are transforming how the world moves people and goods.',
+    items:['Self-Driving Cars: Level 5 autonomy research','Traffic AI: 30% congestion reduction','Drone Delivery: Last-mile automation','Predictive Maintenance: Fleet management','Route Optimization: Real-time AI routing']
+  },
+  'Education': {
+    icon:'🎓', color:'#A855F7',
+    desc:'AI personalizes learning experiences, automates assessment, and provides intelligent tutoring systems for students worldwide.',
+    items:['Adaptive Learning: Personalized curriculum','Automated Grading: Instant feedback','Intelligent Tutors: 24/7 AI assistance','Learning Analytics: Progress tracking','Language Learning: AI conversation practice']
+  },
+  'Entertainment': {
+    icon:'🎬', color:'#FF6B35',
+    desc:'AI recommends content, generates creative works, powers gaming experiences, and enables new forms of interactive storytelling.',
+    items:['Netflix Recommendations: 80% of viewing','AI Music Generation: Studio-quality tracks','Game AI: Adaptive difficulty systems','Deepfake Detection & Creation','Procedural Content: Infinite game worlds']
+  },
+  'Cybersecurity': {
+    icon:'🛡️', color:'#FF2244',
+    desc:'AI defends against cyber threats in real-time, detecting anomalies, predicting attacks, and automating incident response.',
+    items:['Threat Detection: Real-time anomaly AI','Zero-Day Protection: Behavioral analysis','SIEM Integration: Automated correlation','Phishing Detection: NLP email scanning','Network Security: Traffic pattern analysis']
+  },
+  'Smart Home': {
+    icon:'🏠', color:'#00FF88',
+    desc:'AI-powered smart home systems learn user preferences, optimize energy usage, and integrate thousands of IoT devices seamlessly.',
+    items:['Voice Control: 10,000+ device commands','Energy Optimization: 25% bill reduction','Security AI: Facial recognition at door','Predictive Automation: Learn your schedule','Health Monitoring: Air quality, sleep tracking']
+  },
+  'Industry 4.0': {
+    icon:'🏭', color:'#FFD21E',
+    desc:'AI-driven manufacturing combines robotics, IoT sensors, digital twins, and machine learning for the factory of the future.',
+    items:['Predictive Maintenance: 50% downtime reduction','Quality Control: AI visual inspection','Digital Twins: Virtual factory simulation','Collaborative Robots: Human-AI teamwork','Supply Chain: End-to-end AI optimization']
+  }
+};
+
+function showAppInfo(name) {
+  const d = appDetails[name];
+  if (!d) return;
+  document.getElementById('appModalContent').innerHTML = `
+    <div style="font-size:36px; margin-bottom:8px;">${d.icon}</div>
+    <div style="font-family:'Orbitron',sans-serif; font-size:16px; font-weight:900; color:${d.color}; margin-bottom:8px; letter-spacing:.15em;">${name.toUpperCase()}</div>
+    <p style="font-size:13px; color:#8AAABB; line-height:1.6; margin-bottom:12px;">${d.desc}</p>
+    <div style="display:flex; flex-direction:column; gap:5px;">
+      ${d.items.map(i=>`<div style="display:flex; align-items:center; gap:8px; padding:5px 8px; background:rgba(${d.color==='#00FF88'?'0,255,136':'0,212,255'},.06); border:1px solid rgba(${d.color==='#00FF88'?'0,255,136':'0,212,255'},.2); border-radius:4px; font-size:11px; color:#C8E8FF;">
+        <span style="color:${d.color}; font-size:10px;">▸</span> ${i}
+      </div>`).join('')}
+    </div>`;
+  document.getElementById('appModal').style.display = 'flex';
+}
+document.getElementById('appModal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+
+// ── 12. UPDATE ALL PAGES NAVIGATION ───────────────────────────────
+// Add AI Ecosystem link to index.html nav via postMessage (just in case it's in iframe)
+console.log('🧬 AI ECOSYSTEM PAGE LOADED — J.A.R.V.I.S. STARK AI ACTIVE');
+</script>
+</body>
+</html>
