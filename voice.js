@@ -621,11 +621,10 @@
         window.JarvisToast?.show('⚠️ Speech Recognition needs Chrome or Safari with HTTPS', 'warning', 6000);
         return;
       }
-      if (voiceMode) return;
       unlockAudio();
       voiceMode = true;
       setVoiceUI(true);
-      ping(880);
+      // Force boot microphone if recognition is not running
       this._boot();
     },
 
