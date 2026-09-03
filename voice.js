@@ -125,8 +125,38 @@
     fn();
   }
 
-  // ── Audio unlock (mobile) ──────────────────────────────────────────
+  // ── Explicit Microphone Permission Requester (triggers Chrome Allow Popup) ──
+  let micPermissionRequested = false;
+  function requestMicPermission() {
+    if (micPermissionRequested) return;
+    micPermissionRequested = true;
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          stream.getTracks().forEach(track => track.stop());
+          console.log('✅ Microphone permission granted by user!');
+        })
+        .catch(err => {
+          console.warn('⚠️ Mic permission blocked:', err);
+          showMicPermissionBanner();
+        });
+    }
+  }
+
+  // ── Visual guidance banner if Chrome blocks microphone ─────────────
+  function showMicPermissionBanner() {
+    if (document.getElementById('micPermissionBanner')) return;
+    const b = document.createElement('div');
+    b.id = 'micPermissionBanner';
+    b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#FF0055;color:#fff;text-align:center;padding:12px 20px;font-family:var(--fhud, sans-serif);font-weight:bold;font-size:13px;box-shadow:0 4px 20px rgba(255,0,85,.6);cursor:pointer;';
+    b.innerHTML = '🚫 MICROPHONE IS BLOCKED BY BROWSER! Click the LOCK 🔒 icon next to URL in address bar -> Change Microphone to ALLOW -> Refresh Page!';
+    b.onclick = () => b.remove();
+    document.body.appendChild(b);
+  }
+
+  // ── Audio unlock (mobile & desktop) ────────────────────────────────
   function unlockAudio() {
+    requestMicPermission();
     if (audioUnlocked) return;
     try {
       window.speechSynthesis?.cancel();
@@ -135,7 +165,6 @@
       window.speechSynthesis?.speak(u);
       new (window.AudioContext || window.webkitAudioContext)().resume();
       audioUnlocked = true;
-      document.getElementById('mobileUnlockBanner')?.remove();
     } catch (e) {}
   }
 
@@ -693,7 +722,8 @@
 
       rec.onerror = (e) => {
         if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          window.JarvisToast?.show('🚫 Microphone blocked! Allow microphone access in browser settings.', 'error', 8000);
+          showMicPermissionBanner();
+          window.JarvisToast?.show('🚫 Microphone blocked! Click 🔒 LOCK icon in address bar -> Allow Microphone!', 'error', 10000);
           return;
         }
         // Auto-reboot mic immediately on silence or network glitch
