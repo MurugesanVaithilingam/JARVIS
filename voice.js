@@ -645,10 +645,15 @@
           val.textContent = `🎙️ "${heard.slice(0, 22)}..."`;
         }
 
-        // Process command on final speech result
-        if (finalText && finalText.trim().length >= 2) {
-          let cmd = finalText.trim();
-          const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
+        // Instant trigger on final speech OR matched direct command
+        const lowerHeard = heard.toLowerCase().trim();
+        const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
+        const cleanedHeard = lowerHeard.replace(wakePrefixRe, '').trim();
+
+        const isDirectCmd = /open (whatsapp|whats app|whatapp|chatgpt|youtube|file explorer|explorer|cmd|powershell|notepad|calc|instagram|facebook|gmail|maps|google)|close|hello boss|hi boss|vanakkam|how are you/i.test(cleanedHeard || lowerHeard);
+
+        if (finalText.trim().length >= 2 || isDirectCmd) {
+          let cmd = (finalText.trim() || heard);
           if (wakePrefixRe.test(cmd)) {
             const stripped = cmd.replace(wakePrefixRe, '').trim();
             if (stripped.length >= 2) cmd = stripped;
@@ -657,13 +662,12 @@
         }
       };
 
-
       rec.onend = () => {
         // 24/7 persistent mic auto-restart (handles browser silence timeouts)
         if (voiceMode && !isSpeaking) {
           setTimeout(() => {
-            if (voiceMode && !isSpeaking && recognition === rec) this._boot();
-          }, 100);
+            if (voiceMode && !isSpeaking) this._boot();
+          }, 50);
         }
       };
 
@@ -676,7 +680,7 @@
         if (voiceMode && !isSpeaking) {
           setTimeout(() => {
             if (voiceMode && !isSpeaking) this._boot();
-          }, 200);
+          }, 150);
         }
       };
 
@@ -684,10 +688,17 @@
         rec.start();
         setVoiceUI(true);
       } catch (er) {
-        if (voiceMode && !isSpeaking) setTimeout(() => this._boot(), 300);
+        if (voiceMode && !isSpeaking) setTimeout(() => this._boot(), 200);
       }
     },
   };
+
+  // ── 24/7 Mic Keep-Alive Monitor (verifies mic is active every 8s) ──
+  setInterval(() => {
+    if (voiceMode && !isSpeaking && (!recognition || recognition.readyState === 'ended')) {
+      window.JarvisVoice?._boot();
+    }
+  }, 8000);
 
   // ── Boot on DOM ready ─────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
