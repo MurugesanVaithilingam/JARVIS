@@ -337,10 +337,37 @@ function voiceAuth() {
   }
 }
 
-// ── 4. FORM LOGIN ─────────────────────────────────────────────────
+// ── 4. FORM LOGIN VIA REAL MYSQL DATABASE ─────────────────────────
 function handleLogin(e) {
   e.preventDefault();
-  triggerBiometricScan();
+  const username = document.getElementById('userInp').value;
+  const pin = document.getElementById('passInp').value;
+  const msg = document.getElementById('statusMsg');
+
+  msg.style.color = '#00D4FF';
+  msg.textContent = 'CONNECTING TO MYSQL DATABASE... VERIFYING CLEARANCE...';
+
+  fetch('api_auth.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, pin })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.authenticated) {
+      msg.style.color = '#00FF88';
+      msg.textContent = `MYSQL VERIFIED: ${data.user.full_name.toUpperCase()} — LEVEL ${data.user.clearance} ACCESS GRANTED!`;
+      if (window.speechSynthesis) {
+        const u = new SpeechSynthesisUtterance(`Welcome back, ${data.user.full_name}. Access granted.`);
+        window.speechSynthesis.speak(u);
+      }
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    } else {
+      msg.style.color = '#FF2244';
+      msg.textContent = `ACCESS DENIED: ${data.message}`;
+    }
+  })
+  .catch(() => triggerBiometricScan());
 }
 </script>
 </body>

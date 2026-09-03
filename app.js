@@ -142,6 +142,7 @@ window.JarvisApp = (function() {
     buildTabs();
     updateSidebar();
     loadHistory();
+    loadDatabaseTelemetry();
 
     // Auto-select first provider if available
     if (window.JarvisProviders && window.JarvisProviders.length > 0) {
@@ -545,13 +546,20 @@ window.JarvisApp = (function() {
   }
 
   // ── History ─────────────────────────────────────────────────
-  function saveHistory(pid, msg) {
+  function saveHistory(pid, msg, role = 'user') {
     try {
       const key  = 'jarvis_history';
       const hist = JSON.parse(localStorage.getItem(key)||'[]');
       hist.unshift({ pid, msg:msg.slice(0,60), ts:Date.now() });
       localStorage.setItem(key, JSON.stringify(hist.slice(0,20)));
       loadHistory();
+
+      // Post to real MySQL database (jarvis_db.chat_messages)
+      fetch('api_chat.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: 'default_session', provider_key: pid, role, content: msg })
+      }).catch(e => console.warn('MySQL save err:', e));
     } catch(e) {}
   }
 
