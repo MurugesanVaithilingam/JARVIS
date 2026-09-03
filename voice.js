@@ -775,17 +775,12 @@
 
   // ── Auto-boot on load + zero-click passive gesture listeners ─────
   document.addEventListener('DOMContentLoaded', () => {
-    let initialGreetingDone = false;
     const autoActivate = () => {
       unlockAudio();
       voiceMode = true;
       setVoiceUI(true);
       if (window.JarvisVoice && !recognition) {
         window.JarvisVoice.start();
-      }
-      if (!initialGreetingDone) {
-        initialGreetingDone = true;
-        speak('Hello Boss, eppadi irukkeenga? Jarvis systems 100 percent online-il ullathu!', null, true);
       }
     };
 
