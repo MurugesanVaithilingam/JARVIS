@@ -321,12 +321,13 @@
       clearTimeout(ttsWatchdog);
       clearInterval(ttsKeepAlive);
       isSpeaking = false;
-      setVoiceUI(voiceMode);
-      // 🎙️ Immediately restart 24/7 mic listening after JARVIS finishes speaking
-      if (voiceMode && window.JarvisVoice) {
+      voiceMode = true; // Always stay active in 24/7 voice mode!
+      setVoiceUI(true);
+      // 🎙️ INSTANT 24/7 MIC RESUME (Gemini Live / ChatGPT Advanced Voice Mode style)
+      if (window.JarvisVoice) {
         setTimeout(() => {
-          if (voiceMode) window.JarvisVoice._boot();
-        }, 150);
+          if (!isSpeaking) window.JarvisVoice._boot();
+        }, 30);
       }
       if (onDone) onDone();
     };
@@ -712,11 +713,11 @@
       };
 
       rec.onend = () => {
-        // 24/7 persistent mic auto-restart (handles browser silence timeouts)
-        if (voiceMode && !isSpeaking) {
+        voiceMode = true;
+        if (!isSpeaking) {
           setTimeout(() => {
-            if (voiceMode && !isSpeaking) this._boot();
-          }, 50);
+            if (!isSpeaking) this._boot();
+          }, 30);
         }
       };
 
@@ -726,11 +727,11 @@
           window.JarvisToast?.show('🚫 Microphone blocked! Click 🔒 LOCK icon in address bar -> Allow Microphone!', 'error', 10000);
           return;
         }
-        // Auto-reboot mic immediately on silence or network glitch
-        if (voiceMode && !isSpeaking) {
+        voiceMode = true;
+        if (!isSpeaking) {
           setTimeout(() => {
-            if (voiceMode && !isSpeaking) this._boot();
-          }, 150);
+            if (!isSpeaking) this._boot();
+          }, 50);
         }
       };
 
@@ -738,17 +739,17 @@
         rec.start();
         setVoiceUI(true);
       } catch (er) {
-        if (voiceMode && !isSpeaking) setTimeout(() => this._boot(), 200);
+        if (!isSpeaking) setTimeout(() => this._boot(), 100);
       }
     },
   };
 
-  // ── 24/7 Mic Keep-Alive Monitor (verifies mic is active every 8s) ──
+  // ── 24/7 Live Voice Keep-Alive Monitor (verifies mic every 3s) ──
   setInterval(() => {
     if (voiceMode && !isSpeaking && (!recognition || recognition.readyState === 'ended')) {
       window.JarvisVoice?._boot();
     }
-  }, 8000);
+  }, 3000);
 
   // ── Auto-boot on load + zero-click passive gesture listeners ─────
   document.addEventListener('DOMContentLoaded', () => {
