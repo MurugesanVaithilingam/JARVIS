@@ -700,16 +700,23 @@
     }
   }, 8000);
 
-  // ── Boot on DOM ready ─────────────────────────────────────────────
+  // ── Auto-boot on load + zero-click passive gesture listeners ─────
   document.addEventListener('DOMContentLoaded', () => {
-    showVoiceUnlockBanner();
-
-    const startGlobalVoice = () => {
+    const autoActivate = () => {
       unlockAudio();
       if (!voiceMode && window.JarvisVoice) {
         window.JarvisVoice.start();
       }
     };
+
+    // Immediate auto-start attempts
+    setTimeout(autoActivate, 100);
+    setTimeout(autoActivate, 400);
+
+    // Passive auto-unlock on any natural user movement (mousemove, touch, scroll, focus)
+    ['mousemove', 'pointermove', 'touchstart', 'scroll', 'keydown', 'click', 'focus'].forEach(evt => {
+      window.addEventListener(evt, autoActivate, { passive: true });
+    });
 
     document.getElementById('voiceBtn')?.addEventListener('click', () => {
       unlockAudio();
@@ -719,14 +726,6 @@
       unlockAudio();
       window.JarvisVoice.start();
     });
-
-    // Universal gesture listeners: start 24/7 mic on ANY click/tap/keypress
-    window.addEventListener('click',     startGlobalVoice, { passive: true });
-    window.addEventListener('touchstart',startGlobalVoice, { passive: true });
-    window.addEventListener('keydown',   startGlobalVoice, { passive: true });
-
-    // Auto-start attempt on load
-    setTimeout(startGlobalVoice, 500);
   });
 
 })();
