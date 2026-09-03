@@ -632,8 +632,6 @@
       recognition = rec;
 
       rec.onresult = (e) => {
-        if (isSpeaking) return;
-
         let interimText = '';
         let finalText = '';
 
@@ -650,6 +648,17 @@
         const heard = (finalText || interimText).trim();
         if (!heard || heard.length < 2) return;
 
+        // 🎙️ Barge-In Interrupt: If JARVIS is speaking and user says a command, stop speech and process command!
+        if (isSpeaking) {
+          const lowerH = heard.toLowerCase();
+          if (/open|close|stop|jarvis|hello|whatsapp|cmd|explorer/i.test(lowerH)) {
+            try { window.speechSynthesis?.cancel(); } catch(er){}
+            isSpeaking = false;
+          } else {
+            return;
+          }
+        }
+
         // 🎙️ REAL-TIME HUD FEEDBACK: Show live transcript as user speaks!
         const val = document.getElementById('voiceVal');
         if (val && voiceMode) {
@@ -658,7 +667,7 @@
 
         // Instant trigger on final speech OR matched direct command
         const lowerHeard = heard.toLowerCase().trim();
-        const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
+        const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|garvis|service|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
         const cleanedHeard = lowerHeard.replace(wakePrefixRe, '').trim();
 
         const isDirectCmd = /open (whatsapp|whats app|whatapp|chatgpt|youtube|file explorer|explorer|cmd|powershell|notepad|calc|instagram|facebook|gmail|maps|google)|close|hello boss|hi boss|vanakkam|how are you/i.test(cleanedHeard || lowerHeard);
