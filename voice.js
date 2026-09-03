@@ -616,29 +616,45 @@
       const rec = new SR();
       rec.lang             = 'en-IN'; // Optimized for Indian accent & command recognition
       rec.continuous       = true;   // stays on forever, no restart loops
-      rec.interimResults   = false;  // only fires on complete sentences
+      rec.interimResults   = true;   // REAL-TIME speech detection as user speaks!
       rec.maxAlternatives  = 1;
       recognition = rec;
 
       rec.onresult = (e) => {
-        const result = e.results[e.resultIndex];
-        if (!result?.isFinal) return;
-        const text = result[0].transcript.trim();
-        if (!text || text.length < 2) return;
-
-        // Mic is hard-stopped during TTS so this should never fire while speaking
         if (isSpeaking) return;
 
-        // Strip optional wake word prefix ("Jarvis open whatsapp" -> "open whatsapp")
-        let cmd = text;
-        const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
-        if (wakePrefixRe.test(cmd)) {
-          const stripped = cmd.replace(wakePrefixRe, '').trim();
-          if (stripped.length >= 2) cmd = stripped;
+        let interimText = '';
+        let finalText = '';
+
+        for (let i = e.resultIndex; i < e.results.length; ++i) {
+          const res = e.results[i];
+          const tr = res[0]?.transcript?.trim() || '';
+          if (res.isFinal) {
+            finalText += ' ' + tr;
+          } else {
+            interimText += ' ' + tr;
+          }
         }
 
-        // Execute command IMMEDIATELY — 100% active, zero blocking gates!
-        handleCommand(cmd);
+        const heard = (finalText || interimText).trim();
+        if (!heard || heard.length < 2) return;
+
+        // 🎙️ REAL-TIME HUD FEEDBACK: Show live transcript as user speaks!
+        const val = document.getElementById('voiceVal');
+        if (val && voiceMode) {
+          val.textContent = `🎙️ "${heard.slice(0, 22)}..."`;
+        }
+
+        // Process command on final speech result
+        if (finalText && finalText.trim().length >= 2) {
+          let cmd = finalText.trim();
+          const wakePrefixRe = /^(hello boss|hi boss|hello jarvis|hi jarvis|jarvis|jervis|jarvez|charvis|hey jarvis|ok jarvis|boss|karen|chitti|friday|edith|stark)[,!\s]*/i;
+          if (wakePrefixRe.test(cmd)) {
+            const stripped = cmd.replace(wakePrefixRe, '').trim();
+            if (stripped.length >= 2) cmd = stripped;
+          }
+          handleCommand(cmd);
+        }
       };
 
 
