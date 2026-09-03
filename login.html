@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STARK INDUSTRIES — Biometric Intelligence Security Portal</title>
+  <meta name="description" content="Stark Industries Level 5 Classified Biometric Authentication Portal & Security Gate.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ══════════════════════════════════════════════════════════════════
+       STYLISH STARK BIOMETRIC LOGIN PORTAL STYLES
+       ══════════════════════════════════════════════════════════════════ */
+    html, body {
+      width: 100%; height: 100vh; overflow: hidden;
+      background: #01060E;
+      font-family: 'Rajdhani', sans-serif;
+      color: #D4ECFF;
+    }
+
+    /* Floating canvas particle background */
+    #loginCanvas {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    }
+
+    /* Ambient neon background glow elements */
+    .glow-orb-1 {
+      position: fixed; top: 15%; left: 20%; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.18) 0%, transparent 70%);
+      filter: blur(50px); pointer-events: none; z-index: 2;
+      animation: orbFloat 8s ease-in-out infinite alternate;
+    }
+    .glow-orb-2 {
+      position: fixed; bottom: 15%; right: 20%; width: 450px; height: 450px;
+      background: radial-gradient(circle, rgba(255, 34, 68, 0.15) 0%, transparent 70%);
+      filter: blur(60px); pointer-events: none; z-index: 2;
+      animation: orbFloat 10s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 30px) scale(1.15); }
+    }
+
+    /* Login Card Container */
+    .login-container {
+      position: relative; z-index: 10;
+      width: 100%; height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%; max-width: 460px;
+      background: rgba(2, 14, 30, 0.85);
+      border: 1px solid rgba(0, 212, 255, 0.35);
+      border-radius: 16px; padding: 36px 30px;
+      box-shadow: 0 0 50px rgba(0, 212, 255, 0.25), inset 0 0 25px rgba(0, 212, 255, 0.08);
+      backdrop-filter: blur(24px);
+      display: flex; flex-direction: column; align-items: center; gap: 20px;
+      position: relative; overflow: hidden;
+      animation: loginCardPop 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes loginCardPop {
+      0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .login-card::before, .login-card::after {
+      content: ''; position: absolute; width: 14px; height: 14px;
+      border-color: #00D4FF; border-style: solid; pointer-events: none;
+    }
+    .login-card::before { top: 0; left: 0; border-width: 3px 0 0 3px; border-radius: 16px 0 0 0; }
+    .login-card::after  { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 16px 0; }
+
+    /* Animated Laser Scanner Line across Card */
+    .laser-scan-line {
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #00D4FF, #00FF88, #00D4FF, transparent);
+      box-shadow: 0 0 15px #00D4FF, 0 0 30px #00FF88;
+      animation: laserMove 3.5s linear infinite; pointer-events: none;
+    }
+    @keyframes laserMove { 0% { top: 0%; } 100% { top: 100%; } }
+
+    /* Header Brand */
+    .login-hdr { text-align: center; }
+    .login-brand {
+      font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900;
+      color: #fff; letter-spacing: 0.3em;
+      text-shadow: 0 0 20px #00D4FF, 0 0 40px rgba(0, 212, 255, 0.5);
+    }
+    .login-brand span { color: #FF2244; text-shadow: 0 0 15px #FF2244; }
+    .login-clearance {
+      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      color: #5A7B98; letter-spacing: 0.25em; margin-top: 4px;
+    }
+
+    /* Biometric Scanner Visual */
+    .scanner-wrap {
+      width: 110px; height: 110px; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: transform 0.3s ease;
+    }
+    .scanner-wrap:hover { transform: scale(1.06); }
+
+    .scanner-ring {
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 2px dashed rgba(0, 212, 255, 0.4);
+      animation: spinR 8s linear infinite;
+    }
+    .scanner-ring-2 {
+      position: absolute; inset: 8px; border-radius: 50%;
+      border: 2px solid rgba(0, 212, 255, 0.7);
+      border-top-color: transparent; border-bottom-color: transparent;
+      animation: spinR 4s linear infinite reverse;
+    }
+    @keyframes spinR { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .scanner-icon {
+      font-size: 38px; color: #00D4FF;
+      filter: drop-shadow(0 0 12px #00D4FF);
+      animation: eyePulse 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes eyePulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+
+    /* Form Fields */
+    .login-form { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+
+    .inp-group { display: flex; flex-direction: column; gap: 4px; }
+    .inp-label {
+      font-family: 'Share Tech Mono', monospace; font-size: 10px;
+      color: #5A7B98; letter-spacing: 0.12em;
+    }
+
+    .inp-box {
+      width: 100%; height: 44px;
+      background: rgba(0, 5, 15, 0.7);
+      border: 1px solid rgba(0, 212, 255, 0.25);
+      border-radius: 6px; padding: 0 14px;
+      font-family: 'Share Tech Mono', monospace; font-size: 14px;
+      color: #fff; outline: none; transition: all 0.22s;
+    }
+    .inp-box:focus {
+      border-color: #00D4FF;
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.4), inset 0 0 10px rgba(0, 212, 255, 0.1);
+    }
+
+    /* Buttons */
+    .btn-login {
+      width: 100%; height: 46px; margin-top: 6px;
+      background: linear-gradient(135deg, #00D4FF 0%, #0088AA 100%);
+      border: none; border-radius: 6px;
+      font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900;
+      color: #000; letter-spacing: 0.2em; cursor: pointer;
+      box-shadow: 0 0 25px rgba(0, 212, 255, 0.5);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-login:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.8);
+      background: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);
+    }
+
+    /* Quick Biometric Access Options */
+    .bio-options {
+      display: flex; gap: 8px; width: 100%; justify-content: center;
+    }
+    .bio-btn {
+      flex: 1; padding: 8px 6px;
+      background: rgba(0, 212, 255, 0.05);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 6px;
+      font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 700;
+      color: #00D4FF; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .bio-btn:hover {
+      background: rgba(0, 212, 255, 0.2); border-color: #00D4FF;
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.3); transform: translateY(-1px);
+    }
+
+    /* Status Message */
+    .status-msg {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      color: #00FF88; text-align: center; min-height: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="loginCanvas"></canvas>
+
+<div class="glow-orb-1"></div>
+<div class="glow-orb-2"></div>
+<div class="scanlines"></div>
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="laser-scan-line"></div>
+
+    <!-- Header Brand -->
+    <div class="login-hdr">
+      <div class="login-brand"><span>S</span>TARK SECURITY</div>
+      <div class="login-clearance">CLASSIFIED LEVEL 5 — BIOMETRIC AUTHENTICATION GATE</div>
+    </div>
+
+    <!-- Interactive Biometric Retina Scanner -->
+    <div class="scanner-wrap" onclick="triggerBiometricScan()" title="Click to trigger Retina & Biometric Scan">
+      <div class="scanner-ring"></div>
+      <div class="scanner-ring-2"></div>
+      <div class="scanner-icon" id="scanIcon">👁️</div>
+    </div>
+
+    <!-- Status Output -->
+    <div class="status-msg" id="statusMsg">READY FOR BIOMETRIC OR PASSCODE VERIFICATION</div>
+
+    <!-- Login Form -->
+    <form class="login-form" onsubmit="handleLogin(event)">
+      <div class="inp-group">
+        <label class="inp-label">STARK AGENT IDENTITY / EMAIL</label>
+        <input type="text" id="userInp" class="inp-box" placeholder="tony.stark@starkindustries.com" value="tony.stark@starkindustries.com" required>
+      </div>
+
+      <div class="inp-group">
+        <label class="inp-label">SECURITY PASSCODE / BIOMETRIC PIN</label>
+        <input type="password" id="passInp" class="inp-box" placeholder="••••••••" value="1003" required>
+      </div>
+
+      <button type="submit" class="btn-login" id="loginBtn">🔓 AUTHORIZE ACCESS</button>
+    </form>
+
+    <!-- Quick Biometric Shortcuts -->
+    <div class="bio-options">
+      <button class="bio-btn" onclick="triggerBiometricScan()">👁️ RETINA SCAN</button>
+      <button class="bio-btn" onclick="triggerBiometricScan()">🖐️ FINGERPRINT</button>
+      <button class="bio-btn" onclick="voiceAuth()">🎙️ VOICE AUTH</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── 1. BACKGROUND CANVAS ANIMATION ───────────────────────────────
+const canvas = document.getElementById('loginCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+window.addEventListener('resize', () => { canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
+
+const particles = Array.from({length:70}, () => ({
+  x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight,
+  r: Math.random()*1.8+0.4, vx:(Math.random()-.5)*.4, vy:(Math.random()-.5)*.4,
+  a: Math.random()
+}));
+
+function renderBg() {
+  canvas.width = canvas.width;
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x<0) p.x=canvas.width; if (p.x>canvas.width) p.x=0;
+    if (p.y<0) p.y=canvas.height; if (p.y>canvas.height) p.y=0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(0,212,255,${p.a*0.5})`;
+    ctx.fill();
+  });
+  // Draw connecting line network
+  for (let i=0; i<particles.length; i++) {
+    for (let j=i+1; j<particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      if (d < 130) {
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(0,212,255,${(1-d/130)*0.08})`;
+        ctx.lineWidth = 0.6;
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(renderBg);
+}
+renderBg();
+
+// ── 2. BIOMETRIC SCAN TRIGGER ─────────────────────────────────────
+function triggerBiometricScan() {
+  const icon = document.getElementById('scanIcon');
+  const msg = document.getElementById('statusMsg');
+  const btn = document.getElementById('loginBtn');
+  
+  icon.textContent = '⚡';
+  msg.style.color = '#00D4FF';
+  msg.textContent = 'SCANNING RETINA & BIOMETRICS... HOLD STILL';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    icon.textContent = '🟢';
+    msg.style.color = '#00FF88';
+    msg.textContent = 'BIOMETRIC MATCH VERIFIED — TONY STARK CONFIRMED!';
+    
+    // Play speech synthesis
+    if (window.speechSynthesis) {
+      const u = new SpeechSynthesisUtterance("Welcome back, Mr. Stark. Access granted.");
+      u.rate = 1.0; u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+    }
+
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 1200);
+  }, 1600);
+}
+
+// ── 3. VOICE AUTH ─────────────────────────────────────────────────
+function voiceAuth() {
+  const msg = document.getElementById('statusMsg');
+  msg.style.color = '#00D4FF';
+  msg.textContent = 'LISTENING FOR VOICE KEY... SAY "JARVIS AUTHORIZE"';
+
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SpeechRecognition();
+    rec.start();
+    rec.onresult = function(e) {
+      const text = e.results[0][0].transcript;
+      msg.style.color = '#00FF88';
+      msg.textContent = `VOICE VERIFIED: "${text.toUpperCase()}" — ACCESS GRANTED!`;
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    };
+    rec.onerror = function() {
+      triggerBiometricScan();
+    };
+  } else {
+    triggerBiometricScan();
+  }
+}
+
+// ── 4. FORM LOGIN ─────────────────────────────────────────────────
+function handleLogin(e) {
+  e.preventDefault();
+  triggerBiometricScan();
+}
+</script>
+</body>
+</html>
