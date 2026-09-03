@@ -488,52 +488,52 @@
       });
     };
 
-    if (/open (chatgpt|chat gpt|gpt)|^(chatgpt|chat gpt|gpt)$/i.test(t))
+    if (/open.*(chatgpt|chat gpt|gpt)|(chatgpt|chat gpt|gpt).*open|^(chatgpt|chat gpt|gpt)$/i.test(t))
       return openApp('chatgpt','ChatGPT', 'https://chatgpt.com', 'Open pannitten Boss! Opening Chat G P T.');
 
-    if (/open (whatsapp|whats app|whatapp|what's app|what app)|^(whatsapp|whats app|whatapp|what's app)$/i.test(t))
+    if (/open.*(whatsapp|whats app|whatapp|what's app|what app)|(whatsapp|whats app|whatapp).*open|^(whatsapp|whats app|whatapp)$/i.test(t))
       return openApp('whatsapp','WhatsApp', 'https://web.whatsapp.com', 'Open pannitten Boss! Opening WhatsApp.');
 
-    if (/open (instagram|insta)|^(instagram|insta)$/i.test(t))
+    if (/open.*(instagram|insta)|(instagram|insta).*open|^(instagram|insta)$/i.test(t))
       return openApp('instagram','Instagram', 'https://instagram.com', 'Open pannitten Boss! Opening Instagram.');
 
-    if (/open (facebook|face book|fb)|^(facebook|fb)$/i.test(t))
+    if (/open.*(facebook|face book|fb)|(facebook|fb).*open|^(facebook|fb)$/i.test(t))
       return openApp('facebook','Facebook', 'https://facebook.com', 'Open pannitten Boss! Opening Facebook.');
 
-    if (/open (gmail|g mail|email|e mail)|^(gmail|email)$/i.test(t))
+    if (/open.*(gmail|g mail|email)|(gmail|email).*open|^(gmail|email)$/i.test(t))
       return openApp('gmail','Gmail', 'https://mail.google.com', 'Open pannitten Boss! Opening Gmail.');
 
-    if (/open (youtube|you tube|yt)|^(youtube|you tube)$/i.test(t))
+    if (/open.*(youtube|you tube|yt)|(youtube|you tube).*open|^(youtube|you tube)$/i.test(t))
       return openApp('youtube','YouTube', 'https://youtube.com', 'Open pannitten Boss! Opening YouTube.');
 
-    if (/open google(?!maps| maps)/i.test(t))
+    if (/open.*google(?!maps| maps)/i.test(t))
       return openApp('google','Google', 'https://google.com', 'Open pannitten Boss! Opening Google.');
 
-    if (/open (google maps|maps|navigation)|google maps/i.test(t))
+    if (/open.*(google maps|maps|navigation)|google maps/i.test(t))
       return openApp('maps','Google Maps', 'https://maps.google.com', 'Open pannitten Boss! Opening Google Maps.');
 
-    if (/open (file explorer|explorer|files|file manager|my computer)|^(file explorer|explorer|files)$/i.test(t))
+    if (/open.*(file explorer|explorer|files|file manager|my computer)|(file explorer|explorer).*open|^(file explorer|explorer|files)$/i.test(t))
       return openApp('explorer','File Explorer', 'c:/', 'Open pannitten Boss! Opening Windows File Explorer.');
 
-    if (/open (bluetooth|blue tooth)|^(bluetooth|blue tooth)$/i.test(t))
+    if (/open.*(bluetooth|blue tooth)|(bluetooth|blue tooth).*open|^(bluetooth|blue tooth)$/i.test(t))
       return openApp('bluetooth','Bluetooth', '', 'Open pannitten Boss! Activating Bluetooth settings.');
 
-    if (/open (notepad|note pad)|^(notepad|note pad)$/i.test(t))
+    if (/open.*(notepad|note pad)|(notepad|note pad).*open|^(notepad|note pad)$/i.test(t))
       return openApp('notepad','Notepad', '', 'Open pannitten Boss! Opening Notepad.');
 
-    if (/open (calculator|calc)|^(calculator|calc)$/i.test(t))
+    if (/open.*(calculator|calc)|(calculator|calc).*open|^(calculator|calc)$/i.test(t))
       return openApp('calc','Calculator', '', 'Open pannitten Boss! Opening Calculator.');
 
-    if (/open task manager|^(task manager|taskmgr)$/.test(t))
+    if (/open.*(task manager|taskmgr)|(task manager|taskmgr).*open|^(task manager|taskmgr)$/i.test(t))
       return openApp('taskmgr','Task Manager', '', 'Open pannitten Boss! Opening Task Manager.');
 
-    if (/open (cmd|command prompt|terminal)|^(cmd|command prompt|terminal)$/.test(t))
+    if (/open.*(cmd|command prompt|terminal)|(cmd|command prompt|terminal).*open|^(cmd|command prompt|terminal)$/i.test(t))
       return openApp('cmd','Command Prompt', '', 'Open pannitten Boss! Opening Command Prompt.');
 
-    if (/open powershell|^(powershell)$/.test(t))
+    if (/open.*powershell|powershell.*open|^(powershell)$/i.test(t))
       return openApp('powershell','PowerShell', '', 'Open pannitten Boss! Opening PowerShell.');
 
-    if (/open (control panel|control)|^(control panel|control)$/.test(t))
+    if (/open.*(control panel|control)|(control panel|control).*open|^(control panel|control)$/i.test(t))
       return openApp('control','Control Panel', '', 'Open pannitten Boss! Opening Control Panel.');
 
     // ── 4b. Web Search & Video Launcher Triggers ──────────────────────
