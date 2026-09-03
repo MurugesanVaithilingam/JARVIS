@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI MASTER MATRIX — Complete AI, Data, Cloud & Web Ecosystem</title>
+  <meta name="description" content="Stark Industries AI Master Matrix — Interactive catalog of all 18 AI domains, frameworks, cloud services, tools, databases, and real-time execution pipelines.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ══════════════════════════════════════════════════════════════════
+       AI MASTER MATRIX — ULTRA-PREMIUM CYBERPUNK HARDWARE STYLING
+       ══════════════════════════════════════════════════════════════════ */
+    :root {
+      --m-c1: #00D4FF;
+      --m-c2: #FF2244;
+      --m-c3: #00FF88;
+      --m-c4: #FFD21E;
+      --m-c5: #A855F7;
+      --m-bg: #010612;
+      --m-card: rgba(2, 12, 28, 0.85);
+      --m-border: rgba(0, 212, 255, 0.22);
+    }
+
+    html, body {
+      width: 100%; min-height: 100vh; height: auto !important;
+      overflow-x: hidden !important; overflow-y: auto !important;
+      background: var(--m-bg);
+      font-family: 'Rajdhani', sans-serif;
+      color: #D4ECFF;
+      scroll-behavior: smooth;
+    }
+
+    .matrix-page {
+      padding: 14px 18px 40px;
+      max-width: 1920px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 16px;
+      position: relative; z-index: 5;
+    }
+
+    /* ── SCANNER SEARCH & FILTER BAR ── */
+    .matrix-search-bar {
+      background: rgba(2, 16, 36, 0.9);
+      border: 1px solid var(--m-c1);
+      border-radius: 8px;
+      padding: 12px 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.25), inset 0 0 15px rgba(0, 212, 255, 0.1);
+      backdrop-filter: blur(16px);
+      position: sticky; top: 62px; z-index: 400;
+    }
+
+    .search-input-wrap {
+      flex: 1; display: flex; align-items: center; gap: 10px;
+      background: rgba(0, 5, 15, 0.7);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 6px; padding: 8px 14px;
+    }
+    .search-input-wrap input {
+      flex: 1; background: none; border: none; outline: none;
+      font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #fff;
+    }
+    .search-input-wrap input::placeholder { color: #5A7B98; }
+
+    .filter-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .filter-pill {
+      padding: 6px 12px; border-radius: 4px;
+      font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700;
+      color: var(--m-c1); background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.25);
+      cursor: pointer; white-space: nowrap; transition: all 0.22s;
+    }
+    .filter-pill:hover, .filter-pill.active {
+      color: #000; background: var(--m-c1); font-weight: 900;
+      box-shadow: 0 0 15px var(--m-c1);
+    }
+
+    /* ── TITLE HERO BANNER ── */
+    .matrix-hero {
+      text-align: center; padding: 20px; position: relative;
+      background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+      border: 1px solid var(--m-border); border-radius: 10px;
+    }
+    .matrix-title {
+      font-family: 'Orbitron', sans-serif; font-size: clamp(24px, 4vw, 44px);
+      font-weight: 900; letter-spacing: 0.25em; color: #fff;
+      text-shadow: 0 0 30px #00D4FF, 0 0 60px rgba(0, 212, 255, 0.4);
+    }
+    .matrix-title span { color: var(--m-c1); }
+    .matrix-sub {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      color: #6B8CAE; letter-spacing: 0.2em; margin-top: 6px;
+    }
+
+    /* ── GRID OF 18 DOMAINS ── */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 1400px) { .matrix-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 900px)  { .matrix-grid { grid-template-columns: 1fr; } }
+
+    /* Card styling */
+    .m-card {
+      background: var(--m-card);
+      border: 1px solid var(--m-border);
+      border-radius: 8px; padding: 14px;
+      position: relative; backdrop-filter: blur(12px);
+      box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.04), 0 4px 20px rgba(0, 0, 0, 0.6);
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .m-card:hover {
+      border-color: rgba(0, 212, 255, 0.6);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.25), inset 0 0 20px rgba(0, 212, 255, 0.1);
+      transform: translateY(-3px);
+    }
+
+    .m-card::before, .m-card::after {
+      content: ''; position: absolute; width: 10px; height: 10px;
+      border-color: var(--m-c1); border-style: solid; pointer-events: none;
+    }
+    .m-card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .m-card::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    .m-card-hdr {
+      font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800;
+      color: var(--m-c1); letter-spacing: 0.15em; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 6px; border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+      text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+    }
+    .m-card-hdr .num {
+      background: rgba(0, 212, 255, 0.15); border: 1px solid var(--m-c1);
+      padding: 2px 8px; border-radius: 4px; font-size: 9px; color: #fff;
+    }
+
+    .sub-section { display: flex; flex-direction: column; gap: 4px; }
+    .sub-title {
+      font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700;
+      color: var(--m-c4); letter-spacing: 0.1em; margin-top: 4px;
+    }
+
+    .tag-cloud { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tech-tag {
+      padding: 4px 8px; border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace; font-size: 10px;
+      background: rgba(0, 212, 255, 0.06); border: 1px solid rgba(0, 212, 255, 0.2);
+      color: #C8E8FF; cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .tech-tag:hover {
+      background: rgba(0, 212, 255, 0.22); border-color: var(--m-c1);
+      color: #fff; box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* ── WORKFLOW PIPELINE BAR ── */
+    .pipeline-wrap {
+      background: rgba(2, 14, 30, 0.9);
+      border: 1px solid var(--m-c1); border-radius: 10px;
+      padding: 16px; margin-top: 10px;
+      box-shadow: 0 0 35px rgba(0, 212, 255, 0.2);
+    }
+    .pipeline-hdr {
+      font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800;
+      color: var(--m-c1); letter-spacing: 0.2em; text-align: center; margin-bottom: 12px;
+      text-shadow: 0 0 10px #00D4FF;
+    }
+    .pipeline-steps {
+      display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px;
+    }
+    @media(max-width:1100px) { .pipeline-steps { grid-template-columns: repeat(3, 1fr); } }
+
+    .p-step {
+      background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.25);
+      border-radius: 6px; padding: 10px 4px; text-align: center;
+      transition: all 0.25s; cursor: pointer;
+    }
+    .p-step:hover {
+      background: var(--m-c1); color: #000; font-weight: bold;
+      box-shadow: 0 0 20px #00D4FF; transform: translateY(-2px);
+    }
+    .p-step-num { font-family: 'Orbitron', sans-serif; font-size: 8px; opacity: 0.8; }
+    .p-step-title { font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; margin-top: 2px; }
+
+    /* ── LIVE INTERACTIVE EXECUTION DRAWER ── */
+    #toolDrawer {
+      display: none; position: fixed; bottom: 20px; right: 20px; z-index: 900;
+      width: 420px; background: #020C1C; border: 1px solid var(--m-c1);
+      border-radius: 10px; padding: 18px; box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+      backdrop-filter: blur(20px);
+    }
+  </style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+
+<!-- ══ TOP NAVIGATION BAR ════════════════════════════════════════ -->
+<nav class="eco-nav">
+  <div class="nav-logo"><span>S</span>TARK MATRIX</div>
+
+  <div class="nav-strip">
+    <a href="index.html">🤖 HUD</a>
+    <a href="stark_hud.html">🌐 STARK HUD</a>
+    <a href="ai_ecosystem.html">🧬 AI ECOSYSTEM</a>
+    <a href="ai_master_matrix.html" class="active">⚡ MASTER MATRIX</a>
+    <a href="3d_lab.html">🌌 3D LAB</a>
+    <a href="tracker.html">🛰️ TRACKER</a>
+    <a href="code_studio.html">🧠 CODE</a>
+    <a href="cyber_soc.html">🛡️ CYBER</a>
+    <a href="cmd_hacker.html">💻 TERMINAL</a>
+  </div>
+
+  <div class="nav-right">
+    <div class="live-clock" id="matrixClock">00:00:00</div>
+    <div class="sys-badge"><div class="sys-dot"></div>ONLINE</div>
+  </div>
+</nav>
+
+<!-- ══ SEARCH & FILTER BAR ═══════════════════════════════════════ -->
+<div class="matrix-page">
+
+  <div class="matrix-search-bar">
+    <div class="search-input-wrap">
+      <span style="font-size:16px;">🔍</span>
+      <input type="text" id="matrixSearchInp" placeholder="Search 100+ AI models, tools, frameworks, databases, or cloud services..." oninput="filterMatrix(this.value)">
+    </div>
+    <div class="filter-pills">
+      <button class="filter-pill active" onclick="filterCategory('all', this)">ALL (18)</button>
+      <button class="filter-pill" onclick="filterCategory('ai', this)">🤖 AI & MODELS</button>
+      <button class="filter-pill" onclick="filterCategory('data', this)">📊 DATA & PIPELINES</button>
+      <button class="filter-pill" onclick="filterCategory('cloud', this)">☁️ CLOUD & DEVOPS</button>
+      <button class="filter-pill" onclick="filterCategory('dev', this)">💻 DEV & WEB</button>
+    </div>
+  </div>
+
+  <!-- HERO TITLE BANNER -->
+  <div class="matrix-hero">
+    <div class="matrix-title"><span>AI MASTER</span> MATRIX</div>
+    <div class="matrix-sub">ALL AI TOOLS, MODELS, TECH & EVERYTHING YOU NEED — STARK INDUSTRIES COMPLETE ECOSYSTEM</div>
+  </div>
+
+  <!-- ══ 18 COMPLETE DOMAIN SECTIONS GRID ═════════════════════════ -->
+  <div class="matrix-grid" id="matrixGrid">
+
+    <!-- 1. DATA MANAGEMENT & STORAGE -->
+    <div class="m-card" data-cat="data">
+      <div class="m-card-hdr"><span>1. DATA MANAGEMENT & STORAGE</span><span class="num">DATA</span></div>
+      <div class="sub-section">
+        <div class="sub-title">DATA COLLECTION</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Web Scraping')">🌐 Web Scraping</span>
+          <span class="tech-tag" onclick="inspectTech('APIs')">🔌 APIs</span>
+          <span class="tech-tag" onclick="inspectTech('IoT Devices')">📡 IoT Devices</span>
+          <span class="tech-tag" onclick="inspectTech('Databases')">🗄️ Databases</span>
+          <span class="tech-tag" onclick="inspectTech('Logs')">📋 Logs</span>
+          <span class="tech-tag" onclick="inspectTech('Sensors')">📟 Sensors</span>
+          <span class="tech-tag" onclick="inspectTech('Social Media')">💬 Social Media</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">DATA STORAGE & WAREHOUSES</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('MySQL')">🐬 MySQL</span>
+          <span class="tech-tag" onclick="inspectTech('PostgreSQL')">🐘 PostgreSQL</span>
+          <span class="tech-tag" onclick="inspectTech('MongoDB')">🍃 MongoDB</span>
+          <span class="tech-tag" onclick="inspectTech('Snowflake')">❄️ Snowflake</span>
+          <span class="tech-tag" onclick="inspectTech('BigQuery')">📊 BigQuery</span>
+          <span class="tech-tag" onclick="inspectTech('Redshift')">🔴 Redshift</span>
+          <span class="tech-tag" onclick="inspectTech('Redis')">⚡ Redis</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">ETL & DATA PROCESSING</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Kafka')">🟢 Kafka</span>
+          <span class="tech-tag" onclick="inspectTech('Spark')">⚡ Spark</span>
+          <span class="tech-tag" onclick="inspectTech('Airflow')">🌀 Airflow</span>
+          <span class="tech-tag" onclick="inspectTech('Talend')">📦 Talend</span>
+          <span class="tech-tag" onclick="inspectTech('NiFi')">🌊 NiFi</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. AI MODELS & ALGORITHMS -->
+    <div class="m-card" data-cat="ai">
+      <div class="m-card-hdr"><span>2. AI MODELS & ALGORITHMS</span><span class="num">AI CORE</span></div>
+      <div class="sub-section">
+        <div class="sub-title">MACHINE LEARNING MODELS</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Regression')">📈 Regression</span>
+          <span class="tech-tag" onclick="inspectTech('Random Forest')">🌲 Random Forest</span>
+          <span class="tech-tag" onclick="inspectTech('XGBoost')">⚡ XGBoost</span>
+          <span class="tech-tag" onclick="inspectTech('SVM')">🎯 SVM</span>
+          <span class="tech-tag" onclick="inspectTech('k-NN')">📍 k-NN</span>
+          <span class="tech-tag" onclick="inspectTech('Clustering')">📊 Clustering</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">DEEP LEARNING ARCHITECTURES</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('CNN')">👁️ CNN</span>
+          <span class="tech-tag" onclick="inspectTech('RNN')">🔄 RNN</span>
+          <span class="tech-tag" onclick="inspectTech('LSTM')">🧠 LSTM</span>
+          <span class="tech-tag" onclick="inspectTech('GRU')">⚡ GRU</span>
+          <span class="tech-tag" onclick="inspectTech('Transformer')">🤖 Transformer</span>
+          <span class="tech-tag" onclick="inspectTech('GAN')">🎨 GAN</span>
+          <span class="tech-tag" onclick="inspectTech('Autoencoder')">📦 Autoencoder</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">ADVANCED AI & REINFORCEMENT</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Diffusion Models')">✨ Diffusion Models</span>
+          <span class="tech-tag" onclick="inspectTech('Vision Transformers')">👁️ ViT</span>
+          <span class="tech-tag" onclick="inspectTech('Reinforcement Learning')">🎮 RL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. NLP & TEXT AI -->
+    <div class="m-card" data-cat="ai">
+      <div class="m-card-hdr"><span>3. NLP & TEXT AI</span><span class="num">NLP</span></div>
+      <div class="sub-section">
+        <div class="sub-title">NLP PREPROCESSING</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Tokenization')">✂️ Tokenization</span>
+          <span class="tech-tag" onclick="inspectTech('Stopword Removal')">🧹 Stopwords</span>
+          <span class="tech-tag" onclick="inspectTech('Lemmatization')">🌱 Lemmatization</span>
+          <span class="tech-tag" onclick="inspectTech('POS Tagging')">🏷️ POS Tagging</span>
+          <span class="tech-tag" onclick="inspectTech('NER')">🎯 NER</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">SENTIMENT & RAG</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('VADER')">📊 VADER Sentiment</span>
+          <span class="tech-tag" onclick="inspectTech('RAG')">📚 RAG System</span>
+          <span class="tech-tag" onclick="inspectTech('Vector Search')">🔍 Vector Search</span>
+          <span class="tech-tag" onclick="inspectTech('Context Augmentation')">🧠 Context Aug</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">LLMs (LARGE LANGUAGE MODELS)</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('GPT-4o')">🤖 GPT-4o</span>
+          <span class="tech-tag" onclick="inspectTech('Claude 3.5')">🎭 Claude 3.5</span>
+          <span class="tech-tag" onclick="inspectTech('Gemini 1.5')">✨ Gemini 1.5</span>
+          <span class="tech-tag" onclick="inspectTech('Llama 3')">🦙 Llama 3</span>
+          <span class="tech-tag" onclick="inspectTech('DeepSeek')">🔍 DeepSeek</span>
+          <span class="tech-tag" onclick="inspectTech('Mistral')">🌪️ Mistral</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. AI ASSISTANTS & AGENTS -->
+    <div class="m-card" data-cat="ai">
+      <div class="m-card-hdr"><span>4. AI ASSISTANTS & AGENTS</span><span class="num">AGENTS</span></div>
+      <div class="sub-section">
+        <div class="sub-title">STARK ASSISTANTS</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('JARVIS')">⚙️ J.A.R.V.I.S.</span>
+          <span class="tech-tag" onclick="inspectTech('Alexa')">🔵 Alexa AI</span>
+          <span class="tech-tag" onclick="inspectTech('EDITH')">👓 E.D.I.T.H.</span>
+          <span class="tech-tag" onclick="inspectTech('FRIDAY')">👩‍🔬 F.R.I.D.A.Y.</span>
+          <span class="tech-tag" onclick="inspectTech('Claire')">👩‍💼 Claire AI</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">AUTONOMOUS AGENT FRAMEWORKS</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('LangChain')">🦜 LangChain</span>
+          <span class="tech-tag" onclick="inspectTech('AutoGen')">🤖 AutoGen</span>
+          <span class="tech-tag" onclick="inspectTech('CrewAI')">👥 CrewAI</span>
+          <span class="tech-tag" onclick="inspectTech('AutoGPT')">⚡ AutoGPT</span>
+          <span class="tech-tag" onclick="inspectTech('LlamaIndex')">🗂️ LlamaIndex</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. ML / DL FRAMEWORKS & TOOLS -->
+    <div class="m-card" data-cat="ai">
+      <div class="m-card-hdr"><span>5. ML / DL FRAMEWORKS</span><span class="num">FRAMEWORKS</span></div>
+      <div class="sub-section">
+        <div class="sub-title">MACHINE LEARNING</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Scikit-learn')">🐍 Scikit-learn</span>
+          <span class="tech-tag" onclick="inspectTech('XGBoost')">⚡ XGBoost</span>
+          <span class="tech-tag" onclick="inspectTech('LightGBM')">💡 LightGBM</span>
+          <span class="tech-tag" onclick="inspectTech('CatBoost')">🐱 CatBoost</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">DEEP LEARNING</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('TensorFlow')">🟠 TensorFlow</span>
+          <span class="tech-tag" onclick="inspectTech('PyTorch')">🔥 PyTorch</span>
+          <span class="tech-tag" onclick="inspectTech('Keras')">🔴 Keras</span>
+          <span class="tech-tag" onclick="inspectTech('JAX')">⚡ JAX</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">COMPUTER VISION & TRANSFORMERS</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('OpenCV')">👁️ OpenCV</span>
+          <span class="tech-tag" onclick="inspectTech('YOLO')">🎯 YOLO</span>
+          <span class="tech-tag" onclick="inspectTech('Hugging Face')">🤗 Hugging Face</span>
+          <span class="tech-tag" onclick="inspectTech('MediaPipe')">🖐️ MediaPipe</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. PROGRAMMING & DEVELOPMENT -->
+    <div class="m-card" data-cat="dev">
+      <div class="m-card-hdr"><span>6. PROGRAMMING & LANGUAGES</span><span class="num">CODE</span></div>
+      <div class="sub-section">
+        <div class="sub-title">LANGUAGES</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Python')">🐍 Python</span>
+          <span class="tech-tag" onclick="inspectTech('JavaScript')">🟨 JavaScript</span>
+          <span class="tech-tag" onclick="inspectTech('TypeScript')">🟦 TypeScript</span>
+          <span class="tech-tag" onclick="inspectTech('C++')">⚙️ C++</span>
+          <span class="tech-tag" onclick="inspectTech('Rust')">🦀 Rust</span>
+          <span class="tech-tag" onclick="inspectTech('Go')">🐹 Go</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">WEB FRAMEWORKS</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('React')">⚛️ React</span>
+          <span class="tech-tag" onclick="inspectTech('Next.js')">▲ Next.js</span>
+          <span class="tech-tag" onclick="inspectTech('Node.js')">🟢 Node.js</span>
+          <span class="tech-tag" onclick="inspectTech('FastAPI')">⚡ FastAPI</span>
+          <span class="tech-tag" onclick="inspectTech('Django')">🎸 Django</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. CLOUD SERVICES (AWS, AZURE, GCP) -->
+    <div class="m-card" data-cat="cloud">
+      <div class="m-card-hdr"><span>7. CLOUD SERVICES</span><span class="num">CLOUD</span></div>
+      <div class="sub-section">
+        <div class="sub-title">AWS / AZURE / GCP SERVICES</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('AWS EC2')">☁️ AWS EC2</span>
+          <span class="tech-tag" onclick="inspectTech('AWS Lambda')">⚡ Lambda</span>
+          <span class="tech-tag" onclick="inspectTech('AWS SageMaker')">🧠 SageMaker</span>
+          <span class="tech-tag" onclick="inspectTech('Azure ML')">🟦 Azure ML</span>
+          <span class="tech-tag" onclick="inspectTech('Google Vertex AI')">🔴 Vertex AI</span>
+          <span class="tech-tag" onclick="inspectTech('Cloud Storage')">📦 Cloud Storage</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. DATA ENGINEERING & PIPELINES -->
+    <div class="m-card" data-cat="data">
+      <div class="m-card-hdr"><span>8. DATA ENGINEERING</span><span class="num">PIPELINES</span></div>
+      <div class="sub-section">
+        <div class="sub-title">STREAM & BATCH PIPELINES</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Apache Spark')">⚡ Apache Spark</span>
+          <span class="tech-tag" onclick="inspectTech('Apache Flink')">🌊 Flink</span>
+          <span class="tech-tag" onclick="inspectTech('dbt')">🛠️ dbt</span>
+          <span class="tech-tag" onclick="inspectTech('Airbyte')">🐙 Airbyte</span>
+          <span class="tech-tag" onclick="inspectTech('Polars')">🐻 Polars</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. OPERATING SYSTEMS & TOOLS -->
+    <div class="m-card" data-cat="cloud">
+      <div class="m-card-hdr"><span>9. OS & CONTAINER TOOLS</span><span class="num">INFRA</span></div>
+      <div class="sub-section">
+        <div class="sub-title">OPERATING SYSTEMS & SHELL</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Linux (Ubuntu)')">🐧 Linux</span>
+          <span class="tech-tag" onclick="inspectTech('Docker')">🐳 Docker</span>
+          <span class="tech-tag" onclick="inspectTech('Kubernetes')">☸️ Kubernetes</span>
+          <span class="tech-tag" onclick="inspectTech('Ansible')">🔴 Ansible</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. DEVOPS & CI/CD -->
+    <div class="m-card" data-cat="cloud">
+      <div class="m-card-hdr"><span>10. DEVOPS & CI/CD</span><span class="num">DEVOPS</span></div>
+      <div class="sub-section">
+        <div class="sub-title">CI/CD & INFRASTRUCTURE AS CODE</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Git')">🐙 Git</span>
+          <span class="tech-tag" onclick="inspectTech('GitHub Actions')">⚡ GitHub Actions</span>
+          <span class="tech-tag" onclick="inspectTech('Terraform')">🟣 Terraform</span>
+          <span class="tech-tag" onclick="inspectTech('Jenkins')">🎩 Jenkins</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. MONITORING & LOGGING -->
+    <div class="m-card" data-cat="cloud">
+      <div class="m-card-hdr"><span>11. MONITORING & LOGGING</span><span class="num">OBSERVE</span></div>
+      <div class="sub-section">
+        <div class="sub-title">LOGGING & METRICS</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Prometheus')">🔥 Prometheus</span>
+          <span class="tech-tag" onclick="inspectTech('Grafana')">📊 Grafana</span>
+          <span class="tech-tag" onclick="inspectTech('ELK Stack')">🔍 ELK Stack</span>
+          <span class="tech-tag" onclick="inspectTech('Datadog')">🐶 Datadog</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. AI USE CASES -->
+    <div class="m-card" data-cat="ai">
+      <div class="m-card-hdr"><span>12. AI USE CASES</span><span class="num">SOLUTIONS</span></div>
+      <div class="sub-section">
+        <div class="sub-title">REAL-WORLD APPLICATIONS</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Healthcare AI')">🏥 Healthcare AI</span>
+          <span class="tech-tag" onclick="inspectTech('Finance AI')">💰 Finance AI</span>
+          <span class="tech-tag" onclick="inspectTech('Autonomous Vehicles')">🚗 Self-Driving</span>
+          <span class="tech-tag" onclick="inspectTech('Cybersecurity AI')">🛡️ Cyber AI</span>
+          <span class="tech-tag" onclick="inspectTech('Robotics')">🤖 Robotics</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13. IMPORTANT CONCEPTS -->
+    <div class="m-card" data-cat="dev">
+      <div class="m-card-hdr"><span>13. COMPUTER SCIENCE CONCEPTS</span><span class="num">CS CORE</span></div>
+      <div class="sub-section">
+        <div class="sub-title">FUNDAMENTALS</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Data Structures')">🏗️ Data Structures</span>
+          <span class="tech-tag" onclick="inspectTech('System Design')">📐 System Design</span>
+          <span class="tech-tag" onclick="inspectTech('Design Patterns')">🧩 Design Patterns</span>
+          <span class="tech-tag" onclick="inspectTech('API Design')">🔌 API Design</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14. DATABASES -->
+    <div class="m-card" data-cat="data">
+      <div class="m-card-hdr"><span>14. DATABASES ENGINE</span><span class="num">STORAGE</span></div>
+      <div class="sub-section">
+        <div class="sub-title">RELATIONAL, NOSQL & VECTOR DB</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('PostgreSQL')">🐘 PostgreSQL</span>
+          <span class="tech-tag" onclick="inspectTech('MongoDB')">🍃 MongoDB</span>
+          <span class="tech-tag" onclick="inspectTech('Pinecone')">🌲 Pinecone</span>
+          <span class="tech-tag" onclick="inspectTech('Neo4j')">🕸️ Neo4j</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 15. AI METHODOLOGIES -->
+    <div class="m-card" data-cat="ai">
+      <div class="m-card-hdr"><span>15. AI METHODOLOGIES & MLOPS</span><span class="num">MLOPS</span></div>
+      <div class="sub-section">
+        <div class="sub-title">PIPELINES & GOVERNANCE</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('MLOps')">🔄 MLOps</span>
+          <span class="tech-tag" onclick="inspectTech('Model Monitoring')">📡 Model Monitoring</span>
+          <span class="tech-tag" onclick="inspectTech('Explainable AI')">🧠 XAI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 16. DEVELOPMENT METHODOLOGIES -->
+    <div class="m-card" data-cat="dev">
+      <div class="m-card-hdr"><span>16. DEV METHODOLOGIES</span><span class="num">AGILE</span></div>
+      <div class="sub-section">
+        <div class="sub-title">PRACTICES</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Agile')">🔄 Agile</span>
+          <span class="tech-tag" onclick="inspectTech('Scrum')">🏃 Scrum</span>
+          <span class="tech-tag" onclick="inspectTech('TDD')">🧪 TDD</span>
+          <span class="tech-tag" onclick="inspectTech('Microservices')">🧩 Microservices</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 17. POPULAR PLATFORMS & SERVICES -->
+    <div class="m-card" data-cat="cloud">
+      <div class="m-card-hdr"><span>17. PLATFORMS & CLOUD SERVICES</span><span class="num">SERVICES</span></div>
+      <div class="sub-section">
+        <div class="sub-title">AI & DEPLOYMENT HOSTING</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('Hugging Face Hub')">🤗 Hugging Face</span>
+          <span class="tech-tag" onclick="inspectTech('OpenAI API')">🤖 OpenAI</span>
+          <span class="tech-tag" onclick="inspectTech('Google Colab')">🔬 Colab</span>
+          <span class="tech-tag" onclick="inspectTech('Vercel')">▲ Vercel</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18. LEARNING RESOURCES -->
+    <div class="m-card" data-cat="dev">
+      <div class="m-card-hdr"><span>18. LEARNING RESOURCES</span><span class="num">LEARN</span></div>
+      <div class="sub-section">
+        <div class="sub-title">DOCS & COMMUNITIES</div>
+        <div class="tag-cloud">
+          <span class="tech-tag" onclick="inspectTech('MDN Web Docs')">📚 MDN Docs</span>
+          <span class="tech-tag" onclick="inspectTech('Stack Overflow')">💬 Stack Overflow</span>
+          <span class="tech-tag" onclick="inspectTech('GitHub')">🐙 GitHub</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /matrix-grid -->
+
+  <!-- ══ WORKFLOW PIPELINE BAR ═══════════════════════════════════ -->
+  <div class="pipeline-wrap">
+    <div class="pipeline-hdr">⚡ COMPLETE AI & DATA LIFECYCLE PIPELINE</div>
+    <div class="pipeline-steps">
+      <div class="p-step" onclick="runPipelineStep('PLAN')"><div class="p-step-num">01</div><div class="p-step-title">📋 PLAN</div></div>
+      <div class="p-step" onclick="runPipelineStep('COLLECT')"><div class="p-step-num">02</div><div class="p-step-title">📥 COLLECT</div></div>
+      <div class="p-step" onclick="runPipelineStep('STORE')"><div class="p-step-num">03</div><div class="p-step-title">🗄️ STORE</div></div>
+      <div class="p-step" onclick="runPipelineStep('PROCESS')"><div class="p-step-num">04</div><div class="p-step-title">⚙️ PROCESS</div></div>
+      <div class="p-step" onclick="runPipelineStep('ANALYZE')"><div class="p-step-num">05</div><div class="p-step-title">📊 ANALYZE</div></div>
+      <div class="p-step" onclick="runPipelineStep('TRAIN')"><div class="p-step-num">06</div><div class="p-step-title">🧠 TRAIN</div></div>
+      <div class="p-step" onclick="runPipelineStep('DEPLOY')"><div class="p-step-num">07</div><div class="p-step-title">🚀 DEPLOY</div></div>
+      <div class="p-step" onclick="runPipelineStep('MONITOR')"><div class="p-step-num">08</div><div class="p-step-title">📡 MONITOR</div></div>
+      <div class="p-step" onclick="runPipelineStep('IMPROVE')"><div class="p-step-num">09</div><div class="p-step-title">⚡ IMPROVE</div></div>
+    </div>
+  </div>
+
+</div><!-- /matrix-page -->
+
+<!-- ══ TOOL DRAWER DIALOG ═════════════════════════════════════════ -->
+<div id="toolDrawer">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+    <div id="drawerTitle" style="font-family:'Orbitron',sans-serif; font-size:13px; font-weight:bold; color:#00D4FF;">TOOL INSPECTOR</div>
+    <button onclick="document.getElementById('toolDrawer').style.display='none'" style="background:none; border:1px solid rgba(0,212,255,0.3); color:#00D4FF; padding:2px 8px; border-radius:4px; cursor:pointer;">✕</button>
+  </div>
+  <div id="drawerBody" style="font-size:12px; color:#C8E8FF; line-height:1.5; margin-bottom:12px;"></div>
+  <button id="drawerActionBtn" style="width:100%; background:linear-gradient(90deg,#0088AA,#00D4FF); border:none; color:#000; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:bold; padding:8px; border-radius:4px; cursor:pointer;">▶ RUN WITH J.A.R.V.I.S.</button>
+</div>
+
+<script>
+function updateClock() {
+  document.getElementById('matrixClock').textContent = new Date().toLocaleTimeString('en-US',{hour12:false});
+}
+setInterval(updateClock, 1000); updateClock();
+
+function filterMatrix(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.m-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(q) ? 'flex' : 'none';
+  });
+}
+
+function filterCategory(cat, btn) {
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.m-card').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) card.style.display = 'flex';
+    else card.style.display = 'none';
+  });
+}
+
+function inspectTech(name) {
+  document.getElementById('drawerTitle').textContent = `⚡ TECH: ${name.toUpperCase()}`;
+  document.getElementById('drawerBody').innerHTML = `
+    <strong>${name}</strong> is integrated into Stark Industries Neural Core.<br>
+    Status: <span style="color:#00FF88;">AVAILABLE & READY</span><br><br>
+    Click below to execute an automated analysis or test script with J.A.R.V.I.S.
+  `;
+  document.getElementById('drawerActionBtn').onclick = function() {
+    window.location.href = `index.html?prompt=${encodeURIComponent('Explain and run code for ' + name)}`;
+  };
+  document.getElementById('toolDrawer').style.display = 'block';
+}
+
+function runPipelineStep(step) {
+  alert(`⚡ EXECUTING PIPELINE STAGE: [${step}]\n\nJ.A.R.V.I.S. has triggered automated ${step} protocol across the neural cluster.`);
+}
+</script>
+</body>
+</html>
