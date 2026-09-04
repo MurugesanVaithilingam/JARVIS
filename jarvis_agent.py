@@ -88,44 +88,59 @@ class JarvisAutonomousAgent:
             return f"All local Stark systems active, Sir. Communication telemetry: {e}"
 
     def execute_local_system_command(self, command):
-        """Executes PC automation, apps launch, and system control."""
+        """Executes PC automation, apps launch, and system control cross-platform."""
         cmd = command.lower()
+        plat = sys.platform
 
-        # 1. Open File Explorer / My Computer / C Drive
-        if any(w in cmd for w in ["file explorer", "explorer", "my computer", "open files", "c drive"]):
-            self.speak("Opening Windows File Explorer on your system, Sir.")
-            if sys.platform == "win32":
+        # 1. Open File Explorer / My Computer / Finder
+        if any(w in cmd for w in ["file explorer", "explorer", "my computer", "open files", "c drive", "finder"]):
+            self.speak("Opening File Explorer, Sir.")
+            if plat == "win32":
                 subprocess.Popen("explorer.exe")
+            elif plat == "darwin":
+                subprocess.Popen(["open", "-a", "Finder"])
+            else:
+                subprocess.Popen(["xdg-open", os.path.expanduser("~")])
             return True
 
         # 2. Bluetooth Settings
         if "bluetooth" in cmd or "blue tooth" in cmd:
             self.speak("Opening Bluetooth Device Panel, Sir.")
-            if sys.platform == "win32":
+            if plat == "win32":
                 subprocess.Popen("start ms-settings:bluetooth", shell=True)
+            elif plat == "darwin":
+                subprocess.Popen(["open", "x-apple.systempreferences:com.apple.preferences.Bluetooth"])
             return True
 
-        # 3. Task Manager
-        if "task manager" in cmd or "taskmgr" in cmd:
-            self.speak("Opening Task Manager.")
-            if sys.platform == "win32":
+        # 3. Task Manager / Activity Monitor
+        if "task manager" in cmd or "taskmgr" in cmd or "activity monitor" in cmd:
+            self.speak("Opening Task Manager, Sir.")
+            if plat == "win32":
                 subprocess.Popen("taskmgr.exe")
+            elif plat == "darwin":
+                subprocess.Popen(["open", "-a", "Activity Monitor"])
+            else:
+                subprocess.Popen(["gnome-system-monitor"])
             return True
 
-        # 4. Control Panel
-        if "control panel" in cmd:
-            self.speak("Opening Control Panel.")
-            if sys.platform == "win32":
+        # 4. Control Panel / Settings
+        if "control panel" in cmd or "settings" in cmd:
+            self.speak("Opening System Settings, Sir.")
+            if plat == "win32":
                 subprocess.Popen("control.exe")
+            elif plat == "darwin":
+                subprocess.Popen(["open", "-a", "System Settings"])
             return True
 
         # 5. Lock Workstation
         if any(w in cmd for w in ["lock pc", "lock computer", "lock screen", "stand down"]):
             self.speak("Locking workstation and standing down, Sir.")
-            if sys.platform == "win32":
+            if plat == "win32":
                 os.system("rundll32.exe user32.dll,LockWorkStation")
+            elif plat == "darwin":
+                os.system("pmset displaysleepnow")
             return True
-            
+
         # 6. Open Web Dashboard
         if any(w in cmd for w in ["open dashboard", "open jarvis", "open app"]):
             self.speak("Opening Stark AI Command Center dashboard.")
@@ -133,16 +148,61 @@ class JarvisAutonomousAgent:
             webbrowser.open("http://localhost/jarvis")
             return True
 
-        # 7. Open Calculator / Notepad
+        # 7. Open Calculator / Notepad / VS Code
         if "calculator" in cmd or "calc" in cmd:
-            self.speak("Opening calculator.")
-            subprocess.Popen("calc.exe" if sys.platform == "win32" else "bc")
+            self.speak("Opening calculator, Sir.")
+            if plat == "win32":
+                subprocess.Popen("calc.exe")
+            elif plat == "darwin":
+                subprocess.Popen(["open", "-a", "Calculator"])
+            else:
+                subprocess.Popen(["gnome-calculator"])
             return True
 
-        if "notepad" in cmd:
-            self.speak("Opening notepad.")
-            subprocess.Popen("notepad.exe" if sys.platform == "win32" else "nano")
+        if "notepad" in cmd or "textedit" in cmd:
+            self.speak("Opening text editor, Sir.")
+            if plat == "win32":
+                subprocess.Popen("notepad.exe")
+            elif plat == "darwin":
+                subprocess.Popen(["open", "-a", "TextEdit"])
+            else:
+                subprocess.Popen(["gedit"])
             return True
+
+        if "code" in cmd or "vscode" in cmd:
+            self.speak("Opening Visual Studio Code, Sir.")
+            if plat == "win32":
+                subprocess.Popen("code", shell=True)
+            elif plat == "darwin":
+                subprocess.Popen(["open", "-a", "Visual Studio Code"])
+            else:
+                subprocess.Popen(["code"])
+            return True
+
+        # 8. Web & Mobile App Launchers (ChatGPT, WhatsApp, YouTube, etc.)
+        url_apps = {
+            "chatgpt": ("ChatGPT", "https://chatgpt.com"),
+            "whatsapp": ("WhatsApp", "https://web.whatsapp.com"),
+            "instagram": ("Instagram", "https://instagram.com"),
+            "facebook": ("Facebook", "https://facebook.com"),
+            "youtube": ("YouTube", "https://youtube.com"),
+            "gmail": ("Gmail", "https://mail.google.com"),
+            "maps": ("Google Maps", "https://maps.google.com"),
+            "spotify": ("Spotify", "https://open.spotify.com"),
+            "telegram": ("Telegram", "https://web.telegram.org"),
+            "twitter": ("Twitter", "https://x.com"),
+            "linkedin": ("LinkedIn", "https://linkedin.com"),
+            "github": ("GitHub", "https://github.com"),
+            "zoom": ("Zoom", "https://zoom.us"),
+            "discord": ("Discord", "https://discord.com")
+        }
+
+        for app_key, (app_name, url) in url_apps.items():
+            if app_key in cmd:
+                self.speak(f"Opening {app_name}, Sir.")
+                import webbrowser
+                webbrowser.open(url)
+                return True
 
         return False
 

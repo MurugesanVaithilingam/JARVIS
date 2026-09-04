@@ -536,6 +536,39 @@
     if (/open.*(control panel|control)|(control panel|control).*open|^(control panel|control)$/i.test(t))
       return openApp('control','Control Panel', '', 'Open pannitten Boss! Opening Control Panel.');
 
+    if (/open.*(vscode|vs code|code|visual studio code)/i.test(t))
+      return openApp('vscode','VS Code', '', 'Open pannitten Boss! Opening Visual Studio Code.');
+
+    if (/open.*(spotify|music)/i.test(t))
+      return openApp('spotify','Spotify', 'https://open.spotify.com', 'Open pannitten Boss! Opening Spotify.');
+
+    if (/open.*(telegram|tg)/i.test(t))
+      return openApp('telegram','Telegram', 'https://web.telegram.org', 'Open pannitten Boss! Opening Telegram.');
+
+    if (/open.*(twitter|x\.com)/i.test(t))
+      return openApp('twitter','Twitter X', 'https://x.com', 'Open pannitten Boss! Opening Twitter.');
+
+    if (/open.*linkedin/i.test(t))
+      return openApp('linkedin','LinkedIn', 'https://linkedin.com', 'Open pannitten Boss! Opening LinkedIn.');
+
+    if (/open.*github/i.test(t))
+      return openApp('github','GitHub', 'https://github.com', 'Open pannitten Boss! Opening GitHub.');
+
+    if (/open.*netflix/i.test(t))
+      return openApp('netflix','Netflix', 'https://netflix.com', 'Open pannitten Boss! Opening Netflix.');
+
+    if (/open.*zoom/i.test(t))
+      return openApp('zoom','Zoom', 'https://zoom.us', 'Open pannitten Boss! Opening Zoom.');
+
+    if (/open.*discord/i.test(t))
+      return openApp('discord','Discord', 'https://discord.com', 'Open pannitten Boss! Opening Discord.');
+
+    if (/open.*(word|ms word)/i.test(t))
+      return openApp('word','Microsoft Word', '', 'Open pannitten Boss! Opening Microsoft Word.');
+
+    if (/open.*(excel|ms excel)/i.test(t))
+      return openApp('excel','Microsoft Excel', '', 'Open pannitten Boss! Opening Microsoft Excel.');
+
     // ── 4b. Web Search & Video Launcher Triggers ──────────────────────
     if (/^(search|google|find)\s+(.+)/i.test(t)) {
       const q = t.replace(/^(search|google|find)\s+/i, '').trim();
