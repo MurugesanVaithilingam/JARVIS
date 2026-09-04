@@ -1,0 +1,17 @@
+# ================================================================
+# J.A.R.V.I.S. V1 — PYTHON BACKEND DEPENDENCIES
+# ================================================================
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+websockets>=12.0
+pyaudio>=0.2.14
+webrtcvad>=2.0.10
+SpeechRecognition>=3.10.0
+pyttsx3>=2.90
+google-genai>=0.1.1
+openai>=1.14.0
+playwright>=1.42.0
+pywin32>=306; sys_platform == 'win32'
+psutil>=5.9.8
+pydantic>=2.6.4
+requests>=2.31.0
