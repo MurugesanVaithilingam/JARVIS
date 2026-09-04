@@ -134,9 +134,9 @@ input,select,textarea{font-family:var(--fbody);}
 .main-hud{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;}
 
 /* ── HEADER ── */
-/* ── HEADER ── */
-.hud-header, .eco-nav, .rag-nav-header, .drone-nav, .lab-nav {
+.hud-header, .stark-header, .eco-nav, .rag-nav-header, .drone-nav, .lab-nav {
   height: 38px !important;
+  min-height: 38px !important;
   background: linear-gradient(180deg, rgba(0, 212, 255, .07) 0%, transparent 100%) !important;
   border-bottom: 1px solid var(--brd) !important;
   display: flex !important;
@@ -144,7 +144,7 @@ input,select,textarea{font-family:var(--fbody);}
   justify-content: space-between !important;
   padding: 0 10px !important;
   position: relative !important;
-  z-index: 20 !important;
+  z-index: 500 !important;
   flex-shrink: 0 !important;
 }
 .hud-header::after {
@@ -965,21 +965,22 @@ img, video, canvas, iframe, svg {
 /* ── Tablets & iPads (600px - 1023px) ── */
 @media (max-width: 1023px) {
   /* Header navigation scrolling */
-  header.lab-nav, header#mainNav, .eco-nav, .rag-nav-header, .hud-header {
-    padding: 8px 12px !important;
+  header.lab-nav, header#mainNav, .eco-nav, .rag-nav-header, .hud-header, .stark-header, .drone-nav {
+    padding: 4px 10px !important;
     flex-wrap: wrap !important;
     height: auto !important;
-    gap: 8px !important;
+    min-height: 38px !important;
+    gap: 6px !important;
   }
-  .main-nav-links, .nav-links-scroll, .nav-links {
-    gap: 4px !important;
+  .main-nav-links, .nav-links-scroll, .drone-nav-scroll, .nav-links, .nav-strip {
+    gap: 3px !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
     width: 100% !important;
     max-width: 100% !important;
     scrollbar-width: none !important;
     -webkit-overflow-scrolling: touch !important;
-    padding: 4px 2px !important;
+    padding: 2px !important;
   }
   .main-nav-links::-webkit-scrollbar, .nav-links-scroll::-webkit-scrollbar { display: none !important; }
   
@@ -1029,8 +1030,10 @@ img, video, canvas, iframe, svg {
 @media (max-width: 600px) {
   html, body { font-size: 13px !important; }
 
-  /* Nav — emoji only mode */
-  .nav-tab { padding: 7px !important; font-size: 17px !important; min-width: 36px !important; text-align: center !important; }
+  /* Nav — compact low profile on small phones */
+  .nav-tab, .nav-links-scroll a, .drone-nav-scroll a, .nav-links a, .nav-strip a {
+    padding: 2px 5px !important; font-size: 8.5px !important; height: 22px !important; min-width: unset !important;
+  }
   .hbtn { width: 30px !important; height: 30px !important; font-size: 14px !important; }
 
   /* Provider tabs */
