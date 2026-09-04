@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ECOSYSTEM — LLM, NLP, RAG & Beyond | Stark Intelligence Network</title>
+  <meta name="description" content="Complete Guide to Language AI, Large Language Models, NLP Pipelines, Embeddings, Vector Stores, RAG Architecture, Sentiment Analysis, Fine-Tuning & Prompt Engineering.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ══════════════════════════════════════════════════════════════════
+       AI ECOSYSTEM — LLM, NLP, RAG & BEYOND (IMAGE 2 INTEGRATION)
+       ══════════════════════════════════════════════════════════════════ */
+    :root {
+      --c-cyan: #00D4FF;
+      --c-red: #FF2244;
+      --c-green: #00FF88;
+      --c-gold: #FFD21E;
+      --c-purple: #A855F7;
+      --c-pink: #FF007F;
+      --c-bg: #010714;
+      --c-card: rgba(2, 14, 32, 0.88);
+      --c-border: rgba(0, 212, 255, 0.22);
+    }
+
+    html, body {
+      width: 100%; min-height: 100vh; height: auto !important;
+      overflow-x: hidden !important; overflow-y: auto !important;
+      background: var(--c-bg);
+      font-family: 'Rajdhani', sans-serif;
+      color: #D4ECFF;
+      scroll-behavior: smooth;
+    }
+
+    .rag-page {
+      padding: 14px 18px 40px;
+      max-width: 1920px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 18px;
+      position: relative; z-index: 5;
+    }
+
+    /* ── SCANNER SEARCH & NAVIGATION BAR ── */
+    .rag-nav-header {
+      position: sticky; top: 0; z-index: 500;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(1, 8, 20, 0.96);
+      border-bottom: 1px solid var(--c-border);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 2px 30px rgba(0, 212, 255, 0.15);
+    }
+
+    .nav-brand {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px; font-weight: 900;
+      color: #fff; letter-spacing: 0.2em;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-brand span { color: var(--c-cyan); text-shadow: 0 0 12px var(--c-cyan); }
+
+    .nav-links-scroll {
+      display: flex; gap: 6px; align-items: center;
+      padding: 4px 8px;
+      background: rgba(2, 11, 24, 0.8);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 8px;
+      overflow-x: auto; scrollbar-width: none;
+      max-width: calc(100vw - 340px);
+    }
+    .nav-links-scroll::-webkit-scrollbar { display: none; }
+    .nav-links-scroll a {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; height: 30px; border-radius: 5px;
+      font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700;
+      letter-spacing: 0.1em; text-decoration: none; white-space: nowrap;
+      color: var(--c-cyan); background: rgba(0, 212, 255, 0.07);
+      border: 1px solid rgba(0, 212, 255, 0.25); transition: all 0.2s;
+    }
+    .nav-links-scroll a:hover {
+      color: #fff; background: rgba(0, 212, 255, 0.25);
+      box-shadow: 0 0 14px rgba(0, 212, 255, 0.4); transform: translateY(-1px);
+    }
+    .nav-links-scroll a.active {
+      color: #000; background: linear-gradient(135deg, #00D4FF, #0088AA);
+      font-weight: 900; box-shadow: 0 0 18px rgba(0, 212, 255, 0.6);
+    }
+
+    /* ── HERO BANNER ── */
+    .hero-banner {
+      text-align: center; padding: 22px 20px;
+      background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.15) 0%, transparent 75%),
+                  linear-gradient(180deg, rgba(2, 16, 36, 0.9) 0%, rgba(1, 8, 20, 0.95) 100%);
+      border: 1px solid var(--c-border); border-radius: 12px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.12);
+    }
+    .hero-banner::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #00D4FF, #FF007F, #00FF88, transparent);
+    }
+    .hero-title {
+      font-family: 'Orbitron', sans-serif; font-size: clamp(22px, 3.8vw, 42px);
+      font-weight: 900; letter-spacing: 0.22em; color: #fff;
+      text-shadow: 0 0 30px #00D4FF, 0 0 60px rgba(0, 212, 255, 0.4);
+    }
+    .hero-title span { color: var(--c-cyan); }
+    .hero-subtitle {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      color: #6B8CAE; letter-spacing: 0.25em; margin-top: 6px;
+    }
+
+    /* ── SECTIONS GRID ── */
+    .grid-2col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-4col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    @media (max-width: 1400px) { .grid-4col { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 1100px) { .grid-3col { grid-template-columns: 1fr; } .grid-2col { grid-template-columns: 1fr; } }
+    @media (max-width: 700px)  { .grid-4col { grid-template-columns: 1fr; } }
+
+    /* ── ULTRA-CARD STYLING ── */
+    .r-card {
+      background: var(--c-card);
+      border: 1px solid var(--c-border);
+      border-radius: 10px; padding: 16px;
+      position: relative; backdrop-filter: blur(14px);
+      box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.04), 0 4px 20px rgba(0, 0, 0, 0.6);
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .r-card:hover {
+      border-color: rgba(0, 212, 255, 0.6);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.25), inset 0 0 20px rgba(0, 212, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    .r-card::before, .r-card::after {
+      content: ''; position: absolute; width: 10px; height: 10px;
+      border-color: var(--c-cyan); border-style: solid; pointer-events: none;
+    }
+    .r-card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .r-card::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    .r-card-hdr {
+      font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800;
+      color: var(--c-cyan); letter-spacing: 0.15em; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+      text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+    }
+    .r-card-hdr .badge {
+      background: rgba(0, 212, 255, 0.15); border: 1px solid var(--c-cyan);
+      padding: 2px 8px; border-radius: 4px; font-size: 9px; color: #fff;
+    }
+
+    .badge-purple { border-color: var(--c-purple) !important; color: var(--c-purple) !important; background: rgba(168, 85, 247, 0.15) !important; }
+    .badge-green  { border-color: var(--c-green)  !important; color: var(--c-green)  !important; background: rgba(0, 255, 136, 0.15) !important; }
+    .badge-gold   { border-color: var(--c-gold)   !important; color: var(--c-gold)   !important; background: rgba(255, 210, 30, 0.15) !important; }
+    .badge-pink   { border-color: var(--c-pink)   !important; color: var(--c-pink)   !important; background: rgba(255, 0, 127, 0.15) !important; }
+    .badge-red    { border-color: var(--c-red)    !important; color: var(--c-red)    !important; background: rgba(255, 34, 68, 0.15) !important; }
+
+    /* Tags & Pills */
+    .pill-box { display: flex; flex-wrap: wrap; gap: 6px; }
+    .p-tag {
+      padding: 4px 9px; border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      background: rgba(0, 212, 255, 0.06); border: 1px solid rgba(0, 212, 255, 0.2);
+      color: #C8E8FF; transition: all 0.2s; cursor: pointer;
+    }
+    .p-tag:hover {
+      background: rgba(0, 212, 255, 0.25); border-color: var(--c-cyan);
+      color: #fff; box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+    }
+    .p-tag.green:hover { border-color: var(--c-green); box-shadow: 0 0 12px rgba(0, 255, 136, 0.4); }
+    .p-tag.gold:hover  { border-color: var(--c-gold);  box-shadow: 0 0 12px rgba(255, 210, 30, 0.4); }
+    .p-tag.purple:hover{ border-color: var(--c-purple);box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }
+
+    /* Feature Item Lists */
+    .feat-list { display: flex; flex-direction: column; gap: 6px; }
+    .feat-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 10px; background: rgba(0, 212, 255, 0.04);
+      border: 1px solid rgba(0, 212, 255, 0.15); border-radius: 6px;
+      font-size: 11px; color: #B0D8FF;
+    }
+    .feat-item strong { color: #fff; font-family: 'Orbitron', sans-serif; font-size: 10px; }
+
+    /* Interactive Pipeline Step Boxes */
+    .flow-steps { display: flex; align-items: center; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
+    .flow-step {
+      flex: 1; min-width: 100px; padding: 8px; text-align: center;
+      background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.25);
+      border-radius: 6px; font-family: 'Share Tech Mono', monospace; font-size: 10px;
+      transition: all 0.2s; cursor: pointer;
+    }
+    .flow-step:hover {
+      background: var(--c-cyan); color: #000; font-weight: bold;
+      box-shadow: 0 0 15px var(--c-cyan); transform: translateY(-2px);
+    }
+    .flow-arrow { color: var(--c-cyan); font-weight: bold; }
+
+    /* Live Sentiment Analyzer Box */
+    .sent-box {
+      background: rgba(0, 10, 25, 0.7); border: 1px solid var(--c-cyan);
+      border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .sent-input {
+      width: 100%; padding: 10px; background: rgba(1, 12, 30, 0.9);
+      border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 6px;
+      color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 12px; outline: none;
+    }
+    .sent-scores { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
+    .score-card {
+      background: rgba(0, 212, 255, 0.08); border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 6px; padding: 8px 4px;
+    }
+    .score-val { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 800; color: var(--c-cyan); }
+    .score-lbl { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #5A7B98; }
+
+    /* Code Snippet Box */
+    .code-box {
+      background: #010A16; border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 6px; padding: 10px; font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; color: #00FF88; overflow-x: auto; white-space: pre-wrap;
+    }
+
+    /* Bottom Infra Grid */
+    .infra-banner {
+      background: rgba(2, 14, 30, 0.95); border: 1px solid var(--c-cyan);
+      border-radius: 10px; padding: 16px; margin-top: 10px;
+      box-shadow: 0 0 35px rgba(0, 212, 255, 0.18);
+    }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="rag-nav-header">
+    <div class="nav-brand">
+      🤖 <span>STARK AI</span> INFRASTRUCTURE
+    </div>
+    <div class="nav-links-scroll">
+      <a href="index.html">🤖 HUD</a>
+      <a href="stark_hud.html">🌐 STARK HUD</a>
+      <a href="ai_ecosystem.html">🧬 AI ECOSYSTEM</a>
+      <a href="ai_master_matrix.html">⚡ MATRIX</a>
+      <a href="ai_llm_rag.html" class="active">🧠 LLM & RAG</a>
+      <a href="3d_lab.html">🌌 3D LAB</a>
+      <a href="tracker.html">🛰️ TRACKER</a>
+      <a href="code_studio.html">💻 CODE SWARM</a>
+      <a href="cyber_soc.html">🛡️ CYBER SOC</a>
+      <a href="cmd_hacker.html">📟 TERMINAL</a>
+      <a href="login.html">🔐 LOGIN</a>
+    </div>
+  </header>
+
+  <div class="rag-page">
+
+    <!-- HERO BANNER -->
+    <div class="hero-banner">
+      <div class="hero-title">AI ECOSYSTEM — <span>LLM, NLP RAG & BEYOND</span></div>
+      <div class="hero-subtitle">A COMPLETE GUIDE TO LANGUAGE AI, MODELS, TECHNIQUES, TOOLS & APPLICATIONS</div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         ROW 1: LLM CAPABILITIES & CORE NLP TASKS (SECTIONS 1 & 2)
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="grid-2col">
+
+      <!-- SECTION 1: LLM (LARGE LANGUAGE MODELS) -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>🧠 1. LLM (LARGE LANGUAGE MODELS)</span>
+          <span class="badge">SECTION 01</span>
+        </div>
+        <p style="font-size: 12px; color: #8AAABB; line-height: 1.4;">
+          Large Language Models (LLMs) are deep learning neural networks trained on massive text corpora to understand, reason over, and generate human-like natural language.
+        </p>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-gold); font-weight:700;">✨ KEY CAPABILITIES</div>
+        <div class="pill-box">
+          <span class="p-tag">Text Generation</span>
+          <span class="p-tag">Question Answering</span>
+          <span class="p-tag">Summarization</span>
+          <span class="p-tag">Translation</span>
+          <span class="p-tag">Code Generation</span>
+          <span class="p-tag">Reasoning & Logic</span>
+          <span class="p-tag">Chatbots</span>
+          <span class="p-tag">Function Calling</span>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-cyan); font-weight:700;">⚙️ KEY CHARACTERISTICS</div>
+        <div class="feat-list">
+          <div class="feat-item"><strong>Large Scale:</strong> 8 Billion to 1 Trillion+ parameters trained across petabytes of web text.</div>
+          <div class="feat-item"><strong>Few-Shot / Zero-Shot:</strong> Performs downstream tasks with minimal or zero prior training examples.</div>
+          <div class="feat-item"><strong>Context Window:</strong> Expanded context capacity up to 2 Million tokens (Gemini 1.5 Pro).</div>
+          <div class="feat-item"><strong>Instruction Following:</strong> Aligned via RLHF and DPO for helpful, safe user responses.</div>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-green); font-weight:700;">🌐 POPULAR LLMs & SOTA PROVIDERS</div>
+        <div class="pill-box">
+          <span class="p-tag green">GPT-4 / GPT-4o (OpenAI)</span>
+          <span class="p-tag green">Claude 3.5 Sonnet (Anthropic)</span>
+          <span class="p-tag green">Gemini 1.5 Pro (Google)</span>
+          <span class="p-tag green">Llama 3 / 3.1 (Meta)</span>
+          <span class="p-tag green">Mistral Large / Mixtral 8x22B</span>
+          <span class="p-tag green">Qwen 2.5 (Alibaba)</span>
+          <span class="p-tag green">Phi-3 / Phi-3.5 (Microsoft)</span>
+        </div>
+      </div>
+
+      <!-- SECTION 2: NLP (NATURAL LANGUAGE PROCESSING) -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>🔤 2. NLP (NATURAL LANGUAGE PROCESSING)</span>
+          <span class="badge badge-purple">SECTION 02</span>
+        </div>
+        <p style="font-size: 12px; color: #8AAABB; line-height: 1.4;">
+          NLP enables machines to understand, interpret, analyze, and synthesize human language through rule-based, statistical, and neural methodologies.
+        </p>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-purple); font-weight:700;">🧩 CORE NLP TASKS</div>
+        <div class="pill-box">
+          <span class="p-tag purple">Tokenization</span>
+          <span class="p-tag purple">Stopword Removal</span>
+          <span class="p-tag purple">Stemming / Lemmatization</span>
+          <span class="p-tag purple">POS Tagging</span>
+          <span class="p-tag purple">NER (Named Entity Recognition)</span>
+          <span class="p-tag purple">Chunking</span>
+          <span class="p-tag purple">Dependency Parsing</span>
+          <span class="p-tag purple">Coreference Resolution</span>
+          <span class="p-tag purple">Text Classification</span>
+          <span class="p-tag purple">Sentiment Analysis</span>
+          <span class="p-tag purple">Summarization</span>
+          <span class="p-tag purple">Machine Translation</span>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-cyan); font-weight:700;">⚡ INTERACTIVE NLP PIPELINE VISUALIZER</div>
+        <div class="flow-steps">
+          <div class="flow-step">📄 1. Raw Text</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">🧹 2. Preprocessing (Tokenize / Clean)</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">📊 3. Feature Extraction (TF-IDF / Embeddings)</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">🤖 4. Model / Algorithm (DL / Transformer)</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">🎯 5. Output / Inference</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         ROW 2: EMBEDDINGS, VECTOR STORES & RAG ARCHITECTURE (SECTIONS 3 & 4)
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="grid-2col">
+
+      <!-- SECTION 3: EMBEDDINGS & VECTOR STORES -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>📐 3. EMBEDDINGS & VECTOR STORES</span>
+          <span class="badge badge-green">SECTION 03</span>
+        </div>
+        <p style="font-size: 12px; color: #8AAABB; line-height: 1.4;">
+          Convert unstructured text into high-dimensional dense vector embeddings that capture semantic meaning, context, and conceptual similarity.
+        </p>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-green); font-weight:700;">🧮 SOTA EMBEDDING MODELS</div>
+        <div class="pill-box">
+          <span class="p-tag green">OpenAI text-embedding-3-large</span>
+          <span class="p-tag green">BGE-large-en-v1.5 (BAAI)</span>
+          <span class="p-tag green">Sentence-BERT (SBERT)</span>
+          <span class="p-tag green">HuggingFace Instructors</span>
+          <span class="p-tag green">Cohere Embed v3</span>
+          <span class="p-tag green">E5-mistral-7b</span>
+          <span class="p-tag green">GTR-T5-XXL</span>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-cyan); font-weight:700;">💾 VECTOR DATABASES</div>
+        <div class="pill-box">
+          <span class="p-tag">FAISS (Meta)</span>
+          <span class="p-tag">Pinecone</span>
+          <span class="p-tag">Weaviate</span>
+          <span class="p-tag">Milvus</span>
+          <span class="p-tag">Chroma DB</span>
+          <span class="p-tag">Qdrant</span>
+          <span class="p-tag">Redis Vector Search</span>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-gold); font-weight:700;">🎯 PRIMARY USES</div>
+        <div class="feat-list">
+          <div class="feat-item"><strong>Semantic Search:</strong> Search documents by conceptual meaning rather than exact keyword match.</div>
+          <div class="feat-item"><strong>RAG Systems:</strong> Retrieve contextually relevant chunks to inject into LLM prompts.</div>
+          <div class="feat-item"><strong>Clustering & Recommendations:</strong> Group similar documents and items in latent space.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: RAG (RETRIEVAL AUGMENTED GENERATION) -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>⚡ 4. RAG (RETRIEVAL AUGMENTED GENERATION)</span>
+          <span class="badge badge-gold">SECTION 04</span>
+        </div>
+        <p style="font-size: 12px; color: #8AAABB; line-height: 1.4;">
+          Combine real-time vector retrieval with LLM text generation to deliver accurate, up-to-date, grounded, and domain-specific answers.
+        </p>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-gold); font-weight:700;">🔄 RAG PIPELINE WORKFLOW</div>
+        <div class="flow-steps">
+          <div class="flow-step">📄 1. Data Ingestion (PDF/Web/DB)</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">✂️ 2. Chunking (Split Text)</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">🔢 3. Embedding (Vectorize)</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">💾 4. Vector DB Indexing</div>
+        </div>
+        <div class="flow-steps">
+          <div class="flow-step">❓ 5. User Query</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">🔍 6. Retrieve Top-K Chunks</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">📝 7. Augment Prompt + Context</div>
+          <span class="flow-arrow">➔</span>
+          <div class="flow-step">🤖 8. LLM Generate Answer</div>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-green); font-weight:700;">🛡️ KEY RAG BENEFITS</div>
+        <div class="feat-list">
+          <div class="feat-item"><strong>Reduces Hallucination:</strong> Forces the LLM to ground its output strictly in retrieved facts.</div>
+          <div class="feat-item"><strong>Private Domain Data:</strong> Connects internal corporate databases without re-training models.</div>
+          <div class="feat-item"><strong>Up-to-Date Knowledge:</strong> Instantly updates information by adding new documents to the vector index.</div>
+          <div class="feat-item"><strong>Explainable & Auditable:</strong> Returns exact source citations and document references with every answer.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         ROW 3: SENTIMENT ANALYSIS & ADVANCED NLP (SECTIONS 5 & 6)
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="grid-2col">
+
+      <!-- SECTION 5: SENTIMENT ANALYSIS & VADER -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>🎭 5. SENTIMENT ANALYSIS & VADER</span>
+          <span class="badge badge-pink">SECTION 05</span>
+        </div>
+
+        <div class="sent-box">
+          <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-cyan); font-weight:700;">🧪 LIVE INTERACTIVE SENTIMENT TESTER</div>
+          <input type="text" id="sentInput" class="sent-input" value="J.A.R.V.I.S. is an extraordinarily powerful, fast and brilliant AI ecosystem!" oninput="runSentimentTest()">
+          <div class="sent-scores">
+            <div class="score-card"><div class="score-val" id="scPos">0.68</div><div class="score-lbl">POSITIVE</div></div>
+            <div class="score-card"><div class="score-val" id="scNeu">0.32</div><div class="score-lbl">NEUTRAL</div></div>
+            <div class="score-card"><div class="score-val" id="scNeg">0.00</div><div class="score-lbl">NEGATIVE</div></div>
+            <div class="score-card"><div class="score-val" id="scCmp" style="color:var(--c-green);">+0.85</div><div class="score-lbl">COMPOUND</div></div>
+          </div>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-pink); font-weight:700;">💡 VADER vs TRANSFORMERS</div>
+        <div class="feat-list">
+          <div class="feat-item"><strong>VADER:</strong> Rule & Lexicon-based sentiment engine optimized for social media, emojis, and slang.</div>
+          <div class="feat-item"><strong>Transformers (RoBERTa / DistilBERT):</strong> Deep contextual sentiment classification with high accuracy.</div>
+        </div>
+
+        <div class="code-box"># Python VADER Example
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+analyzer = SentimentIntensityAnalyzer()
+scores = analyzer.polarity_scores("I love this! Amazing product :-)")
+# {'neg': 0.0, 'neu': 0.318, 'pos': 0.682, 'compound': 0.6369}</div>
+      </div>
+
+      <!-- SECTION 6: ADVANCED NLP TECHNIQUES -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>🚀 6. ADVANCED NLP TECHNIQUES</span>
+          <span class="badge badge-purple">SECTION 06</span>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-purple); font-weight:700;">🏷️ NAMED ENTITY RECOGNITION (NER)</div>
+        <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(0,212,255,0.2); padding:10px; border-radius:6px; font-size:12px;">
+          "<span style="background:rgba(255,210,30,0.3); border:1px solid var(--c-gold); padding:2px 6px; border-radius:4px; font-weight:bold;">Elon Musk (PERSON)</span> founded <span style="background:rgba(0,212,255,0.3); border:1px solid var(--c-cyan); padding:2px 6px; border-radius:4px; font-weight:bold;">SpaceX (ORG)</span> in <span style="background:rgba(0,255,136,0.3); border:1px solid var(--c-green); padding:2px 6px; border-radius:4px; font-weight:bold;">USA (GPE)</span>."
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-cyan); font-weight:700;">📊 TOPIC MODELING (LDA)</div>
+        <div class="feat-list">
+          <div class="feat-item"><strong>Latent Dirichlet Allocation:</strong> Discovers latent thematic topics across large document collections automatically.</div>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-gold); font-weight:700;">🌐 MACHINE TRANSLATION & QA</div>
+        <div class="pill-box">
+          <span class="p-tag gold">Seq2Seq Translation (EN ➔ HI / FR / ES)</span>
+          <span class="p-tag gold">Extractive & Generative QA</span>
+          <span class="p-tag gold">Text Summarization (Extractive vs Abstractive)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         ROW 4: FINE-TUNING, TOOLS & FRAMEWORKS (SECTIONS 7, 8, 9)
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="grid-3col">
+
+      <!-- SECTION 7: FINE-TUNING & ADAPTATION -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>🔧 7. LLM FINE-TUNING</span>
+          <span class="badge badge-red">SECTION 07</span>
+        </div>
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-red); font-weight:700;">🛠️ ADAPTATION METHODS</div>
+        <div class="pill-box">
+          <span class="p-tag red">Full Fine-Tuning</span>
+          <span class="p-tag red">LoRA / QLoRA</span>
+          <span class="p-tag red">PEFT</span>
+          <span class="p-tag red">Prompt Tuning</span>
+          <span class="p-tag red">RLHF / DPO</span>
+        </div>
+
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-cyan); font-weight:700;">⚡ FINE-TUNING TOOLS</div>
+        <div class="feat-list">
+          <div class="feat-item"><strong>Axolotl & Unsloth:</strong> 2x to 5x faster LLM fine-tuning with 80% reduced VRAM.</div>
+          <div class="feat-item"><strong>DeepSpeed & Accelerate:</strong> Distributed multi-GPU training & Zero Redundancy Optimizer.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 8: NLP LIBRARIES -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>📦 8. NLP LIBRARIES & TOOLS</span>
+          <span class="badge">SECTION 08</span>
+        </div>
+        <div class="pill-box">
+          <span class="p-tag">spaCy</span>
+          <span class="p-tag">NLTK</span>
+          <span class="p-tag">HuggingFace Transformers</span>
+          <span class="p-tag">TextBlob</span>
+          <span class="p-tag">Gensim</span>
+          <span class="p-tag">Stanza</span>
+          <span class="p-tag">Flair</span>
+          <span class="p-tag">FastText</span>
+        </div>
+        <p style="font-size: 11px; color: #8AAABB; margin-top: 6px;">
+          Industry standard frameworks providing pre-trained models, tokenizers, embeddings, and NLP pipelines for production web services.
+        </p>
+      </div>
+
+      <!-- SECTION 9: LLM FRAMEWORKS -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>🤝 9. LLM FRAMEWORKS</span>
+          <span class="badge badge-purple">SECTION 09</span>
+        </div>
+        <div class="pill-box">
+          <span class="p-tag purple">LangChain</span>
+          <span class="p-tag purple">LlamaIndex</span>
+          <span class="p-tag purple">Haystack</span>
+          <span class="p-tag purple">Semantic Kernel</span>
+          <span class="p-tag purple">CrewAI</span>
+          <span class="p-tag purple">AutoGPT / AgentGPT</span>
+          <span class="p-tag purple">Flowise</span>
+          <span class="p-tag purple">Ollama / OpenLLM</span>
+        </div>
+        <p style="font-size: 11px; color: #8AAABB; margin-top: 6px;">
+          Orchestration SDKs to build multi-agent swarms, complex prompt chains, autonomous agents, and local offline LLM runners.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         ROW 5: EVALUATION, LLMOps & PROMPT PATTERNS (SECTIONS 10, 11, 12)
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="grid-3col">
+
+      <!-- SECTION 10: EVALUATION & METRICS -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>📊 10. EVALUATION & METRICS</span>
+          <span class="badge badge-gold">SECTION 10</span>
+        </div>
+        <div class="feat-list">
+          <div class="feat-item"><strong>Perplexity:</strong> Quantifies how well a probability model predicts a sample text.</div>
+          <div class="feat-item"><strong>BLEU / ROUGE:</strong> Benchmarks machine translation and summary overlap against human references.</div>
+          <div class="feat-item"><strong>F1 / Exact Match (EM):</strong> Precision/recall metric for question answering benchmarks.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 11: LLMOps & PRODUCTION -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>🚀 11. LLMOps & PRODUCTION</span>
+          <span class="badge badge-green">SECTION 11</span>
+        </div>
+        <div class="pill-box">
+          <span class="p-tag green">Prompt Engineering</span>
+          <span class="p-tag green">Langfuse / Helicone</span>
+          <span class="p-tag green">Redis Semantic Cache</span>
+          <span class="p-tag green">NeMo Guardrails</span>
+          <span class="p-tag green">vLLM / TGI Inference</span>
+          <span class="p-tag green">Weights & Biases</span>
+        </div>
+      </div>
+
+      <!-- SECTION 12: PROMPT ENGINEERING PATTERNS -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>✍️ 12. PROMPT PATTERNS</span>
+          <span class="badge badge-pink">SECTION 12</span>
+        </div>
+        <div class="feat-list">
+          <div class="feat-item"><strong>Zero-Shot / Few-Shot:</strong> Direct query or providing N input-output examples.</div>
+          <div class="feat-item"><strong>Chain-of-Thought (CoT):</strong> "Think step by step" reasoning for complex math and logic.</div>
+          <div class="feat-item"><strong>Role Prompting:</strong> "Act as a Senior Cyber Security Architect..."</div>
+          <div class="feat-item"><strong>Structured Output:</strong> Enforces JSON schema / XML tabular format response.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         ROW 6: APPLICATIONS, CHALLENGES & FUTURE TRENDS (SECTIONS 15, 16, 17)
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="grid-3col">
+
+      <!-- SECTION 15: REAL-WORLD APPLICATIONS -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>💼 15. REAL-WORLD APPLICATIONS</span>
+          <span class="badge">SECTION 15</span>
+        </div>
+        <div class="pill-box">
+          <span class="p-tag">Enterprise Search</span>
+          <span class="p-tag">AI Chatbots</span>
+          <span class="p-tag">Content Gen</span>
+          <span class="p-tag">Code Assistant</span>
+          <span class="p-tag">Data Analysis</span>
+          <span class="p-tag">Education</span>
+          <span class="p-tag">Healthcare AI</span>
+          <span class="p-tag">Legal Contract Analysis</span>
+        </div>
+      </div>
+
+      <!-- SECTION 16: CHALLENGES & LIMITATIONS -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>⚠️ 16. CHALLENGES & LIMITATIONS</span>
+          <span class="badge badge-red">SECTION 16</span>
+        </div>
+        <div class="feat-list">
+          <div class="feat-item"><strong>Hallucination:</strong> Plausible sounding but false or ungrounded factual assertions.</div>
+          <div class="feat-item"><strong>Data Privacy & Security:</strong> Preventing sensitive enterprise data leakage and prompt injection.</div>
+          <div class="feat-item"><strong>High Compute Cost:</strong> Massive GPU infrastructure overhead for high throughput inference.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 17: FUTURE TRENDS -->
+      <div class="r-card">
+        <div class="r-card-hdr">
+          <span>🔮 17. FUTURE TRENDS & AGI</span>
+          <span class="badge badge-purple">SECTION 17</span>
+        </div>
+        <div class="pill-box">
+          <span class="p-tag purple">Longer Context (Millions of Tokens)</span>
+          <span class="p-tag purple">Native Multimodal (Text + Vision + Audio)</span>
+          <span class="p-tag purple">On-Device Edge LLMs (NPUs)</span>
+          <span class="p-tag purple">Autonomous AI Agent Swarms</span>
+          <span class="p-tag purple">AGI (Artificial General Intelligence)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         BOTTOM INFRASTRUCTURE BANNER & QUOTE
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="infra-banner">
+      <div style="font-family:'Orbitron',sans-serif; font-size:12px; font-weight:800; color:var(--c-cyan); text-align:center; letter-spacing:0.2em; margin-bottom:12px;">
+        🌐 GLOBAL AI PROVIDERS, VECTOR DBs & DEPLOYMENT INFRASTRUCTURE
+      </div>
+      <div class="grid-3col" style="text-align:center;">
+        <div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-gold); margin-bottom:6px;">⚡ POPULAR LLM PROVIDERS</div>
+          <div class="pill-box" style="justify-content:center;">
+            <span class="p-tag gold">OpenAI API</span>
+            <span class="p-tag gold">Anthropic API</span>
+            <span class="p-tag gold">Google Vertex AI</span>
+            <span class="p-tag gold">Cohere API</span>
+            <span class="p-tag gold">Mistral AI API</span>
+            <span class="p-tag gold">Groq API</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-green); margin-bottom:6px;">💾 VECTOR DB & SEARCH</div>
+          <div class="pill-box" style="justify-content:center;">
+            <span class="p-tag green">Pinecone</span>
+            <span class="p-tag green">Weaviate</span>
+            <span class="p-tag green">Qdrant</span>
+            <span class="p-tag green">Milvus</span>
+            <span class="p-tag green">Chroma</span>
+            <span class="p-tag green">Redis</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--c-purple); margin-bottom:6px;">☁️ DEPLOYMENT & INFRA</div>
+          <div class="pill-box" style="justify-content:center;">
+            <span class="p-tag purple">AWS</span>
+            <span class="p-tag purple">Azure</span>
+            <span class="p-tag purple">GCP</span>
+            <span class="p-tag purple">Vercel</span>
+            <span class="p-tag purple">Render</span>
+            <span class="p-tag purple">Kubernetes</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace; font-size:12px; color:#00FF88; text-align:center; margin-top:14px; letter-spacing:0.15em;">
+        "The goal of AI is not to replace humans, but to augment human intelligence." — STARK INDUSTRIES CORE DIRECTIVE
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function runSentimentTest() {
+      const val = document.getElementById('sentInput').value.toLowerCase();
+      let pos = 0.1, neg = 0.1, neu = 0.8;
+      
+      const posWords = ['love', 'amazing', 'brilliant', 'powerful', 'fast', 'good', 'great', 'excellent', 'fantastic'];
+      const negWords = ['bad', 'slow', 'hate', 'terrible', 'error', 'bug', 'fail', 'worst'];
+      
+      posWords.forEach(w => { if (val.includes(w)) pos += 0.2; });
+      negWords.forEach(w => { if (val.includes(w)) neg += 0.2; });
+      
+      const total = pos + neg + neu;
+      pos = (pos / total).toFixed(2);
+      neg = (neg / total).toFixed(2);
+      neu = (1 - pos - neg).toFixed(2);
+      
+      const cmp = (pos - neg).toFixed(2);
+      
+      document.getElementById('scPos').textContent = pos;
+      document.getElementById('scNeg').textContent = neg;
+      document.getElementById('scNeu').textContent = neu;
+      document.getElementById('scCmp').textContent = (cmp >= 0 ? '+' : '') + cmp;
+      document.getElementById('scCmp').style.color = cmp >= 0 ? '#00FF88' : '#FF2244';
+    }
+  </script>
+</body>
+</html>
