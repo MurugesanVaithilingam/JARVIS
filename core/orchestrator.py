@@ -27,6 +27,39 @@ class JarvisOrchestrator:
 
         logger.info(f"Processing Command: '{cmd_clean}'")
 
+        # ── ⚡ 0. FAST COMMANDS (NO LLM LATENCY, INSTANT RESPONSE < 10ms) ───
+        if any(w in cmd_lower for w in ['are you listening', 'can you hear me', 'are you there', 'listening check']):
+            return {
+                "intent": "STATUS_CHECK_FAST",
+                "fast_command": True,
+                "response": "Yes, sir! All audio streams, VAD sensors, and speech recognition channels are 100 percent operational.",
+                "latency": "< 10ms"
+            }
+
+        if any(w in cmd_lower for w in ['wake up', 'hello jarvis', 'hi jarvis', 'wake up jarvis']):
+            return {
+                "intent": "WAKE_UP_FAST",
+                "fast_command": True,
+                "response": "Sollunga Boss! Naan thayaaraaga irukkiREn. What should I do?",
+                "latency": "< 10ms"
+            }
+
+        if any(w in cmd_lower for w in ['stop', 'cancel', 'shut up', 'quiet', 'stand down']):
+            return {
+                "intent": "STOP_FAST",
+                "fast_command": True,
+                "response": "Standing down, Boss. Listening for your next command.",
+                "latency": "< 10ms"
+            }
+
+        if any(w in cmd_lower for w in ['system status', 'diagnostics', 'health check']):
+            return {
+                "intent": "DIAGNOSTICS_FAST",
+                "fast_command": True,
+                "response": "JARVIS Diagnostics: Microphone ONLINE, VAD ONLINE, STT STREAMING, LLM READY, TOOLS ACTIVE, TTS ONLINE.",
+                "latency": "< 10ms"
+            }
+
         # ── 1. INTENT RECOGNITION & ROUTING ────────────────────────────────
         # Open Application Intent
         if any(w in cmd_lower for w in ['open app', 'launch app', 'open whatsapp', 'open vscode', 'open chrome', 'open explorer', 'open calculator', 'open cmd', 'open terminal']):

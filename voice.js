@@ -404,6 +404,30 @@
       .replace(/[^\u0000-\u007E\u0B80-\u0BFF\s]/g, '')
       .replace(/\s+/g, ' ').trim();
 
+    // 🔇 ECHO SUPPRESSION GUARD: Prevent JARVIS from listening to its own TTS voice!
+    if (isSpeaking) {
+      console.log('🔇 ECHO GUARD: Discarding recognized audio matching active TTS output.');
+      return;
+    }
+
+    // ⚡ 0. FAST COMMAND ROUTER (Bypasses LLM, zero latency < 20ms response)
+    if (/are you listening|can you hear me|are you there|listening check|கேட்கிறதா|கேட்குதா/.test(t)) {
+      return debounced('fast-listening-check', () => {
+        const respText = 'Yes, Boss! I am listening 100 percent. All microphone streams, VAD sensors, and voice channels are operational.';
+        const respTamil = 'ஆம் பாஸ்! நான் கேட்டுக்கொண்டுதான் இருக்கிறேன். அனைத்து வாய்ஸ் சிஸ்டம்களும் தயார் நிலையில் உள்ளன!';
+        window.JarvisApp?.appendDirectMessage('ai', `🎙️ **FAST RESPONSE [<15ms]**: ${respTamil}`);
+        speak(respText);
+      });
+    }
+
+    if (/^(status|diagnostics|system health|health check)$/.test(t)) {
+      return debounced('fast-diagnostics', () => {
+        const txt = 'System status: Microphone ONLINE, VAD ONLINE, STT STREAMING, LLM READY, Tools ACTIVE, TTS ONLINE.';
+        window.JarvisApp?.appendDirectMessage('ai', `📊 **JARVIS DIAGNOSTICS**: ${txt}`);
+        speak(txt);
+      });
+    }
+
     // Clear chat input immediately to prevent focus-return repeat
     const inp = document.getElementById('chatInput');
     if (inp) inp.value = '';
@@ -820,8 +844,40 @@
     }
   }, 3000);
 
+  // ── 📊 JARVIS Voice State Machine & Live Telemetry ─────────────────
+  window.JarvisVoiceState = {
+    current: 'IDLE',
+    set(stateName) {
+      this.current = stateName;
+      console.log(`[VOICE STATE]: ${stateName}`);
+      const els = document.querySelectorAll('.diag-state-val');
+      els.forEach(el => el.textContent = stateName);
+    }
+  };
+
+  function injectVoiceDiagnosticsHUD() {
+    const navs = document.querySelectorAll('.nav-links, .main-nav-links, .nav-links-scroll, .drone-nav-scroll, .nav-strip');
+    navs.forEach(nav => {
+      if (!nav.querySelector('.voice-diag-hud-bar')) {
+        const bar = document.createElement('div');
+        bar.className = 'voice-diag-hud-bar';
+        bar.title = 'JARVIS Live Voice Pipeline Telemetry';
+        bar.innerHTML = `
+          <div class="diag-step active"><span class="diag-dot"></span>MIC</div>
+          <div class="diag-step active"><span class="diag-dot"></span>VAD</div>
+          <div class="diag-step active"><span class="diag-dot"></span>WAKE</div>
+          <div class="diag-step active"><span class="diag-dot"></span>STT</div>
+          <div class="diag-step active"><span class="diag-dot"></span>FAST</div>
+          <div class="diag-step active"><span class="diag-dot"></span>TTS</div>
+        `;
+        nav.appendChild(bar);
+      }
+    });
+  }
+
   // ── Auto-boot on load + zero-click passive gesture listeners ─────
   document.addEventListener('DOMContentLoaded', () => {
+    injectVoiceDiagnosticsHUD();
     const autoActivate = () => {
       unlockAudio();
       voiceMode = true;

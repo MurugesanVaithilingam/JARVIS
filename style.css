@@ -1658,3 +1658,47 @@ img, video, canvas, iframe, svg {
 .perm-item.granted .perm-status { color: #00FF88; }
 .perm-item.locked .perm-status { color: #FF5555; }
 
+/* ================================================================
+   VOICE PIPELINE DIAGNOSTICS HUD BAR & STATE MACHINE STYLES
+   ================================================================ */
+.voice-diag-hud-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(4, 12, 24, 0.85);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: var(--fmono);
+  font-size: 9px;
+  color: #A0C4E2;
+  margin-left: 8px;
+}
+
+.diag-step {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.diag-step.active {
+  opacity: 1;
+  color: #00FF88;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+}
+
+.diag-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #6A9AB8;
+}
+
+.diag-step.active .diag-dot {
+  background: #00FF88;
+  box-shadow: 0 0 6px #00FF88;
+}
+
+
