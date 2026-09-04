@@ -33,6 +33,76 @@
 /* Persona themes */
 body.persona-friday  { --c1:#FF6B35; --c1d:#A83D10; --c1g:rgba(255,107,53,.2); }
 body.persona-karen   { --c1:#FF2D7B; --c1d:#991444; --c1g:rgba(255,45,123,.2); }
+body.persona-chitti  { --c1:#00FF88; --c1d:#009952; --c1g:rgba(0,255,136,.2); }
+body.persona-edith   { --c1:#A855F7; --c1d:#6B21A8; --c1g:rgba(168,85,247,.2); }
+
+/* ══════════════════════════════════════════════════════════════════
+   STARK INDUSTRIES PROFESSIONAL STYLISH ANIMATIONS (ALL PAGES)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* 1. Page Entrance Fade & Scale Up */
+@keyframes starkPageEnter {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  animation: starkPageEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) ease-out;
+}
+
+.hud-body, .stark-hud-container, .eco-page, .matrix-page, .rag-page, .drone-page, .lab-body, .soc-grid, .studio-layout, .login-container {
+  animation: starkPageEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) ease-out;
+}
+
+/* 2. Interactive Card 3D Lift & Shimmer Glow */
+.card, .m-card, .r-card, .d-card, .hud-box, .stat-card, .editor-card, .info-card {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+.card:hover, .m-card:hover, .r-card:hover, .d-card:hover, .hud-box:hover, .stat-card:hover, .editor-card:hover, .info-card:hover {
+  transform: translateY(-4px) scale(1.008) !important;
+  border-color: rgba(0, 212, 255, 0.65) !important;
+  box-shadow: 0 10px 35px rgba(0, 212, 255, 0.25), inset 0 0 20px rgba(0, 212, 255, 0.1) !important;
+}
+
+/* 3. Header Laser Beam Sweep */
+@keyframes laserHeaderBeam {
+  0%   { left: -20%; width: 120px; opacity: 0.2; }
+  50%  { left: 50%; width: 350px; opacity: 1; }
+  100% { left: 120%; width: 120px; opacity: 0.2; }
+}
+
+.hud-header::after, .stark-header::after, .eco-nav::after, .rag-nav-header::after, .drone-nav::after, .lab-nav::after {
+  animation: laserHeaderBeam 5.5s linear infinite !important;
+}
+
+/* 4. Glowing Neon Pulse Badges */
+@keyframes neonGlowPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(0, 212, 255, 0.4); transform: scale(1); }
+  50%      { box-shadow: 0 0 18px rgba(0, 212, 255, 0.9), 0 0 35px rgba(0, 212, 255, 0.5); transform: scale(1.03); }
+}
+
+.live-badge, .sys-badge, .badge, .status-item {
+  animation: neonGlowPulse 2.5s ease-in-out infinite;
+}
+
+/* 5. Button Hover Glow Ripple */
+.hbtn, .mbtn, .bio-btn, .filter-pill, .p-tag {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.hbtn:hover, .mbtn:hover, .bio-btn:hover, .filter-pill:hover, .p-tag:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 0 14px rgba(0, 212, 255, 0.5) !important;
+}
+
+.hbtn:active, .mbtn:active, .bio-btn:active, .filter-pill:active, .p-tag:active {
+  transform: translateY(0) scale(0.96) !important;
+}
 body.persona-edith   { --c1:#A855F7; --c1d:#7C3AED; --c1g:rgba(168,85,247,.2); }
 body.persona-aria    { --c1:#00FF88; --c1d:#009944; --c1g:rgba(0,255,136,.2);  }
 
