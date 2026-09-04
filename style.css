@@ -1018,11 +1018,15 @@ img, video, canvas, iframe, svg {
   .matrix-grid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 
-@media (max-width: 1200px) {
-  .main-nav-links, .nav-links-scroll, .nav-links {
-    gap: 4px !important;
+@media (max-width: 1400px) {
+  .main-nav-links, .nav-links-scroll, .nav-links, .drone-nav-scroll, .nav-strip {
+    gap: 2px !important;
   }
-  .nav-tab { padding: 5px 8px !important; font-size: 10px !important; }
+  .nav-tab, .nav-links-scroll a, .drone-nav-scroll a, .nav-links a, .nav-strip a {
+    padding: 2px 5px !important;
+    font-size: 8.5px !important;
+    height: 22px !important;
+  }
   .hud { flex-direction: column !important; }
   .sidebar { width: 100% !important; min-width: unset !important; flex-direction: row; flex-wrap: wrap; }
   .chat-panel { min-height: 420px !important; }
