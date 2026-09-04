@@ -31,6 +31,9 @@ window.JarvisGuardrails = {
   },
 
   async authorize(actionName, target = '') {
+    if (window.JarvisSecurityEngine && typeof window.JarvisSecurityEngine.authorizeAction === 'function') {
+      return await window.JarvisSecurityEngine.authorizeAction(actionName, target);
+    }
     const check = this.classifyAction(actionName, target);
 
     if (check.level === this.levels.GREEN) {

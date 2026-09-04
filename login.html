@@ -357,6 +357,16 @@ function handleLogin(e) {
     if (data.authenticated) {
       msg.style.color = '#00FF88';
       msg.textContent = `MYSQL VERIFIED: ${data.user.full_name.toUpperCase()} — LEVEL ${data.user.clearance} ACCESS GRANTED!`;
+      
+      // Save authenticated user & clearance to Security Engine
+      localStorage.setItem('jarvis_user', data.user.full_name);
+      localStorage.setItem('jarvis_role', data.user.role || 'Supreme Administrator');
+      localStorage.setItem('jarvis_clearance', data.user.clearance || '6');
+
+      if (window.JarvisSecurityEngine) {
+        window.JarvisSecurityEngine.setClearance(data.user.clearance || 6);
+      }
+
       if (window.speechSynthesis) {
         const u = new SpeechSynthesisUtterance(`Welcome back, ${data.user.full_name}. Access granted.`);
         window.speechSynthesis.speak(u);
@@ -370,5 +380,7 @@ function handleLogin(e) {
   .catch(() => triggerBiometricScan());
 }
 </script>
+<script src="security_engine.js"></script>
+<script src="voice.js"></script>
 </body>
 </html>

@@ -385,6 +385,20 @@
   function handleCommand(raw) {
     if (!raw || raw.trim().length < 1) return;
 
+    // ⚡ INSTANT BARGE-IN: If JARVIS is currently speaking, cancel TTS immediately when user speaks!
+    if (window.speechSynthesis && window.speechSynthesis.speaking) {
+      try { window.speechSynthesis.cancel(); } catch(e){}
+      isSpeaking = false;
+      console.log('⚡ BARGE-IN DETECTED: Stopped JARVIS speech to listen to user input.');
+    }
+
+    // 🛡️ SECURITY ENGINE VOICE CONFIRMATION HOOK
+    if (window.JarvisSecurityEngine && typeof window.JarvisSecurityEngine.handleVoiceConfirmation === 'function') {
+      if (window.JarvisSecurityEngine.handleVoiceConfirmation(raw)) {
+        return; // Confirmation modal resolved by voice!
+      }
+    }
+
     // Normalize
     const t = raw.toLowerCase()
       .replace(/[^\u0000-\u007E\u0B80-\u0BFF\s]/g, '')

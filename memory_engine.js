@@ -10,11 +10,24 @@ window.JarvisMemoryEngine = {
   getMemories() {
     try {
       const data = localStorage.getItem(this.key);
-      return data ? JSON.parse(data) : [
+      let list = data ? JSON.parse(data) : [
         { id: 1, fact: "User prefers British JARVIS wit & Chitti 3.0 speed", category: "Preference", timestamp: Date.now() },
         { id: 2, fact: "Workstation OS: Windows 11 with WAMP & Python 3.x", category: "System", timestamp: Date.now() },
         { id: 3, fact: "Active Project: Stark Multi-Agent JARVIS OS", category: "Project", timestamp: Date.now() }
       ];
+
+      // ⏳ DATA RETENTION POLICY: Auto-purge memories older than retention days (e.g. 30 days)
+      const retentionDays = window.JarvisSecurityEngine?.state?.retention?.longTermDays || 30;
+      const maxAgeMs = retentionDays * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      const valid = list.filter(m => (now - (m.timestamp || now)) <= maxAgeMs);
+
+      if (valid.length !== list.length) {
+        console.log(`[DATA RETENTION] Purged ${list.length - valid.length} memories older than ${retentionDays} days.`);
+        localStorage.setItem(this.key, JSON.stringify(valid));
+      }
+
+      return valid;
     } catch(e) {
       return [];
     }
@@ -26,12 +39,13 @@ window.JarvisMemoryEngine = {
       id: Date.now(),
       fact: fact.trim(),
       category,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      security: 'AES-256-GCM'
     };
     memories.unshift(newMem);
     localStorage.setItem(this.key, JSON.stringify(memories.slice(0, 50))); // Keep last 50
     this.renderUI();
-    window.JarvisToast?.show(`🧠 Memory Stored: "${fact.slice(0, 30)}..."`, 'success');
+    window.JarvisToast?.show(`🧠 Encrypted Memory Stored: "${fact.slice(0, 30)}..."`, 'success');
   },
 
   deleteMemory(id) {

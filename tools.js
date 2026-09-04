@@ -170,7 +170,9 @@ window.JarvisTools = {
   },
 
   // ⚡ Live JS Code Execution Sandbox
-  runCodeSandbox() {
+  async runCodeSandbox() {
+    const ok = await window.JarvisSecurityEngine?.authorizeAction('Execute Code Sandbox', 'Local Browser Engine');
+    if (!ok) return;
     window.JarvisAudio.playBeep(950, 'square', 0.1);
     const code = prompt("⚡ STARK CODE SANDBOX\nEnter JavaScript code to execute locally:");
     if (!code) return;
@@ -201,7 +203,9 @@ window.JarvisTools = {
   },
 
   // ⚡ Chitti 3.0 Swarm Microbot Formation Tool
-  chittiSwarmFormation() {
+  async chittiSwarmFormation() {
+    const ok = await window.JarvisSecurityEngine?.authorizeAction('Swarm Microbot Formation', 'Chitti 3.0 Swarm');
+    if (!ok) return;
     window.JarvisAudio.playBeep(1400, 'sawtooth', 0.15);
     const formations = ['Giant Sphere', 'Snake Formation', 'Humanoid Giant', 'Microbot Defensive Shield', 'Machine Gun Array'];
     const choice = formations[Math.floor(Math.random() * formations.length)];
@@ -239,18 +243,15 @@ window.JarvisTools = {
     window.JarvisToast?.show('Tactical Recon Scanner Active', 'info');
   },
 
-  instantKill() {
+  async instantKill() {
+    const ok = await window.JarvisSecurityEngine?.authorizeAction('Instant Kill Protocol', 'Tactical Targeting Matrix');
+    if (!ok) return;
     window.JarvisAudio.playAlarm();
-    const confirmKill = confirm("⚠️ INSTANT KILL PROTOCOL OVERRIDE ⚠️\n\nWarning: This activates maximum targeting lethal protocols. Are you sure, Peter?");
-    if (confirmKill) {
-      document.body.classList.add('instant-kill-mode');
-      this._inject('INSTANT KILL PROTOCOL ACTIVATED. Target acquisition locked. Awaiting engagement parameters.', true);
-      window.JarvisToast?.show('⚡ INSTANT KILL PROTOCOL ENGAGED!', 'error', 5000);
-      setTimeout(() => {
-        document.body.classList.remove('instant-kill-mode');
-      }, 8000);
-    } else {
-      window.JarvisToast?.show('Instant Kill Protocol aborted. Standing down.', 'info');
-    }
+    document.body.classList.add('instant-kill-mode');
+    this._inject('INSTANT KILL PROTOCOL ACTIVATED. Target acquisition locked. Awaiting engagement parameters.', true);
+    window.JarvisToast?.show('⚡ INSTANT KILL PROTOCOL ENGAGED!', 'error', 5000);
+    setTimeout(() => {
+      document.body.classList.remove('instant-kill-mode');
+    }, 8000);
   }
 };

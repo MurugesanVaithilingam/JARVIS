@@ -1285,6 +1285,8 @@ img, video, canvas, iframe, svg {
   }
 }
 
+}
+
 /* ── Touch hover reset ── */
 @media (hover: none) {
   .card:hover, .hud-box:hover, .stat-card:hover, .tool-btn:hover, .nav-tab:hover {
@@ -1292,3 +1294,367 @@ img, video, canvas, iframe, svg {
     box-shadow: none !important;
   }
 }
+
+/* ================================================================
+   STARK SECURITY ENGINE & ENCRYPTION VAULT STYLES
+   ================================================================ */
+
+/* Security HUD Badge Button in Nav */
+.sec-hud-badge-btn {
+  background: rgba(0, 212, 255, 0.08) !important;
+  border: 1px solid rgba(0, 212, 255, 0.3) !important;
+  color: #E2F1FF !important;
+  font-family: var(--fmono);
+  font-size: 10px !important;
+  padding: 4px 10px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+  margin-left: 6px !important;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)) !important;
+}
+
+.sec-hud-badge-btn:hover {
+  background: rgba(0, 212, 255, 0.2) !important;
+  border-color: #00FF88 !important;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Confirmation Modal Overlay */
+.stark-sec-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 10, 20, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: starkPageEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stark-sec-modal-card {
+  width: 100%;
+  max-width: 480px;
+  background: linear-gradient(145deg, rgba(10, 25, 45, 0.96), rgba(4, 12, 24, 0.98));
+  border: 1.5px solid #00D4FF;
+  border-radius: 12px;
+  box-shadow: 0 0 35px rgba(0, 212, 255, 0.35), inset 0 0 15px rgba(0, 212, 255, 0.1);
+  padding: 24px;
+  box-sizing: border-box;
+  color: #FFF;
+  font-family: var(--fmain);
+  position: relative;
+  overflow: hidden;
+}
+
+.stark-sec-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.sec-badge-pulse {
+  font-family: var(--fmono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #00FF88;
+  letter-spacing: 0.12em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: neonGlowPulse 2s infinite ease-in-out;
+}
+
+.sec-level-tag {
+  font-family: var(--fmono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.sec-level-tag.level-4 { background: rgba(255, 170, 0, 0.2); border: 1px solid #FFAA00; color: #FFAA00; }
+.sec-level-tag.level-5 { background: rgba(255, 0, 127, 0.2); border: 1px solid #FF007F; color: #FF007F; }
+.sec-level-tag.level-6 { background: rgba(255, 51, 51, 0.2); border: 1px solid #FF3333; color: #FF3333; }
+
+.sec-scan-ring {
+  width: 48px;
+  height: 48px;
+  border: 2px dashed #00D4FF;
+  border-radius: 50%;
+  margin: 0 auto 12px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: spinHud 6s linear infinite;
+}
+
+.sec-scan-ring .ring-core {
+  width: 24px;
+  height: 24px;
+  background: #00FF88;
+  border-radius: 50%;
+  box-shadow: 0 0 16px #00FF88;
+}
+
+.sec-target-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFF;
+  margin: 0 0 6px 0;
+  font-family: var(--fhead);
+}
+
+.sec-target-desc {
+  text-align: center;
+  font-size: 12px;
+  color: #A0C4E2;
+  margin: 0 0 16px 0;
+}
+
+.sec-detail-box {
+  background: rgba(0, 212, 255, 0.04);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: var(--fmono);
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.sec-detail-box div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sec-detail-box span { color: #6A9AB8; }
+
+.stark-sec-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.sec-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: var(--fmono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.sec-btn.cancel {
+  background: rgba(255, 51, 51, 0.15);
+  border: 1px solid #FF3333;
+  color: #FF7777;
+}
+
+.sec-btn.cancel:hover {
+  background: rgba(255, 51, 51, 0.3);
+  box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+}
+
+.sec-btn.confirm {
+  background: linear-gradient(135deg, #00FF88, #00D4FF);
+  color: #040C18;
+}
+
+.sec-btn.confirm:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Security Vault Full Overlay Modal */
+.stark-sec-vault-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 8, 16, 0.92);
+  backdrop-filter: blur(14px);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: starkPageEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stark-vault-card {
+  width: 100%;
+  max-width: 850px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: linear-gradient(145deg, rgba(8, 20, 36, 0.98), rgba(4, 12, 22, 0.99));
+  border: 1.5px solid #00D4FF;
+  border-radius: 12px;
+  box-shadow: 0 0 45px rgba(0, 212, 255, 0.25);
+  padding: 24px;
+  box-sizing: border-box;
+  color: #FFF;
+}
+
+.vault-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  padding-bottom: 14px;
+  margin-bottom: 20px;
+}
+
+.vault-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vault-title h2 {
+  font-family: var(--fhead);
+  font-size: 18px;
+  margin: 0;
+  color: #FFF;
+  letter-spacing: 0.05em;
+}
+
+.vault-subtitle {
+  font-family: var(--fmono);
+  font-size: 10px;
+  color: #00FF88;
+  letter-spacing: 0.1em;
+}
+
+.vault-close-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFF;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.vault-close-btn:hover { background: rgba(255, 51, 51, 0.3); border-color: #FF3333; }
+
+.vault-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .vault-body { grid-template-columns: 1fr; }
+}
+
+.vault-box {
+  background: rgba(0, 212, 255, 0.03);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.box-head {
+  font-family: var(--fmono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #00D4FF;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+  padding-bottom: 6px;
+}
+
+.vault-kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--fmono);
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.vault-kv span { color: #6A9AB8; }
+.tok-code { background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 3px; font-size: 9px; color: #00FF88; }
+.badge-ok { background: rgba(0,255,136,0.15); border: 1px solid #00FF88; color: #00FF88; padding: 2px 6px; border-radius: 4px; font-size: 9px; }
+
+.vault-select {
+  width: 100%;
+  background: rgba(4, 12, 24, 0.9);
+  border: 1px solid #00D4FF;
+  color: #FFF;
+  padding: 8px;
+  font-family: var(--fmono);
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+.vault-act-btn {
+  width: 100%;
+  margin-top: 10px;
+  background: rgba(0, 212, 255, 0.15);
+  border: 1px solid #00D4FF;
+  color: #FFF;
+  padding: 8px 12px;
+  font-family: var(--fmono);
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vault-act-btn:hover { background: rgba(0, 212, 255, 0.3); box-shadow: 0 0 12px rgba(0, 212, 255, 0.3); }
+.vault-act-btn.danger { background: rgba(255, 51, 51, 0.15); border-color: #FF3333; color: #FF8888; }
+.vault-act-btn.danger:hover { background: rgba(255, 51, 51, 0.3); }
+
+.vault-actions-row { display: flex; gap: 8px; margin-top: 10px; }
+
+.perm-matrix { display: flex; flex-direction: column; gap: 8px; }
+
+.perm-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.perm-item.granted { border-color: rgba(0, 255, 136, 0.3); }
+.perm-item.locked { border-color: rgba(255, 51, 51, 0.2); opacity: 0.6; }
+
+.perm-lvl {
+  font-family: var(--fmono);
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(0, 212, 255, 0.2);
+  color: #00D4FF;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.perm-info { flex: 1; }
+.perm-name { font-size: 11px; font-weight: 600; color: #FFF; }
+.perm-desc { font-size: 9px; color: #6A9AB8; }
+.perm-status { font-family: var(--fmono); font-size: 9px; font-weight: 700; }
+.perm-item.granted .perm-status { color: #00FF88; }
+.perm-item.locked .perm-status { color: #FF5555; }
+
