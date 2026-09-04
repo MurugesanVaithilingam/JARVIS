@@ -156,22 +156,38 @@
 
     /* Animated AI Core Pulse */
     .ai-core-graphic {
-      width: 100px; height: 100px; margin: 0 auto;
+      width: 90px; height: 90px; margin: 0 auto;
       border-radius: 50%; border: 2px dashed var(--d-cyan);
       display: flex; align-items: center; justify-content: center;
       position: relative; animation: rotateCore 12s linear infinite;
     }
     @keyframes rotateCore { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .ai-core-inner {
-      width: 60px; height: 60px; border-radius: 50%;
+      width: 54px; height: 54px; border-radius: 50%;
       background: radial-gradient(circle, #00D4FF 0%, rgba(0,212,255,0.2) 70%);
       box-shadow: 0 0 25px #00D4FF; animation: corePulse 2s ease-in-out infinite alternate;
     }
     @keyframes corePulse { 0% { scale: 0.85; opacity: 0.7; } 100% { scale: 1.15; opacity: 1; } }
 
     /* Canvas Simulators */
-    .vision-canvas-wrap { position: relative; width: 100%; height: 220px; background: #000; border-radius: 6px; overflow: hidden; }
+    .vision-canvas-wrap { position: relative; width: 100%; height: 230px; background: #000; border-radius: 6px; overflow: hidden; }
     canvas { display: block; width: 100%; height: 100%; }
+
+    /* Interactive Virtual Joystick Controller Box */
+    .joystick-panel {
+      display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center;
+      background: rgba(0, 5, 15, 0.6); border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 8px; padding: 10px; margin-top: 6px;
+    }
+    .dpad {
+      display: grid; grid-template-columns: repeat(3, 36px); grid-template-rows: repeat(3, 36px); gap: 4px;
+    }
+    .dbtn {
+      background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 6px; color: var(--d-cyan); font-weight: bold; font-size: 14px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none;
+    }
+    .dbtn:hover, .dbtn:active { background: var(--d-cyan); color: #000; box-shadow: 0 0 10px var(--d-cyan); }
 
     /* Controls Bar */
     .hud-btn-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -189,12 +205,14 @@
     .h-btn.red:hover { background: var(--d-red); color: #fff; box-shadow: 0 0 15px var(--d-red); }
     .h-btn.green { color: var(--d-green); border-color: rgba(0,255,136,0.4); background: rgba(0,255,136,0.08); }
     .h-btn.green:hover { background: var(--d-green); color: #000; box-shadow: 0 0 15px var(--d-green); }
+    .h-btn.gold { color: var(--d-gold); border-color: rgba(255,210,30,0.4); background: rgba(255,210,30,0.08); }
+    .h-btn.gold:hover { background: var(--d-gold); color: #000; box-shadow: 0 0 15px var(--d-gold); }
 
     /* Console Terminal Output */
     .console-box {
       background: #000510; border: 1px solid rgba(0, 212, 255, 0.3);
       border-radius: 6px; padding: 10px; font-family: 'Share Tech Mono', monospace;
-      font-size: 11px; height: 120px; overflow-y: auto; color: #00FF88;
+      font-size: 11px; height: 130px; overflow-y: auto; color: #00FF88;
       display: flex; flex-direction: column; gap: 4px;
     }
 
@@ -284,7 +302,7 @@
     <!-- HERO BANNER -->
     <div class="drone-hero">
       <div class="drone-title">J.A.R.V.I.S. <span>AUTONOMOUS DRONE CONTROL</span></div>
-      <div class="drone-subtitle">VOICE ➔ LLM INTENT ➔ MAVLINK PROTOCOL ➔ COMPUTER VISION ➔ TELEMETRY RAG</div>
+      <div class="drone-subtitle">LIVE REAL-TIME FLIGHT CONTROL — KEYBOARD (WASD), TOUCH JOYSTICK & LIVE MIC SPEECH RECOGNITION</div>
     </div>
 
     <!-- ══════════════════════════════════════════════════════════════════
@@ -299,30 +317,31 @@
         <div class="hud-box-d">
           <div class="hud-box-title">💻 SYSTEM STATUS</div>
           <div style="font-family:'Share Tech Mono',monospace; font-size:11px; display:flex; flex-direction:column; gap:6px;">
-            <div>CPU USAGE: <span style="color:var(--d-green); font-weight:bold;">18.4% (8 CORES)</span></div>
+            <div>CPU USAGE: <span style="color:var(--d-green); font-weight:bold;" id="sysCpu">18.4% (8 CORES)</span></div>
             <div>RAM LOAD: <span style="color:var(--d-cyan); font-weight:bold;">4.2 GB / 16 GB</span></div>
             <div>NETWORK: <span style="color:var(--d-gold); font-weight:bold;">1.2 Gbps UPLINK</span></div>
-            <div>MAVLINK PORT: <span style="color:var(--d-green); font-weight:bold;">UDP 14550 OK</span></div>
+            <div>MAVLINK PORT: <span style="color:var(--d-green); font-weight:bold;" id="sysMav">UDP 14550 OK</span></div>
           </div>
         </div>
 
         <div class="hud-box-d" style="text-align:center;">
           <div class="hud-box-title" style="justify-content:center;">🧠 JARVIS AI CORE</div>
           <div class="ai-core-graphic">
-            <div class="ai-core-inner"></div>
+            <div class="ai-core-inner" id="corePulseCircle"></div>
           </div>
           <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--d-cyan); margin-top:6px;" id="aiCoreState">
-            STATUS: STANDBY (WAITING FOR VOICE)
+            STATUS: STANDBY (WAITING FOR VOICE / MANUAL CONTROL)
           </div>
         </div>
 
         <div class="hud-box-d">
           <div class="hud-box-title">🚁 DRONE TELEMETRY</div>
           <div style="font-family:'Share Tech Mono',monospace; font-size:11px; display:flex; flex-direction:column; gap:6px;">
-            <div>BATTERY: <span style="color:var(--d-green); font-weight:bold;" id="droneBat">94% (16.8V 4S)</span></div>
+            <div>STATE: <span style="color:var(--d-green); font-weight:bold;" id="droneState">LANDED</span></div>
+            <div>BATTERY: <span style="color:var(--d-green); font-weight:bold;" id="droneBat">98% (16.8V 4S)</span></div>
             <div>GPS LOCK: <span style="color:var(--d-cyan); font-weight:bold;">18 SATS (FIX 3D)</span></div>
-            <div>ALTITUDE: <span style="color:var(--d-gold); font-weight:bold;" id="droneAlt">14.2 METERS</span></div>
-            <div>AIRSPEED: <span style="color:var(--d-cyan); font-weight:bold;" id="droneSpd">18.5 KM/H</span></div>
+            <div>ALTITUDE: <span style="color:var(--d-gold); font-weight:bold;" id="droneAlt">0.0 METERS</span></div>
+            <div>AIRSPEED: <span style="color:var(--d-cyan); font-weight:bold;" id="droneSpd">0.0 KM/H</span></div>
           </div>
         </div>
       </div>
@@ -333,7 +352,7 @@
         <div class="hud-box-d">
           <div class="hud-box-title">
             <span>👁️ LIVE CAMERA & YOLO OBJECT RECOGNITION</span>
-            <span style="color:var(--d-green); font-size:9px;">FPS: 60</span>
+            <span style="color:var(--d-green); font-size:9px;" id="fpsVal">FPS: 60</span>
           </div>
           <div class="vision-canvas-wrap">
             <canvas id="visionCanvas"></canvas>
@@ -343,6 +362,7 @@
             <button class="h-btn" onclick="setVisionMode('vehicle')">Vehicle Tracking</button>
             <button class="h-btn" onclick="setVisionMode('landing')">Landing Zone</button>
             <button class="h-btn" onclick="setVisionMode('obstacle')">Obstacle Matrix</button>
+            <button class="h-btn" onclick="setVisionMode('thermal')">Thermal Vision</button>
           </div>
         </div>
 
@@ -350,34 +370,48 @@
         <div class="hud-box-d">
           <div class="hud-box-title">
             <span>🗺️ AUTONOMOUS ROUTE & WAYPOINT RADAR</span>
-            <span style="color:var(--d-gold); font-size:9px;">GPS: 37.7749, -122.4194</span>
+            <span style="color:var(--d-gold); font-size:9px;" id="gpsCoords">GPS: 37.7749, -122.4194</span>
           </div>
           <div class="vision-canvas-wrap">
             <canvas id="radarCanvas"></canvas>
           </div>
           <div class="hud-btn-row">
-            <button class="h-btn green" onclick="sendVoiceCmd('JARVIS, take off.')">🚀 Take Off</button>
-            <button class="h-btn red" onclick="sendVoiceCmd('JARVIS, land.')">🛬 Land</button>
-            <button class="h-btn" onclick="sendVoiceCmd('JARVIS, start patrol mode.')">🔄 Patrol Mode</button>
-            <button class="h-btn" onclick="sendVoiceCmd('JARVIS, return home.')">🏠 Return Home</button>
+            <button class="h-btn green" onclick="executeTakeoff()">🚀 Take Off (Space)</button>
+            <button class="h-btn red" onclick="executeLanding()">🛬 Land (Esc)</button>
+            <button class="h-btn gold" onclick="togglePatrolMode()">🔄 Patrol Mode</button>
+            <button class="h-btn" onclick="returnToHome()">🏠 Return Home</button>
           </div>
         </div>
 
-        <!-- Telemetry & Gyroscope Instrument -->
+        <!-- Telemetry & Gyroscope Instrument & Manual D-Pad -->
         <div class="hud-box-d">
-          <div class="hud-box-title">🧭 GYRO & FLIGHT INSTRUMENTS</div>
-          <div style="font-family:'Share Tech Mono',monospace; font-size:11px; display:flex; flex-direction:column; gap:8px;">
-            <div>PITCH: <span style="color:var(--d-cyan);">+2.4°</span> | ROLL: <span style="color:var(--d-cyan);">-0.8°</span></div>
-            <div>YAW HEADING: <span style="color:var(--d-gold);">315° (NW)</span></div>
-            <div>BAROMETER: <span style="color:var(--d-green);">1013.25 hPa</span></div>
+          <div class="hud-box-title">🧭 GYRO & MANUAL D-PAD</div>
+          <div style="font-family:'Share Tech Mono',monospace; font-size:11px; display:flex; flex-direction:column; gap:4px;">
+            <div>PITCH: <span style="color:var(--d-cyan);" id="pitchVal">+0.0°</span> | ROLL: <span style="color:var(--d-cyan);" id="rollVal">0.0°</span></div>
+            <div>YAW HEADING: <span style="color:var(--d-gold);" id="yawVal">0° (N)</span></div>
             <div>ESC MOTOR RPM:</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:10px;">
-              <div style="background:rgba(0,212,255,0.1); padding:4px; border-radius:4px;">M1: 8,420 RPM</div>
-              <div style="background:rgba(0,212,255,0.1); padding:4px; border-radius:4px;">M2: 8,415 RPM</div>
-              <div style="background:rgba(0,212,255,0.1); padding:4px; border-radius:4px;">M3: 8,430 RPM</div>
-              <div style="background:rgba(0,212,255,0.1); padding:4px; border-radius:4px;">M4: 8,422 RPM</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:9px;">
+              <div style="background:rgba(0,212,255,0.1); padding:2px 4px; border-radius:4px;" id="m1Rpm">M1: 0 RPM</div>
+              <div style="background:rgba(0,212,255,0.1); padding:2px 4px; border-radius:4px;" id="m2Rpm">M2: 0 RPM</div>
+              <div style="background:rgba(0,212,255,0.1); padding:2px 4px; border-radius:4px;" id="m3Rpm">M3: 0 RPM</div>
+              <div style="background:rgba(0,212,255,0.1); padding:2px 4px; border-radius:4px;" id="m4Rpm">M4: 0 RPM</div>
             </div>
-            <div>FLIGHT STACK: <span style="color:var(--d-purple); font-weight:bold;">PX4 Autopilot (MAVLink v2)</span></div>
+          </div>
+
+          <!-- Virtual D-Pad Touch Controller -->
+          <div class="joystick-panel">
+            <div style="font-family:'Orbitron',sans-serif; font-size:9px; color:var(--d-cyan); font-weight:700;">MANUAL TOUCH / WASD FLIGHT</div>
+            <div class="dpad">
+              <div></div>
+              <div class="dbtn" onclick="moveDrone('forward')" title="Forward (W / Up)">▲</div>
+              <div></div>
+              <div class="dbtn" onclick="moveDrone('left')" title="Rotate Left (A / Left)">◀</div>
+              <div class="dbtn" onclick="moveDrone('stop')" title="Hover Stop">●</div>
+              <div class="dbtn" onclick="moveDrone('right')" title="Rotate Right (D / Right)">▶</div>
+              <div></div>
+              <div class="dbtn" onclick="moveDrone('backward')" title="Backward (S / Down)">▼</div>
+              <div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -385,10 +419,12 @@
       <!-- BOTTOM ROW: VOICE INTERACTIVE CONSOLE -->
       <div class="hud-box-d">
         <div class="hud-box-title">
-          <span>🎙️ VOICE CONTROL & TELEMETRY LOG CONSOLE</span>
-          <span style="color:var(--d-green); font-size:9px;">SPEECH SYNTHESIS: ONLINE</span>
+          <span>🎙️ REAL-TIME VOICE CONTROL & MAVLINK TELEMETRY CONSOLE</span>
+          <span style="color:var(--d-green); font-size:9px;">SPEECH ENGINE: ACTIVE</span>
         </div>
+
         <div class="hud-btn-row" style="margin-bottom:8px;">
+          <button class="h-btn green" onclick="startMicRecognition()">🎙️ START LIVE MIC SPEECH</button>
           <button class="h-btn" onclick="sendVoiceCmd('JARVIS, take off.')">"JARVIS, take off."</button>
           <button class="h-btn" onclick="sendVoiceCmd('Move forward 2 meters.')">"Move forward 2 meters."</button>
           <button class="h-btn" onclick="sendVoiceCmd('Rotate left.')">"Rotate left."</button>
@@ -401,13 +437,14 @@
         </div>
 
         <div style="display:flex; gap:8px; margin-bottom:8px;">
-          <input type="text" id="voiceInput" placeholder="Speak or type custom JARVIS drone command..." style="flex:1; padding:8px 12px; background:rgba(0,5,15,0.8); border:1px solid rgba(0,212,255,0.3); border-radius:6px; color:#fff; font-family:'Share Tech Mono',monospace; outline:none;" onkeypress="if(event.key==='Enter') sendCustomVoiceCmd();">
+          <input type="text" id="voiceInput" placeholder="Speak into mic or type custom JARVIS command (e.g. 'JARVIS take off', 'rotate left', 'check battery')..." style="flex:1; padding:8px 12px; background:rgba(0,5,15,0.8); border:1px solid rgba(0,212,255,0.3); border-radius:6px; color:#fff; font-family:'Share Tech Mono',monospace; outline:none;" onkeypress="if(event.key==='Enter') sendCustomVoiceCmd();">
           <button class="h-btn green" onclick="sendCustomVoiceCmd()">🎤 TRANSMIT VOICE</button>
         </div>
 
         <div class="console-box" id="consoleLogs">
-          <div>[10:55:01] J.A.R.V.I.S. System initialized. Connected to PX4 Flight Controller via MAVLink UDP 14550.</div>
-          <div>[10:55:02] GPS 3D Fix established. 18 Satellites active. Ready for autonomous voice flight.</div>
+          <div>[11:00:00] J.A.R.V.I.S. Real-World Tactical Drone Control System initialized.</div>
+          <div>[11:00:01] MAVLink UDP 14550 connection active. Flight Stack: PX4 Autopilot v1.14.</div>
+          <div>[11:00:02] Controls ready: Use Keyboard WASD / Arrows, Touch D-Pad, or Click "START LIVE MIC SPEECH".</div>
         </div>
       </div>
 
@@ -422,7 +459,7 @@
       <div class="d-card">
         <div class="d-card-title">
           <span>🧠 1. JARVIS AI CORE & VOICE PIPELINE</span>
-          <span class="badge">AI SYSTEM</span>
+          <span class="badge">ACTIVE EXECUTION</span>
         </div>
         <p style="font-size: 12px; color: #8AAABB;">
           Real-world voice-to-drone control architecture replacing simple text chatbots with active MAVLink tool-calling execution.
@@ -469,11 +506,9 @@
           Queries historical flight telemetry, battery degradation logs, and drone manuals in natural language.
         </p>
         <div style="background:rgba(0,10,25,0.8); border:1px solid var(--d-cyan); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
-          <div style="font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--d-gold);">
-            "JARVIS, what was the battery level during yesterday's flight?"
-          </div>
+          <input type="text" id="ragInput" value="What was the battery level during yesterday's flight?" style="padding:6px 10px; background:#000; border:1px solid rgba(0,212,255,0.3); border-radius:4px; color:#fff; font-family:'Share Tech Mono',monospace; font-size:11px;">
           <button class="h-btn" style="align-self:flex-start;" onclick="runRAGDemo()">Execute RAG Query</button>
-          <div id="ragResult" style="font-size:11px; color:#00FF88; font-family:'Share Tech Mono',monospace;"></div>
+          <div id="ragResult" style="font-size:11px; color:#00FF88; font-family:'Share Tech Mono',monospace; min-height:40px;"></div>
         </div>
       </div>
 
@@ -529,10 +564,35 @@
   </div>
 
   <script>
-    // ── Vision Canvas Animation Simulator ──
+    // ══════════════════════════════════════════════════════════════════
+    // REAL-TIME FLIGHT PHYSICS & CONTROL STATE ENGINE
+    // ══════════════════════════════════════════════════════════════════
+    let drone = {
+      state: 'LANDED', // LANDED, TAKING_OFF, IN_FLIGHT, PATROL, RETURN_HOME, LANDING
+      alt: 0.0,
+      targetAlt: 0.0,
+      spd: 0.0,
+      targetSpd: 0.0,
+      bat: 98.0,
+      x: 0, // offset from center
+      y: 0,
+      vx: 0,
+      vy: 0,
+      yaw: 0,
+      pitch: 0,
+      roll: 0,
+      patrolStep: 0,
+      patrolTimer: 0
+    };
+
+    let visionMode = 'person';
+    let frame = 0;
+
+    // Canvases
     const visionCanvas = document.getElementById('visionCanvas');
     const vCtx = visionCanvas.getContext('2d');
-    let visionMode = 'person';
+    const radarCanvas = document.getElementById('radarCanvas');
+    const rCtx = radarCanvas.getContext('2d');
 
     function resizeCanvases() {
       visionCanvas.width = visionCanvas.parentElement.clientWidth;
@@ -542,72 +602,240 @@
     }
     window.addEventListener('resize', resizeCanvases);
 
-    let frame = 0;
-    function drawVision() {
+    // ── MAIN 60FPS PHYSICS UPDATE LOOP ──
+    function updatePhysics() {
       frame++;
-      vCtx.fillStyle = '#010A16';
-      vCtx.fillRect(0, 0, visionCanvas.width, visionCanvas.height);
 
-      // Grid background
-      vCtx.strokeStyle = 'rgba(0,212,255,0.15)';
-      vCtx.lineWidth = 1;
-      for (let x = 0; x < visionCanvas.width; x += 30) {
-        vCtx.beginPath(); vCtx.moveTo(x, 0); vCtx.lineTo(x, visionCanvas.height); vCtx.stroke();
-      }
-      for (let y = 0; y < visionCanvas.height; y += 30) {
-        vCtx.beginPath(); vCtx.moveTo(0, y); vCtx.lineTo(visionCanvas.width, y); vCtx.stroke();
+      // Altitude interpolation
+      if (Math.abs(drone.alt - drone.targetAlt) > 0.1) {
+        drone.alt += (drone.targetAlt - drone.alt) * 0.05;
+      } else {
+        drone.alt = drone.targetAlt;
+        if (drone.state === 'TAKING_OFF') drone.state = 'IN_FLIGHT';
+        if (drone.state === 'LANDING') { drone.state = 'LANDED'; drone.spd = 0; }
       }
 
-      // Simulated YOLO bounding box
-      const boxX = 60 + Math.sin(frame * 0.03) * 40;
-      const boxY = 40 + Math.cos(frame * 0.02) * 20;
-      const boxW = 90, boxH = 110;
+      // Airspeed interpolation
+      drone.spd += (drone.targetSpd - drone.spd) * 0.08;
 
-      vCtx.strokeStyle = '#00FF88';
-      vCtx.lineWidth = 2;
-      vCtx.strokeRect(boxX, boxY, boxW, boxH);
+      // Battery drain when motors run
+      if (drone.alt > 0 || drone.state === 'TAKING_OFF') {
+        drone.bat = Math.max(0, drone.bat - 0.002);
+      }
 
-      vCtx.fillStyle = '#00FF88';
-      vCtx.font = '10px "Share Tech Mono"';
-      vCtx.fillText(visionMode.toUpperCase() + ' [98.4%]', boxX + 4, boxY - 6);
+      // Patrol Mode Autonomous Flight Logic
+      if (drone.state === 'PATROL') {
+        drone.patrolTimer++;
+        const speed = 1.2;
+        if (drone.patrolStep === 0) { drone.x += speed; drone.yaw = 90; if (drone.x > 80) drone.patrolStep = 1; }
+        else if (drone.patrolStep === 1) { drone.y += speed; drone.yaw = 180; if (drone.y > 60) drone.patrolStep = 2; }
+        else if (drone.patrolStep === 2) { drone.x -= speed; drone.yaw = 270; if (drone.x < -80) drone.patrolStep = 3; }
+        else if (drone.patrolStep === 3) { drone.y -= speed; drone.yaw = 0; if (drone.y < -60) drone.patrolStep = 0; }
+      }
 
-      requestAnimationFrame(drawVision);
+      // Return to Home Logic
+      if (drone.state === 'RETURN_HOME') {
+        const dist = Math.hypot(drone.x, drone.y);
+        if (dist > 2) {
+          drone.x *= 0.95;
+          drone.y *= 0.95;
+          drone.yaw = (Math.atan2(-drone.y, -drone.x) * 180 / Math.PI + 360) % 360;
+        } else {
+          drone.x = 0; drone.y = 0;
+          executeLanding();
+        }
+      }
+
+      // Apply movement velocity
+      drone.x += drone.vx;
+      drone.y += drone.vy;
+      drone.vx *= 0.92;
+      drone.vy *= 0.92;
+
+      // Pitch & Roll dynamics
+      drone.pitch = -drone.vy * 4;
+      drone.roll = drone.vx * 4;
+
+      // Update DOM Indicators
+      document.getElementById('droneState').textContent = drone.state;
+      document.getElementById('droneBat').textContent = drone.bat.toFixed(1) + '% (16.8V 4S)';
+      document.getElementById('droneAlt').textContent = drone.alt.toFixed(1) + ' METERS';
+      document.getElementById('droneSpd').textContent = drone.spd.toFixed(1) + ' KM/H';
+      document.getElementById('pitchVal').textContent = (drone.pitch >= 0 ? '+' : '') + drone.pitch.toFixed(1) + '°';
+      document.getElementById('rollVal').textContent = (drone.roll >= 0 ? '+' : '') + drone.roll.toFixed(1) + '°';
+      document.getElementById('yawVal').textContent = Math.round((drone.yaw % 360 + 360) % 360) + '°';
+
+      // Motor RPM calculation
+      const baseRpm = (drone.alt > 0 || drone.state === 'TAKING_OFF') ? 8400 + Math.round(drone.spd * 50) : 0;
+      document.getElementById('m1Rpm').textContent = `M1: ${baseRpm > 0 ? baseRpm + 12 : 0} RPM`;
+      document.getElementById('m2Rpm').textContent = `M2: ${baseRpm > 0 ? baseRpm - 8 : 0} RPM`;
+      document.getElementById('m3Rpm').textContent = `M3: ${baseRpm > 0 ? baseRpm + 15 : 0} RPM`;
+      document.getElementById('m4Rpm').textContent = `M4: ${baseRpm > 0 ? baseRpm + 5 : 0} RPM`;
+
+      // Render Canvases
+      renderVisionCanvas();
+      renderRadarCanvas();
+
+      requestAnimationFrame(updatePhysics);
     }
 
-    // ── Radar Canvas Animation Simulator ──
-    const radarCanvas = document.getElementById('radarCanvas');
-    const rCtx = radarCanvas.getContext('2d');
+    // ── RENDER OPENCV / YOLO CAMERA CANVAS ──
+    function renderVisionCanvas() {
+      const w = visionCanvas.width, h = visionCanvas.height;
+      vCtx.fillStyle = visionMode === 'thermal' ? '#1a0022' : '#010A16';
+      vCtx.fillRect(0, 0, w, h);
 
-    function drawRadar() {
-      const cx = radarCanvas.width / 2;
-      const cy = radarCanvas.height / 2;
-      const r = Math.min(cx, cy) - 15;
+      // Camera HUD Scanlines & Crosshair
+      vCtx.strokeStyle = visionMode === 'thermal' ? 'rgba(255,0,127,0.3)' : 'rgba(0,212,255,0.2)';
+      vCtx.lineWidth = 1;
+      for (let y = 0; y < h; y += 20) {
+        vCtx.beginPath(); vCtx.moveTo(0, y); vCtx.lineTo(w, y); vCtx.stroke();
+      }
+
+      // Center Aiming Crosshair
+      vCtx.strokeStyle = 'rgba(0,255,136,0.6)';
+      vCtx.beginPath(); vCtx.moveTo(w/2 - 15, h/2); vCtx.lineTo(w/2 + 15, h/2); vCtx.stroke();
+      vCtx.beginPath(); vCtx.moveTo(w/2, h/2 - 15); vCtx.lineTo(w/2, h/2 + 15); vCtx.stroke();
+
+      // Dynamic Object Detection Box Simulator based on mode
+      const boxX = (w / 2 - 45) + Math.sin(frame * 0.04) * 30 + drone.x * 0.5;
+      const boxY = (h / 2 - 50) + Math.cos(frame * 0.03) * 20 + drone.y * 0.5;
+
+      if (visionMode === 'person') {
+        vCtx.strokeStyle = '#00FF88'; vCtx.lineWidth = 2;
+        vCtx.strokeRect(boxX, boxY, 80, 110);
+        vCtx.fillStyle = '#00FF88'; vCtx.font = '10px "Share Tech Mono"';
+        vCtx.fillText('ID #101 HUMAN [98.4%]', boxX, boxY - 6);
+      } else if (visionMode === 'vehicle') {
+        vCtx.strokeStyle = '#00D4FF'; vCtx.lineWidth = 2;
+        vCtx.strokeRect(boxX - 20, boxY + 10, 130, 80);
+        vCtx.fillStyle = '#00D4FF'; vCtx.font = '10px "Share Tech Mono"';
+        vCtx.fillText('ID #302 VEHICLE [97.8%]', boxX - 20, boxY + 4);
+      } else if (visionMode === 'landing') {
+        vCtx.strokeStyle = '#FFD21E'; vCtx.lineWidth = 2;
+        vCtx.beginPath(); vCtx.arc(w/2, h/2, 45, 0, Math.PI * 2); vCtx.stroke();
+        vCtx.fillStyle = '#FFD21E'; vCtx.font = '14px "Orbitron"'; vCtx.textAlign = 'center';
+        vCtx.fillText('H', w/2, h/2 + 5); vCtx.textAlign = 'left';
+        vCtx.font = '10px "Share Tech Mono"'; vCtx.fillText('LANDING PAD ALIGNED', w/2 - 50, h/2 + 65);
+      } else if (visionMode === 'obstacle') {
+        vCtx.strokeStyle = '#FF2244'; vCtx.lineWidth = 1.5;
+        vCtx.beginPath(); vCtx.arc(boxX + 40, boxY + 40, 50 + Math.sin(frame*0.1)*10, 0, Math.PI * 2); vCtx.stroke();
+        vCtx.fillStyle = '#FF2244'; vCtx.font = '10px "Share Tech Mono"';
+        vCtx.fillText('WARNING: OBSTACLE 1.8m', boxX - 10, boxY - 10);
+      } else if (visionMode === 'thermal') {
+        const grad = vCtx.createRadialGradient(boxX+40, boxY+40, 5, boxX+40, boxY+40, 60);
+        grad.addColorStop(0, '#FF007F'); grad.addColorStop(0.5, '#FFD21E'); grad.addColorStop(1, 'transparent');
+        vCtx.fillStyle = grad; vCtx.beginPath(); vCtx.arc(boxX+40, boxY+40, 60, 0, Math.PI * 2); vCtx.fill();
+        vCtx.fillStyle = '#FF007F'; vCtx.font = '10px "Share Tech Mono"';
+        vCtx.fillText('THERMAL SIGNATURE 37.2°C', boxX - 10, boxY - 10);
+      }
+    }
+
+    // ── RENDER AUTONOMOUS RADAR CANVAS ──
+    function renderRadarCanvas() {
+      const w = radarCanvas.width, h = radarCanvas.height;
+      const cx = w / 2, cy = h / 2;
+      const maxR = Math.min(cx, cy) - 15;
 
       rCtx.fillStyle = '#010A16';
-      rCtx.fillRect(0, 0, radarCanvas.width, radarCanvas.height);
+      rCtx.fillRect(0, 0, w, h);
 
-      // Concentric radar circles
-      rCtx.strokeStyle = 'rgba(0,212,255,0.3)';
+      // Concentric Radar Rings
+      rCtx.strokeStyle = 'rgba(0,212,255,0.25)';
       rCtx.lineWidth = 1;
-      [r * 0.33, r * 0.66, r].forEach(cr => {
-        rCtx.beginPath(); rCtx.arc(cx, cy, cr, 0, Math.PI * 2); rCtx.stroke();
+      [maxR * 0.33, maxR * 0.66, maxR].forEach(r => {
+        rCtx.beginPath(); rCtx.arc(cx, cy, r, 0, Math.PI * 2); rCtx.stroke();
       });
 
-      // Rotating radar sweep line
-      const angle = frame * 0.03;
-      rCtx.strokeStyle = 'rgba(0,212,255,0.6)';
+      // Crosslines
+      rCtx.beginPath(); rCtx.moveTo(cx - maxR, cy); rCtx.lineTo(cx + maxR, cy); rCtx.stroke();
+      rCtx.beginPath(); rCtx.moveTo(cx, cy - maxR); rCtx.lineTo(cx, cy + maxR); rCtx.stroke();
+
+      // Sweeping Line
+      const sweepAngle = frame * 0.03;
+      rCtx.strokeStyle = 'rgba(0,212,255,0.5)';
       rCtx.beginPath(); rCtx.moveTo(cx, cy);
-      rCtx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+      rCtx.lineTo(cx + Math.cos(sweepAngle) * maxR, cy + Math.sin(sweepAngle) * maxR);
       rCtx.stroke();
 
-      // Drone blip
-      const dx = cx + Math.cos(angle * 0.5) * (r * 0.5);
-      const dy = cy + Math.sin(angle * 0.5) * (r * 0.5);
-      rCtx.fillStyle = '#FF2244';
-      rCtx.beginPath(); rCtx.arc(dx, dy, 5, 0, Math.PI * 2); rCtx.fill();
+      // Home Launch Pad
+      rCtx.fillStyle = '#FFD21E';
+      rCtx.fillRect(cx - 3, cy - 3, 6, 6);
 
-      requestAnimationFrame(drawRadar);
+      // Drone Position Blip
+      const dronePx = cx + drone.x;
+      const dronePy = cy + drone.y;
+
+      rCtx.save();
+      rCtx.translate(dronePx, dronePy);
+      rCtx.rotate(drone.yaw * Math.PI / 180);
+
+      // Drone Quadcopter Icon
+      rCtx.fillStyle = drone.state === 'LANDED' ? '#5A7B98' : '#00FF88';
+      rCtx.shadowColor = '#00FF88'; rCtx.shadowBlur = 10;
+      rCtx.beginPath(); rCtx.arc(0, 0, 6, 0, Math.PI * 2); rCtx.fill();
+      rCtx.strokeStyle = '#00D4FF'; rCtx.lineWidth = 2;
+      rCtx.beginPath(); rCtx.moveTo(-8, -8); rCtx.lineTo(8, 8); rCtx.stroke();
+      rCtx.beginPath(); rCtx.moveTo(8, -8); rCtx.lineTo(-8, 8); rCtx.stroke();
+
+      rCtx.restore();
     }
+
+    // ── FLIGHT ACTIONS ──
+    function executeTakeoff() {
+      if (drone.state === 'LANDED') {
+        drone.state = 'TAKING_OFF';
+        drone.targetAlt = 15.0;
+        drone.targetSpd = 12.0;
+        sendVoiceCmd('JARVIS, take off.');
+      }
+    }
+
+    function executeLanding() {
+      drone.state = 'LANDING';
+      drone.targetAlt = 0.0;
+      drone.targetSpd = 0.0;
+      sendVoiceCmd('JARVIS, land.');
+    }
+
+    function togglePatrolMode() {
+      if (drone.state === 'PATROL') {
+        drone.state = 'IN_FLIGHT';
+        logConsole('Patrol mode deactivated.');
+      } else {
+        if (drone.alt === 0) executeTakeoff();
+        drone.state = 'PATROL';
+        sendVoiceCmd('JARVIS, start patrol mode.');
+      }
+    }
+
+    function returnToHome() {
+      if (drone.alt === 0) executeTakeoff();
+      drone.state = 'RETURN_HOME';
+      sendVoiceCmd('JARVIS, return home.');
+    }
+
+    function moveDrone(dir) {
+      if (drone.alt === 0 && dir !== 'stop') executeTakeoff();
+      const speed = 4;
+      if (dir === 'forward') { drone.vy -= speed; drone.targetSpd = 24.5; }
+      else if (dir === 'backward') { drone.vy += speed; drone.targetSpd = 18.0; }
+      else if (dir === 'left') { drone.vx -= speed; drone.yaw -= 15; }
+      else if (dir === 'right') { drone.vx += speed; drone.yaw += 15; }
+      else if (dir === 'stop') { drone.vx = 0; drone.vy = 0; drone.targetSpd = 0; }
+      logConsole(`Manual flight input: ${dir.toUpperCase()}`);
+    }
+
+    // Keyboard Flight Listeners (WASD + Arrows + Space + Esc)
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      if (k === 'w' || k === 'arrowup') moveDrone('forward');
+      if (k === 's' || k === 'arrowdown') moveDrone('backward');
+      if (k === 'a' || k === 'arrowleft') moveDrone('left');
+      if (k === 'd' || k === 'arrowright') moveDrone('right');
+      if (k === ' ') { e.preventDefault(); executeTakeoff(); }
+      if (k === 'escape') executeLanding();
+    });
 
     function setVisionMode(mode) {
       visionMode = mode;
@@ -623,17 +851,24 @@
       logConsole(`[NLP INTENT]: PARSING_COMMAND ➔ SAFETY_CHECK_OK`);
       logConsole(`[MAVLINK DISPATCH]: DISPATCHING COMMAND TO PX4 AUTOPILOT...`);
 
-      // Audio feedback using Web Speech API
+      // Natural Voice Feedback using Web Speech API
       if ('speechSynthesis' in window) {
         const synth = window.speechSynthesis;
         synth.cancel();
-        const msg = new SpeechSynthesisUtterance(cmdText.replace('JARVIS, ', ''));
-        msg.rate = 1.1; msg.pitch = 0.9;
+        let reply = cmdText.replace('JARVIS, ', '');
+        if (cmdText.includes('take off')) reply = 'Taking off now, sir. Altitude target set to 15 meters.';
+        else if (cmdText.includes('land')) reply = 'Initiating landing sequence. Descending aircraft.';
+        else if (cmdText.includes('return home')) reply = 'Returning to home launch coordinates.';
+        else if (cmdText.includes('patrol')) reply = 'Starting autonomous waypoint patrol pattern.';
+        else if (cmdText.includes('battery')) reply = `Battery level is currently at ${drone.bat.toFixed(0)} percent.`;
+
+        const msg = new SpeechSynthesisUtterance(reply);
+        msg.rate = 1.05; msg.pitch = 0.95;
         synth.speak(msg);
       }
 
       setTimeout(() => {
-        document.getElementById('aiCoreState').textContent = 'STATUS: STANDBY (WAITING FOR VOICE)';
+        document.getElementById('aiCoreState').textContent = 'STATUS: STANDBY (WAITING FOR VOICE / MANUAL CONTROL)';
         document.getElementById('aiCoreState').style.color = '#00D4FF';
       }, 3000);
     }
@@ -641,9 +876,42 @@
     function sendCustomVoiceCmd() {
       const input = document.getElementById('voiceInput');
       if (input.value.trim()) {
+        const val = input.value.trim().toLowerCase();
         sendVoiceCmd(input.value.trim());
+        if (val.includes('take off')) executeTakeoff();
+        else if (val.includes('land')) executeLanding();
+        else if (val.includes('return') || val.includes('home')) returnToHome();
+        else if (val.includes('patrol')) togglePatrolMode();
+        else if (val.includes('forward')) moveDrone('forward');
+        else if (val.includes('backward')) moveDrone('backward');
+        else if (val.includes('left')) moveDrone('left');
+        else if (val.includes('right')) moveDrone('right');
         input.value = '';
       }
+    }
+
+    // ── Live Speech Recognition (Microphone API) ──
+    function startMicRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Web Speech Recognition API is not supported in this browser. You can type commands into the input box below!');
+        return;
+      }
+      const recog = new SpeechRecognition();
+      recog.continuous = false; recog.interimResults = false; recog.lang = 'en-US';
+      
+      logConsole('🎤 Listening to microphone... Speak a JARVIS command!');
+      document.getElementById('aiCoreState').textContent = '🎤 LISTENING TO MICROPHONE...';
+      document.getElementById('aiCoreState').style.color = '#FFD21E';
+
+      recog.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        logConsole(`🎤 Speech Heard: "${text}"`);
+        document.getElementById('voiceInput').value = text;
+        sendCustomVoiceCmd();
+      };
+      recog.onerror = (e) => { logConsole(`Speech recognition error: ${e.error}`); };
+      recog.start();
     }
 
     function logConsole(msg) {
@@ -656,16 +924,16 @@
     }
 
     function runRAGDemo() {
+      const q = document.getElementById('ragInput').value;
       document.getElementById('ragResult').textContent = 'Searching vector database (FAISS + Chroma)...';
       setTimeout(() => {
-        document.getElementById('ragResult').textContent = 'JARVIS: "During yesterday\'s flight (Log #4829), battery level was 96% at takeoff and 24% at landing (Flight time: 28m 14s)."';
-      }, 1200);
+        document.getElementById('ragResult').textContent = `JARVIS RAG Response: "Query '${q}' retrieved Flight Log #4829 — Takeoff Battery: 98%, Landing Battery: 24%, Max Alt: 18.4m, Airspeed: 28 km/h."`;
+      }, 1000);
     }
 
     window.onload = () => {
       resizeCanvases();
-      drawVision();
-      drawRadar();
+      updatePhysics();
     };
   </script>
 </body>
