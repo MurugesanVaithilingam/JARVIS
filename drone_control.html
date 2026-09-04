@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J.A.R.V.I.S. Autonomous Drone & AI Control Center | Stark Industries</title>
+  <meta name="description" content="Real-world JARVIS AI Operating System & Tactical Control Center connected to Autonomous Drones via Voice, LLM Intent Detection, MAVLink, Computer Vision, and RAG Flight Telemetry.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ══════════════════════════════════════════════════════════════════
+       J.A.R.V.I.S. AUTONOMOUS DRONE & AI CONTROL CENTER STYLES
+       ══════════════════════════════════════════════════════════════════ */
+    :root {
+      --d-cyan: #00D4FF;
+      --d-red: #FF2244;
+      --d-green: #00FF88;
+      --d-gold: #FFD21E;
+      --d-purple: #A855F7;
+      --d-bg: #010612;
+      --d-card: rgba(2, 14, 30, 0.88);
+      --d-border: rgba(0, 212, 255, 0.25);
+    }
+
+    html, body {
+      width: 100%; min-height: 100vh; height: auto !important;
+      overflow-x: hidden !important; overflow-y: auto !important;
+      background: var(--d-bg);
+      font-family: 'Rajdhani', sans-serif;
+      color: #D4ECFF;
+      scroll-behavior: smooth;
+    }
+
+    .drone-page {
+      padding: 14px 18px 40px;
+      max-width: 1920px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 16px;
+      position: relative; z-index: 5;
+    }
+
+    /* ── TOP NAV BAR ── */
+    .drone-nav {
+      position: sticky; top: 0; z-index: 500;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(1, 8, 20, 0.96);
+      border-bottom: 1px solid var(--d-border);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 2px 30px rgba(0, 212, 255, 0.18);
+    }
+
+    .nav-brand-drone {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 15px; font-weight: 900;
+      color: #fff; letter-spacing: 0.2em;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-brand-drone span { color: var(--d-cyan); text-shadow: 0 0 12px var(--d-cyan); }
+
+    .drone-nav-scroll {
+      display: flex; gap: 6px; align-items: center;
+      padding: 4px 8px; background: rgba(2, 11, 24, 0.8);
+      border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 8px;
+      overflow-x: auto; scrollbar-width: none;
+      max-width: calc(100vw - 360px);
+    }
+    .drone-nav-scroll::-webkit-scrollbar { display: none; }
+    .drone-nav-scroll a {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; height: 30px; border-radius: 5px;
+      font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700;
+      letter-spacing: 0.1em; text-decoration: none; white-space: nowrap;
+      color: var(--d-cyan); background: rgba(0, 212, 255, 0.07);
+      border: 1px solid rgba(0, 212, 255, 0.25); transition: all 0.2s;
+    }
+    .drone-nav-scroll a:hover {
+      color: #fff; background: rgba(0, 212, 255, 0.25);
+      box-shadow: 0 0 14px rgba(0, 212, 255, 0.4); transform: translateY(-1px);
+    }
+    .drone-nav-scroll a.active {
+      color: #000; background: linear-gradient(135deg, #00D4FF, #0088AA);
+      font-weight: 900; box-shadow: 0 0 18px rgba(0, 212, 255, 0.6);
+    }
+
+    /* ── HERO BANNER ── */
+    .drone-hero {
+      text-align: center; padding: 20px;
+      background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.15) 0%, transparent 70%),
+                  linear-gradient(180deg, rgba(2, 16, 36, 0.95) 0%, rgba(1, 8, 20, 0.98) 100%);
+      border: 1px solid var(--d-border); border-radius: 10px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
+    }
+    .drone-hero::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #00D4FF, #FF2244, #00FF88, transparent);
+    }
+    .drone-title {
+      font-family: 'Orbitron', sans-serif; font-size: clamp(22px, 3.8vw, 42px);
+      font-weight: 900; letter-spacing: 0.22em; color: #fff;
+      text-shadow: 0 0 30px #00D4FF, 0 0 60px rgba(0, 212, 255, 0.4);
+    }
+    .drone-title span { color: var(--d-cyan); }
+    .drone-subtitle {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      color: #6B8CAE; letter-spacing: 0.25em; margin-top: 6px;
+    }
+
+    /* ── ASCII COMMAND CENTER HUD ── */
+    .hud-ascii-container {
+      background: rgba(1, 10, 24, 0.95);
+      border: 1px solid var(--d-cyan); border-radius: 12px;
+      padding: 16px; position: relative;
+      box-shadow: 0 0 35px rgba(0, 212, 255, 0.2);
+    }
+
+    .ascii-hdr {
+      text-align: center; font-family: 'Orbitron', sans-serif;
+      font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 0.25em;
+      text-shadow: 0 0 15px var(--d-cyan); margin-bottom: 4px;
+    }
+    .ascii-sub {
+      text-align: center; font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; color: var(--d-gold); letter-spacing: 0.2em; margin-bottom: 14px;
+    }
+
+    /* HUD Layout 3 Columns */
+    .ascii-grid-top {
+      display: grid; grid-template-columns: 240px 1fr 240px; gap: 14px;
+      margin-bottom: 14px;
+    }
+    .ascii-grid-mid {
+      display: grid; grid-template-columns: 1fr 1fr 260px; gap: 14px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 1200px) {
+      .ascii-grid-top { grid-template-columns: 1fr; }
+      .ascii-grid-mid { grid-template-columns: 1fr; }
+    }
+
+    .hud-box-d {
+      background: rgba(2, 16, 36, 0.85);
+      border: 1px solid rgba(0, 212, 255, 0.25); border-radius: 8px;
+      padding: 12px; position: relative;
+      box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.05);
+    }
+    .hud-box-title {
+      font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800;
+      color: var(--d-cyan); letter-spacing: 0.15em; text-transform: uppercase;
+      margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2); padding-bottom: 4px;
+    }
+
+    /* Animated AI Core Pulse */
+    .ai-core-graphic {
+      width: 100px; height: 100px; margin: 0 auto;
+      border-radius: 50%; border: 2px dashed var(--d-cyan);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; animation: rotateCore 12s linear infinite;
+    }
+    @keyframes rotateCore { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .ai-core-inner {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: radial-gradient(circle, #00D4FF 0%, rgba(0,212,255,0.2) 70%);
+      box-shadow: 0 0 25px #00D4FF; animation: corePulse 2s ease-in-out infinite alternate;
+    }
+    @keyframes corePulse { 0% { scale: 0.85; opacity: 0.7; } 100% { scale: 1.15; opacity: 1; } }
+
+    /* Canvas Simulators */
+    .vision-canvas-wrap { position: relative; width: 100%; height: 220px; background: #000; border-radius: 6px; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    /* Controls Bar */
+    .hud-btn-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .h-btn {
+      padding: 6px 12px; border-radius: 4px;
+      font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700;
+      color: var(--d-cyan); background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.3); cursor: pointer; transition: all 0.2s;
+    }
+    .h-btn:hover {
+      color: #000; background: var(--d-cyan); font-weight: 900;
+      box-shadow: 0 0 15px var(--d-cyan); transform: translateY(-1px);
+    }
+    .h-btn.red { color: var(--d-red); border-color: rgba(255,34,68,0.4); background: rgba(255,34,68,0.08); }
+    .h-btn.red:hover { background: var(--d-red); color: #fff; box-shadow: 0 0 15px var(--d-red); }
+    .h-btn.green { color: var(--d-green); border-color: rgba(0,255,136,0.4); background: rgba(0,255,136,0.08); }
+    .h-btn.green:hover { background: var(--d-green); color: #000; box-shadow: 0 0 15px var(--d-green); }
+
+    /* Console Terminal Output */
+    .console-box {
+      background: #000510; border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 6px; padding: 10px; font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; height: 120px; overflow-y: auto; color: #00FF88;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    /* ── SECTIONS GRID ── */
+    .grid-2col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 1024px) { .grid-3col { grid-template-columns: 1fr; } .grid-2col { grid-template-columns: 1fr; } }
+
+    .d-card {
+      background: var(--d-card); border: 1px solid var(--d-border);
+      border-radius: 10px; padding: 16px; position: relative; backdrop-filter: blur(14px);
+      box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.04), 0 4px 20px rgba(0, 0, 0, 0.6);
+      display: flex; flex-direction: column; gap: 10px; transition: all 0.25s;
+    }
+    .d-card:hover {
+      border-color: rgba(0, 212, 255, 0.6);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.25), inset 0 0 20px rgba(0, 212, 255, 0.1);
+    }
+    .d-card-title {
+      font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800;
+      color: var(--d-cyan); letter-spacing: 0.15em; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2); padding-bottom: 6px;
+    }
+    .badge {
+      background: rgba(0, 212, 255, 0.15); border: 1px solid var(--d-cyan);
+      padding: 2px 8px; border-radius: 4px; font-size: 9px; color: #fff;
+    }
+
+    .pill-box { display: flex; flex-wrap: wrap; gap: 6px; }
+    .p-tag {
+      padding: 4px 9px; border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      background: rgba(0, 212, 255, 0.06); border: 1px solid rgba(0, 212, 255, 0.2);
+      color: #C8E8FF; transition: all 0.2s; cursor: pointer;
+    }
+    .p-tag:hover {
+      background: rgba(0, 212, 255, 0.25); border-color: var(--d-cyan);
+      color: #fff; box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+    }
+
+    /* Image Gallery Grid */
+    .img-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
+    @media (max-width: 900px) { .img-gallery { grid-template-columns: 1fr; } }
+    .gallery-img-wrap {
+      border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 8px; overflow: hidden;
+      position: relative; background: #000; height: 180px;
+    }
+    .gallery-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s;
+    }
+    .gallery-img-wrap:hover img { transform: scale(1.06); }
+    .gallery-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 6px 10px; background: rgba(1, 8, 20, 0.85);
+      font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--d-cyan);
+      backdrop-filter: blur(8px); border-top: 1px solid rgba(0, 212, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="drone-nav">
+    <div class="nav-brand-drone">
+      🚁 <span>J.A.R.V.I.S.</span> DRONE CONTROL
+    </div>
+    <div class="drone-nav-scroll">
+      <a href="index.html">🤖 HUD</a>
+      <a href="stark_hud.html">🌐 STARK HUD</a>
+      <a href="ai_ecosystem.html">🧬 AI ECOSYSTEM</a>
+      <a href="ai_master_matrix.html">⚡ MATRIX</a>
+      <a href="ai_llm_rag.html">🧠 LLM & RAG</a>
+      <a href="drone_control.html" class="active">🚁 DRONE AI</a>
+      <a href="3d_lab.html">🌌 3D LAB</a>
+      <a href="tracker.html">🛰️ TRACKER</a>
+      <a href="code_studio.html">💻 CODE SWARM</a>
+      <a href="cyber_soc.html">🛡️ CYBER SOC</a>
+      <a href="cmd_hacker.html">📟 TERMINAL</a>
+      <a href="login.html">🔐 LOGIN</a>
+    </div>
+  </header>
+
+  <div class="drone-page">
+
+    <!-- HERO BANNER -->
+    <div class="drone-hero">
+      <div class="drone-title">J.A.R.V.I.S. <span>AUTONOMOUS DRONE CONTROL</span></div>
+      <div class="drone-subtitle">VOICE ➔ LLM INTENT ➔ MAVLINK PROTOCOL ➔ COMPUTER VISION ➔ TELEMETRY RAG</div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         MAIN HUD COMMAND CENTER (MATCHING ASCII SPECIFICATIONS)
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="hud-ascii-container">
+      <div class="ascii-hdr">J.A.R.V.I.S. TACTICAL DRONE COMMAND CENTER</div>
+      <div class="ascii-sub">JUST A RATHER VERY INTELLIGENT SYSTEM — REAL-TIME MAVLINK UPLINK</div>
+
+      <!-- TOP ROW: SYSTEM / AI CORE / DRONE STATUS -->
+      <div class="ascii-grid-top">
+        <div class="hud-box-d">
+          <div class="hud-box-title">💻 SYSTEM STATUS</div>
+          <div style="font-family:'Share Tech Mono',monospace; font-size:11px; display:flex; flex-direction:column; gap:6px;">
+            <div>CPU USAGE: <span style="color:var(--d-green); font-weight:bold;">18.4% (8 CORES)</span></div>
+            <div>RAM LOAD: <span style="color:var(--d-cyan); font-weight:bold;">4.2 GB / 16 GB</span></div>
+            <div>NETWORK: <span style="color:var(--d-gold); font-weight:bold;">1.2 Gbps UPLINK</span></div>
+            <div>MAVLINK PORT: <span style="color:var(--d-green); font-weight:bold;">UDP 14550 OK</span></div>
+          </div>
+        </div>
+
+        <div class="hud-box-d" style="text-align:center;">
+          <div class="hud-box-title" style="justify-content:center;">🧠 JARVIS AI CORE</div>
+          <div class="ai-core-graphic">
+            <div class="ai-core-inner"></div>
+          </div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:var(--d-cyan); margin-top:6px;" id="aiCoreState">
+            STATUS: STANDBY (WAITING FOR VOICE)
+          </div>
+        </div>
+
+        <div class="hud-box-d">
+          <div class="hud-box-title">🚁 DRONE TELEMETRY</div>
+          <div style="font-family:'Share Tech Mono',monospace; font-size:11px; display:flex; flex-direction:column; gap:6px;">
+            <div>BATTERY: <span style="color:var(--d-green); font-weight:bold;" id="droneBat">94% (16.8V 4S)</span></div>
+            <div>GPS LOCK: <span style="color:var(--d-cyan); font-weight:bold;">18 SATS (FIX 3D)</span></div>
+            <div>ALTITUDE: <span style="color:var(--d-gold); font-weight:bold;" id="droneAlt">14.2 METERS</span></div>
+            <div>AIRSPEED: <span style="color:var(--d-cyan); font-weight:bold;" id="droneSpd">18.5 KM/H</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MID ROW: LIVE CAMERA / ROUTE MAP / GYROSCOPE -->
+      <div class="ascii-grid-mid">
+        <!-- Live OpenCV Vision Feed Simulator -->
+        <div class="hud-box-d">
+          <div class="hud-box-title">
+            <span>👁️ LIVE CAMERA & YOLO OBJECT RECOGNITION</span>
+            <span style="color:var(--d-green); font-size:9px;">FPS: 60</span>
+          </div>
+          <div class="vision-canvas-wrap">
+            <canvas id="visionCanvas"></canvas>
+          </div>
+          <div class="hud-btn-row">
+            <button class="h-btn" onclick="setVisionMode('person')">YOLO Person</button>
+            <button class="h-btn" onclick="setVisionMode('vehicle')">Vehicle Tracking</button>
+            <button class="h-btn" onclick="setVisionMode('landing')">Landing Zone</button>
+            <button class="h-btn" onclick="setVisionMode('obstacle')">Obstacle Matrix</button>
+          </div>
+        </div>
+
+        <!-- Autonomous Flight Route Radar Map Simulator -->
+        <div class="hud-box-d">
+          <div class="hud-box-title">
+            <span>🗺️ AUTONOMOUS ROUTE & WAYPOINT RADAR</span>
+            <span style="color:var(--d-gold); font-size:9px;">GPS: 37.7749, -122.4194</span>
+          </div>
+          <div class="vision-canvas-wrap">
+            <canvas id="radarCanvas"></canvas>
+          </div>
+          <div class="hud-btn-row">
+            <button class="h-btn green" onclick="sendVoiceCmd('JARVIS, take off.')">🚀 Take Off</button>
+            <button class="h-btn red" onclick="sendVoiceCmd('JARVIS, land.')">🛬 Land</button>
+            <button class="h-btn" onclick="sendVoiceCmd('JARVIS, start patrol mode.')">🔄 Patrol Mode</button>
+            <button class="h-btn" onclick="sendVoiceCmd('JARVIS, return home.')">🏠 Return Home</button>
+          </div>
+        </div>
+
+        <!-- Telemetry & Gyroscope Instrument -->
+        <div class="hud-box-d">
+          <div class="hud-box-title">🧭 GYRO & FLIGHT INSTRUMENTS</div>
+          <div style="font-family:'Share Tech Mono',monospace; font-size:11px; display:flex; flex-direction:column; gap:8px;">
+            <div>PITCH: <span style="color:var(--d-cyan);">+2.4°</span> | ROLL: <span style="color:var(--d-cyan);">-0.8°</span></div>
+            <div>YAW HEADING: <span style="color:var(--d-gold);">315° (NW)</span></div>
+            <div>BAROMETER: <span style="color:var(--d-green);">1013.25 hPa</span></div>
+            <div>ESC MOTOR RPM:</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:10px;">
+              <div style="background:rgba(0,212,255,0.1); padding:4px; border-radius:4px;">M1: 8,420 RPM</div>
+              <div style="background:rgba(0,212,255,0.1); padding:4px; border-radius:4px;">M2: 8,415 RPM</div>
+              <div style="background:rgba(0,212,255,0.1); padding:4px; border-radius:4px;">M3: 8,430 RPM</div>
+              <div style="background:rgba(0,212,255,0.1); padding:4px; border-radius:4px;">M4: 8,422 RPM</div>
+            </div>
+            <div>FLIGHT STACK: <span style="color:var(--d-purple); font-weight:bold;">PX4 Autopilot (MAVLink v2)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW: VOICE INTERACTIVE CONSOLE -->
+      <div class="hud-box-d">
+        <div class="hud-box-title">
+          <span>🎙️ VOICE CONTROL & TELEMETRY LOG CONSOLE</span>
+          <span style="color:var(--d-green); font-size:9px;">SPEECH SYNTHESIS: ONLINE</span>
+        </div>
+        <div class="hud-btn-row" style="margin-bottom:8px;">
+          <button class="h-btn" onclick="sendVoiceCmd('JARVIS, take off.')">"JARVIS, take off."</button>
+          <button class="h-btn" onclick="sendVoiceCmd('Move forward 2 meters.')">"Move forward 2 meters."</button>
+          <button class="h-btn" onclick="sendVoiceCmd('Rotate left.')">"Rotate left."</button>
+          <button class="h-btn" onclick="sendVoiceCmd('Follow me.')">"Follow me."</button>
+          <button class="h-btn" onclick="sendVoiceCmd('Return home.')">"Return home."</button>
+          <button class="h-btn" onclick="sendVoiceCmd('Land.')">"Land."</button>
+          <button class="h-btn" onclick="sendVoiceCmd('Show me the camera.')">"Show me the camera."</button>
+          <button class="h-btn" onclick="sendVoiceCmd('Check battery.')">"Check battery."</button>
+          <button class="h-btn" onclick="sendVoiceCmd('Start patrol mode.')">"Start patrol mode."</button>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <input type="text" id="voiceInput" placeholder="Speak or type custom JARVIS drone command..." style="flex:1; padding:8px 12px; background:rgba(0,5,15,0.8); border:1px solid rgba(0,212,255,0.3); border-radius:6px; color:#fff; font-family:'Share Tech Mono',monospace; outline:none;" onkeypress="if(event.key==='Enter') sendCustomVoiceCmd();">
+          <button class="h-btn green" onclick="sendCustomVoiceCmd()">🎤 TRANSMIT VOICE</button>
+        </div>
+
+        <div class="console-box" id="consoleLogs">
+          <div>[10:55:01] J.A.R.V.I.S. System initialized. Connected to PX4 Flight Controller via MAVLink UDP 14550.</div>
+          <div>[10:55:02] GPS 3D Fix established. 18 Satellites active. Ready for autonomous voice flight.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         SECTION BREAKDOWNS (SECTIONS 1 TO 7)
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="grid-2col">
+
+      <!-- 1. JARVIS AI CORE & VOICE PIPELINE -->
+      <div class="d-card">
+        <div class="d-card-title">
+          <span>🧠 1. JARVIS AI CORE & VOICE PIPELINE</span>
+          <span class="badge">AI SYSTEM</span>
+        </div>
+        <p style="font-size: 12px; color: #8AAABB;">
+          Real-world voice-to-drone control architecture replacing simple text chatbots with active MAVLink tool-calling execution.
+        </p>
+        <div class="pill-box">
+          <span class="p-tag">Speech-to-Text (STT)</span>
+          <span class="p-tag">NLP Intent Parsing</span>
+          <span class="p-tag">Safety Rules Engine</span>
+          <span class="p-tag">MAVLink API Dispatch</span>
+          <span class="p-tag">Task Planner</span>
+          <span class="p-tag">Voice Response (TTS)</span>
+        </div>
+        <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(0,212,255,0.2); padding:10px; border-radius:6px; font-family:'Share Tech Mono',monospace; font-size:11px; color:#00FF88;">
+          Microphone ➔ Speech-to-Text ➔ NLP/LLM ➔ Intent Detection ➔ Safety Check ➔ Drone API ➔ Telemetry ➔ JARVIS Voice
+        </div>
+      </div>
+
+      <!-- 2. COMPUTER VISION LAYER -->
+      <div class="d-card">
+        <div class="d-card-title">
+          <span>👁️ 2. COMPUTER VISION & OBJECT TRACKING</span>
+          <span class="badge">OPENCV + YOLO</span>
+        </div>
+        <p style="font-size: 12px; color: #8AAABB;">
+          Edge AI video processing pipeline running real-time neural network detection on live video feeds.
+        </p>
+        <div class="pill-box">
+          <span class="p-tag">YOLOv8 / YOLOv9 Detection</span>
+          <span class="p-tag">Person & Vehicle Tracking</span>
+          <span class="p-tag">Obstacle Matrix</span>
+          <span class="p-tag">Face Recognition</span>
+          <span class="p-tag">Barcode / QR Scanning</span>
+          <span class="p-tag">Autonomous Landing Zone</span>
+        </div>
+      </div>
+
+      <!-- 3. LLM + RAG FLIGHT MEMORY VAULT -->
+      <div class="d-card">
+        <div class="d-card-title">
+          <span>📚 3. LLM + RAG FLIGHT LOG DATABASE</span>
+          <span class="badge">RAG VAULT</span>
+        </div>
+        <p style="font-size: 12px; color: #8AAABB;">
+          Queries historical flight telemetry, battery degradation logs, and drone manuals in natural language.
+        </p>
+        <div style="background:rgba(0,10,25,0.8); border:1px solid var(--d-cyan); padding:10px; border-radius:6px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--d-gold);">
+            "JARVIS, what was the battery level during yesterday's flight?"
+          </div>
+          <button class="h-btn" style="align-self:flex-start;" onclick="runRAGDemo()">Execute RAG Query</button>
+          <div id="ragResult" style="font-size:11px; color:#00FF88; font-family:'Share Tech Mono',monospace;"></div>
+        </div>
+      </div>
+
+      <!-- 4. DATA MANAGEMENT & STORAGE LAYER -->
+      <div class="d-card">
+        <div class="d-card-title">
+          <span>🗄️ 4. DATA MANAGEMENT & STORAGE ARCHITECTURE</span>
+          <span class="badge">POSTGRES + REDIS</span>
+        </div>
+        <div class="pill-box">
+          <span class="p-tag">PostgreSQL (Users, Commands, Telemetry)</span>
+          <span class="p-tag">Redis (Real-time State & Cache)</span>
+          <span class="p-tag">FAISS / Chroma (Vector Embeddings)</span>
+          <span class="p-tag">Qdrant / Milvus (Semantic Search)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         IMAGE GALLERY SHOWCASE
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="d-card">
+      <div class="d-card-title">
+        <span>📸 STARK INDUSTRIES DRONE AI COMMAND CENTER SHOWCASE</span>
+        <span class="badge">MEDIA GALLERY</span>
+      </div>
+
+      <div class="img-gallery">
+        <div class="gallery-img-wrap">
+          <img src="assets/drone_center_1.jpg" alt="JARVIS Drone Tactical Hologram Screen">
+          <div class="gallery-caption">Tactical Controller & Holographic Mesh</div>
+        </div>
+        <div class="gallery-img-wrap">
+          <img src="assets/drone_center_2.png" alt="JARVIS Command Center Room">
+          <div class="gallery-caption">Multi-Operator Telemetry Control Room</div>
+        </div>
+        <div class="gallery-img-wrap">
+          <img src="assets/drone_pipeline.png" alt="Voice to Drone NLP Pipeline">
+          <div class="gallery-caption">Voice Input ➔ NLP ➔ MAVLink Pipeline</div>
+        </div>
+        <div class="gallery-img-wrap">
+          <img src="assets/drone_center_3.png" alt="Drone Testing Workbench">
+          <div class="gallery-caption">Autonomous Drone Workbench & HUD</div>
+        </div>
+        <div class="gallery-img-wrap">
+          <img src="assets/drone_center_4.png" alt="Server Rack Telemetry Monitor">
+          <div class="gallery-caption">Server Rack Telemetry & Radar Screen</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Vision Canvas Animation Simulator ──
+    const visionCanvas = document.getElementById('visionCanvas');
+    const vCtx = visionCanvas.getContext('2d');
+    let visionMode = 'person';
+
+    function resizeCanvases() {
+      visionCanvas.width = visionCanvas.parentElement.clientWidth;
+      visionCanvas.height = visionCanvas.parentElement.clientHeight;
+      radarCanvas.width = radarCanvas.parentElement.clientWidth;
+      radarCanvas.height = radarCanvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvases);
+
+    let frame = 0;
+    function drawVision() {
+      frame++;
+      vCtx.fillStyle = '#010A16';
+      vCtx.fillRect(0, 0, visionCanvas.width, visionCanvas.height);
+
+      // Grid background
+      vCtx.strokeStyle = 'rgba(0,212,255,0.15)';
+      vCtx.lineWidth = 1;
+      for (let x = 0; x < visionCanvas.width; x += 30) {
+        vCtx.beginPath(); vCtx.moveTo(x, 0); vCtx.lineTo(x, visionCanvas.height); vCtx.stroke();
+      }
+      for (let y = 0; y < visionCanvas.height; y += 30) {
+        vCtx.beginPath(); vCtx.moveTo(0, y); vCtx.lineTo(visionCanvas.width, y); vCtx.stroke();
+      }
+
+      // Simulated YOLO bounding box
+      const boxX = 60 + Math.sin(frame * 0.03) * 40;
+      const boxY = 40 + Math.cos(frame * 0.02) * 20;
+      const boxW = 90, boxH = 110;
+
+      vCtx.strokeStyle = '#00FF88';
+      vCtx.lineWidth = 2;
+      vCtx.strokeRect(boxX, boxY, boxW, boxH);
+
+      vCtx.fillStyle = '#00FF88';
+      vCtx.font = '10px "Share Tech Mono"';
+      vCtx.fillText(visionMode.toUpperCase() + ' [98.4%]', boxX + 4, boxY - 6);
+
+      requestAnimationFrame(drawVision);
+    }
+
+    // ── Radar Canvas Animation Simulator ──
+    const radarCanvas = document.getElementById('radarCanvas');
+    const rCtx = radarCanvas.getContext('2d');
+
+    function drawRadar() {
+      const cx = radarCanvas.width / 2;
+      const cy = radarCanvas.height / 2;
+      const r = Math.min(cx, cy) - 15;
+
+      rCtx.fillStyle = '#010A16';
+      rCtx.fillRect(0, 0, radarCanvas.width, radarCanvas.height);
+
+      // Concentric radar circles
+      rCtx.strokeStyle = 'rgba(0,212,255,0.3)';
+      rCtx.lineWidth = 1;
+      [r * 0.33, r * 0.66, r].forEach(cr => {
+        rCtx.beginPath(); rCtx.arc(cx, cy, cr, 0, Math.PI * 2); rCtx.stroke();
+      });
+
+      // Rotating radar sweep line
+      const angle = frame * 0.03;
+      rCtx.strokeStyle = 'rgba(0,212,255,0.6)';
+      rCtx.beginPath(); rCtx.moveTo(cx, cy);
+      rCtx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+      rCtx.stroke();
+
+      // Drone blip
+      const dx = cx + Math.cos(angle * 0.5) * (r * 0.5);
+      const dy = cy + Math.sin(angle * 0.5) * (r * 0.5);
+      rCtx.fillStyle = '#FF2244';
+      rCtx.beginPath(); rCtx.arc(dx, dy, 5, 0, Math.PI * 2); rCtx.fill();
+
+      requestAnimationFrame(drawRadar);
+    }
+
+    function setVisionMode(mode) {
+      visionMode = mode;
+      logConsole(`Computer Vision mode switched to: ${mode.toUpperCase()}`);
+    }
+
+    // ── Voice Commands & Speech Synthesis ──
+    function sendVoiceCmd(cmdText) {
+      document.getElementById('aiCoreState').textContent = `EXECUTING: "${cmdText.toUpperCase()}"`;
+      document.getElementById('aiCoreState').style.color = '#00FF88';
+
+      logConsole(`[VOICE INPUT]: "${cmdText}"`);
+      logConsole(`[NLP INTENT]: PARSING_COMMAND ➔ SAFETY_CHECK_OK`);
+      logConsole(`[MAVLINK DISPATCH]: DISPATCHING COMMAND TO PX4 AUTOPILOT...`);
+
+      // Audio feedback using Web Speech API
+      if ('speechSynthesis' in window) {
+        const synth = window.speechSynthesis;
+        synth.cancel();
+        const msg = new SpeechSynthesisUtterance(cmdText.replace('JARVIS, ', ''));
+        msg.rate = 1.1; msg.pitch = 0.9;
+        synth.speak(msg);
+      }
+
+      setTimeout(() => {
+        document.getElementById('aiCoreState').textContent = 'STATUS: STANDBY (WAITING FOR VOICE)';
+        document.getElementById('aiCoreState').style.color = '#00D4FF';
+      }, 3000);
+    }
+
+    function sendCustomVoiceCmd() {
+      const input = document.getElementById('voiceInput');
+      if (input.value.trim()) {
+        sendVoiceCmd(input.value.trim());
+        input.value = '';
+      }
+    }
+
+    function logConsole(msg) {
+      const logs = document.getElementById('consoleLogs');
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.textContent = `[${time}] ${msg}`;
+      logs.appendChild(div);
+      logs.scrollTop = logs.scrollHeight;
+    }
+
+    function runRAGDemo() {
+      document.getElementById('ragResult').textContent = 'Searching vector database (FAISS + Chroma)...';
+      setTimeout(() => {
+        document.getElementById('ragResult').textContent = 'JARVIS: "During yesterday\'s flight (Log #4829), battery level was 96% at takeoff and 24% at landing (Flight time: 28m 14s)."';
+      }, 1200);
+    }
+
+    window.onload = () => {
+      resizeCanvases();
+      drawVision();
+      drawRadar();
+    };
+  </script>
+</body>
+</html>
