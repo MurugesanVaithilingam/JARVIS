@@ -873,68 +873,129 @@ body.instant-kill-mode {
 }
 
 /* ================================================================
-   FULL MOBILE / TABLET RESPONSIVE OVERRIDES
-   Breakpoints: 1200px (laptop), 900px (tablet), 600px (phone)
+   FULL MULTI-DEVICE RESPONSIVE MASTER STYLESHEET
+   Supports: Mobile (320px-599px), Tablet (600px-1023px), 
+             Laptop/Desktop (1024px-1919px), 4K TV & Ultrawide (2000px+)
    ================================================================ */
 
-/* ── Tablet (≤1200px) ── */
-@media (max-width: 1200px) {
-  .main-nav-links { gap: 2px !important; }
-  .nav-tab { padding: 5px 8px !important; font-size: 9px !important; }
-  .hud { flex-direction: column !important; }
-  .sidebar { width: 100% !important; min-width: unset !important; flex-direction: row; flex-wrap: wrap; }
-  .chat-panel { min-height: 400px !important; }
-  .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
-  .hud-grid { grid-template-columns: repeat(2, 1fr) !important; }
+/* ── Universal Container & Viewport Protections ── */
+* {
+  box-sizing: border-box;
 }
 
-/* ── Phone & Tablet (≤900px) ── */
-@media (max-width: 900px) {
-  /* Navigation */
-  header.lab-nav, header#mainNav {
-    padding: 6px 10px !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
+html, body {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  -webkit-text-size-adjust: 100%;
+}
+
+img, video, canvas, iframe, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Ultrawide & 4K Smart TVs (≥2000px) ── */
+@media (min-width: 2000px) {
+  body {
+    font-size: 18px !important;
   }
-  .main-nav-links {
-    gap: 2px !important;
+  .hud-header, .eco-nav, .rag-nav-header, .lab-nav {
+    height: 75px !important;
+    padding: 0 40px !important;
+  }
+  .nav-tab, .filter-pill, .p-tag, .flow-step {
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+  }
+  .logo-mark, .nav-logo, .nav-brand {
+    font-size: 24px !important;
+  }
+  .matrix-title, .hero-title, .eco-banner-title {
+    font-size: 52px !important;
+  }
+  .m-card, .card, .r-card, .hud-box, .stat-card {
+    padding: 24px !important;
+    border-radius: 12px !important;
+  }
+  .matrix-grid, .grid-3col {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  .grid-4col {
+    grid-template-columns: repeat(5, 1fr) !important;
+  }
+}
+
+/* ── Standard Desktop & Laptops (1200px - 1999px) ── */
+@media (max-width: 1600px) {
+  .matrix-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+@media (max-width: 1200px) {
+  .main-nav-links, .nav-links-scroll, .nav-links {
+    gap: 4px !important;
+  }
+  .nav-tab { padding: 5px 8px !important; font-size: 10px !important; }
+  .hud { flex-direction: column !important; }
+  .sidebar { width: 100% !important; min-width: unset !important; flex-direction: row; flex-wrap: wrap; }
+  .chat-panel { min-height: 420px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
+  .hud-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid-3col { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid-4col { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ── Tablets & iPads (600px - 1023px) ── */
+@media (max-width: 1023px) {
+  /* Header navigation scrolling */
+  header.lab-nav, header#mainNav, .eco-nav, .rag-nav-header, .hud-header {
+    padding: 8px 12px !important;
+    flex-wrap: wrap !important;
+    height: auto !important;
+    gap: 8px !important;
+  }
+  .main-nav-links, .nav-links-scroll, .nav-links {
+    gap: 4px !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
     scrollbar-width: none !important;
     -webkit-overflow-scrolling: touch !important;
+    padding: 4px 2px !important;
   }
-  .main-nav-links::-webkit-scrollbar { display: none !important; }
-  .nav-tab span { display: none !important; }
-  .nav-tab { padding: 6px 8px !important; font-size: 16px !important; }
-  .logo-mark { font-size: 12px !important; }
+  .main-nav-links::-webkit-scrollbar, .nav-links-scroll::-webkit-scrollbar { display: none !important; }
+  
+  .logo-mark { font-size: 13px !important; }
   .vline { display: none !important; }
 
-  /* Main HUD layout */
+  /* HUD Layout */
   .hud { flex-direction: column !important; height: auto !important; overflow: auto !important; }
   .sidebar {
     width: 100% !important; min-width: unset !important;
-    max-height: 220px !important; overflow-y: auto !important;
+    max-height: 250px !important; overflow-y: auto !important;
     flex-direction: row !important; flex-wrap: wrap !important;
   }
-  .chat-panel { height: calc(100vh - 340px) !important; min-height: 350px !important; }
+  .chat-panel { height: calc(100vh - 360px) !important; min-height: 380px !important; }
 
-  /* Grids → single column */
-  .stats-row, .hud-grid, .matrix-grid, .pipeline-steps {
+  /* Grids → 1-2 Columns */
+  .stats-row, .hud-grid, .matrix-grid, .pipeline-steps, .row-main, .alexa-section, .models-grid {
     grid-template-columns: 1fr !important;
   }
-  .eco-grid, .ai-grid { grid-template-columns: 1fr !important; }
+  .eco-grid, .ai-grid, .grid-2col, .grid-3col, .grid-4col {
+    grid-template-columns: 1fr !important;
+  }
+  .pipeline-steps { grid-template-columns: repeat(3, 1fr) !important; }
 
   /* Boot screen */
   .boot-content { padding: 20px 14px !important; max-width: 96vw !important; }
   .boot-arc { width: 90px !important; height: 90px !important; }
 
   /* Tool drawer (inspector) */
-  #toolDrawer { width: calc(100vw - 20px) !important; right: 10px !important; }
+  #toolDrawer { width: calc(100vw - 20px) !important; right: 10px !important; bottom: 10px !important; }
 
-  /* Card sizing */
-  .m-card, .card, .hud-box { padding: 10px !important; }
-  .matrix-title { font-size: 22px !important; }
-  .pipeline-steps { grid-template-columns: repeat(3, 1fr) !important; }
+  /* Card padding */
+  .m-card, .card, .r-card, .hud-box { padding: 12px !important; }
+  .matrix-title, .hero-title, .eco-banner-title { font-size: 22px !important; letter-spacing: 0.15em !important; }
 
   /* Input area */
   .chat-footer { flex-wrap: wrap !important; gap: 6px !important; }
