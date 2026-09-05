@@ -51,6 +51,39 @@ class BrowserController:
         search_url = f"https://www.google.com/search?q={query.replace(' ', '+')}"
         return await self.open_url(search_url)
 
+    async def read_page(self, max_chars: int = 4000) -> Dict[str, Any]:
+        """Extract visible text from the current DOM — no mouse coordinates."""
+        try:
+            if not self._page:
+                return {"status": "error", "message": "No active browser page. Open a URL first."}
+            title = await self._page.title()
+            url = self._page.url
+            text = await self._page.inner_text("body")
+            text = " ".join((text or "").split())
+            return {
+                "status": "success",
+                "title": title,
+                "url": url,
+                "summary": text[:max_chars],
+                "length": len(text),
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def new_tab(self, url: str) -> Dict[str, Any]:
+        if not url.startswith(("http://", "https://")):
+            url = "https://" + url
+        try:
+            if not self._browser:
+                await self.initialize()
+            if not self._browser:
+                return await self.open_url(url)
+            self._page = await self._browser.new_page()
+            await self._page.goto(url, wait_until="domcontentloaded")
+            return {"status": "success", "url": url, "title": await self._page.title()}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
     async def close(self):
         if self._browser:
             await self._browser.close()

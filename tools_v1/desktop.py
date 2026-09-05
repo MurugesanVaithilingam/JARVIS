@@ -53,6 +53,14 @@ class DesktopController:
                 elif plat == 'darwin': subprocess.Popen(['open', '-a', 'Calculator'])
                 else: subprocess.Popen(['gnome-calculator'])
 
+            elif app_clean in ['chrome', 'google chrome', 'browser']:
+                if plat == 'win32':
+                    subprocess.Popen('start chrome', shell=True)
+                elif plat == 'darwin':
+                    subprocess.Popen(['open', '-a', 'Google Chrome'])
+                else:
+                    subprocess.Popen(['google-chrome'])
+
             else:
                 # Fallback: shell execution
                 if plat == 'win32':

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>J.A.R.V.I.S. & KAREN — Stark AI Command Center</title>
   <meta name="description" content="Stark Industries AI Command Center — Access JARVIS, FRIDAY, KAREN, EDITH and all major AI providers in one unified Iron Man HUD.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +14,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="shell.css">
 </head>
 <body>
   <div class="scanlines"></div>
@@ -178,19 +179,31 @@
         <!-- Provider Tabs -->
         <div class="ptabs" id="providerTabs"></div>
 
-        <!-- Chat -->
+        <!-- Chat Panel -->
         <div class="chat-panel" id="chatPanel">
           <div class="chat-hdr">
-            <div class="chat-pname" id="chatPName">SELECT PROVIDER</div>
-            <select id="modelSel" class="hud-sel"></select>
-            <button class="hbtn sm" id="clearBtn">✕ CLEAR</button>
+            <div class="chat-pname" id="chatPName" style="display:none;">SELECT PROVIDER</div>
+            <div class="chat-hdr-left">
+              <span class="hdr-lbl">PROVIDER:</span>
+              <select id="providerSel" class="hud-sel provider-sel" title="Select AI Intelligence Engine"></select>
+              <span class="hdr-lbl">MODEL:</span>
+              <select id="modelSel" class="hud-sel model-sel" title="Select LLM Model"></select>
+            </div>
+            <div class="chat-hdr-right">
+              <button class="clear-chat-btn" id="clearBtn" title="Clear Conversation History">
+                <span class="clear-icon">🗑️</span>
+                <span class="clear-text">CLEAR CHAT</span>
+              </button>
+            </div>
           </div>
+
           <div class="chat-msgs" id="chatMsgs">
             <div class="welcome" id="welcomeMsg">
               <div class="wt" id="welcomeTitle">GOOD EVENING.</div>
               <div class="ws" id="welcomeSub">All systems nominal. Select a provider to begin.</div>
             </div>
           </div>
+
           <div class="chat-foot">
             <div class="voice-ind" id="voiceInd">
               <div class="vwaves"><span></span><span></span><span></span><span></span><span></span></div>
@@ -219,9 +232,9 @@
         <div class="panel-body">
 
           <!-- Tactical Radar Sweeper Canvas -->
-          <div class="radar-container" style="text-align:center; margin-bottom:8px; position:relative;">
+          <div class="radar-container" style="text-align:center; margin-top:10px; margin-bottom:12px; position:relative;">
             <canvas id="radarCanvas" width="200" height="130" style="background:rgba(0,0,0,0.3); border:1px solid var(--brd); border-radius:6px; box-shadow:var(--glow1);"></canvas>
-            <div style="font-family:var(--fhud); font-size:8px; color:var(--c1); letter-spacing:0.15em; margin-top:2px;">LIVE TACTICAL RADAR — SCANNING</div>
+            <div style="font-family:var(--fhud); font-size:8px; color:var(--c1); letter-spacing:0.15em; margin-top:4px;">LIVE TACTICAL RADAR — SCANNING</div>
           </div>
 
           <!-- Stats -->
@@ -242,6 +255,21 @@
               <button class="tool-btn" onclick="JarvisTools.toggleBabyMonitor()">🔓 Baby Monitor</button>
               <button class="tool-btn" style="border-color: rgba(255,34,68,0.4); color: #ff2d7b;" onclick="JarvisTools.instantKill()">⚡ Instant Kill</button>
             </div>
+
+            <div class="sect-label">JARVIS 2.0 PHASE MATRIX</div>
+            <div class="tool-btns">
+              <button class="tool-btn" onclick="JarvisTools.browserOpenUrl()">🌐 Open URL</button>
+              <button class="tool-btn" onclick="JarvisTools.browserReadPage()">📄 Read DOM</button>
+              <button class="tool-btn" onclick="JarvisTools.browserSearchWeb()">🔎 Web Search</button>
+              <button class="tool-btn" onclick="JarvisTools.databaseQueryAssistant()">🗄️ Database / RAG</button>
+              <button class="tool-btn" onclick="JarvisTools.pandasDataAnalysis()">📊 Pandas</button>
+              <button class="tool-btn" onclick="JarvisTools.mlModelBuilder()">🧠 ML Builder</button>
+              <button class="tool-btn" onclick="JarvisTools.computerVisionScan()">👁️ Vision Scan</button>
+              <button class="tool-btn" onclick="JarvisTools.iotSmartHomeControl()">🏠 IoT / MQTT</button>
+              <button class="tool-btn" onclick="JarvisTools.robotTelemetryCheck()">🤖 Robot</button>
+              <button class="tool-btn" onclick="JarvisTools.droneBatteryCheck()">🚁 Drone</button>
+            </div>
+            <div class="divline"></div>
 
             <div class="sect-label">⚡ HIGH-TECH AI TOOLS & AUTONOMOUS AGENT</div>
             <div class="tool-btns">
@@ -291,12 +319,13 @@
           <!-- Voice commands -->
           <div class="sect-label">VOICE COMMANDS</div>
           <div class="vcmd-list">
-            <div class="vcmd">"Hey KAREN, run suit diagnostic"</div>
-            <div class="vcmd">"Hey JARVIS, open ChatGPT"</div>
-            <div class="vcmd">"Switch to KAREN / FRIDAY"</div>
-            <div class="vcmd">"Search the web for..."</div>
-            <div class="vcmd">"Clear conversation"</div>
-            <div class="vcmd">"Open settings"</div>
+            <div class="vcmd">"Jarvis, open LinkedIn"</div>
+            <div class="vcmd">"Read this page"</div>
+            <div class="vcmd">"How many customers?"</div>
+            <div class="vcmd">"Analyze sales data"</div>
+            <div class="vcmd">"Camera vision scan"</div>
+            <div class="vcmd">"Living room light on"</div>
+            <div class="vcmd">"Drone battery"</div>
           </div>
 
           <div class="divline"></div>
@@ -438,6 +467,8 @@
         </div>
       </div>
     </div>
+  </div>
+
   <!-- MULTITASKING EMBEDDED HUD WINDOW -->
   <div id="multitaskHUD" class="multitask-hud hidden">
     <div class="mhud-hdr">
@@ -494,5 +525,6 @@
       });
     }
   </script>
+  <script src="nav.js" defer></script>
 </body>
 </html>

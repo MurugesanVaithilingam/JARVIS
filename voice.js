@@ -36,8 +36,94 @@
   let wakeGateActive  = false;  // Alexa-style: only process after wake word
   let wakeGateTimer   = null;
   let wakeTimeout     = null;   // buffer for pure wake word greeting
+  let micPaused       = false;  // pause STT during TTS without destroying handlers
+  let voiceSocket     = null;
+  let socketReady     = false;
+  const VOICE_WS_URL  = 'ws://localhost:8000/ws/voice';
+  const VOICE_API_URL = 'http://localhost:8000/api/voice/command';
 
-  // ── Wake words (primary: "hello boss" | "jarvis") ────────────────
+  function sessionToken() {
+    return localStorage.getItem('jarvis_session') || localStorage.getItem('jarvis_token') || '';
+  }
+
+  function authHeaders() {
+    const t = sessionToken();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': t ? ('Bearer ' + t) : '',
+      'X-JARVIS-TOKEN': t,
+      'X-JARVIS-CLEARANCE': localStorage.getItem('jarvis_clearance') || ''
+    };
+  }
+
+  // ── Backend Voice Bridge (WebSocket → guaranteed reply) ───────────
+  function connectVoiceBackend() {
+    if (voiceSocket && (voiceSocket.readyState === WebSocket.OPEN || voiceSocket.readyState === WebSocket.CONNECTING)) return;
+    try {
+      const t = sessionToken();
+      const url = t ? (VOICE_WS_URL + '?token=' + encodeURIComponent(t)) : VOICE_WS_URL;
+      voiceSocket = new WebSocket(url);
+      voiceSocket.onopen = () => {
+        socketReady = true;
+        console.log('✅ JARVIS Voice Backend connected');
+        window.JarvisVoiceState?.set('LISTENING');
+      };
+      voiceSocket.onclose = () => {
+        socketReady = false;
+        voiceSocket = null;
+        setTimeout(connectVoiceBackend, 3000);
+      };
+      voiceSocket.onerror = () => { socketReady = false; };
+    } catch (e) {
+      socketReady = false;
+    }
+  }
+
+  async function sendToBackend(text, opts = {}) {
+    const payload = {
+      command: text,
+      confirmed: !!opts.confirmed,
+      pending_id: opts.pending_id || null
+    };
+    // Prefer WebSocket (lower latency, persistent)
+    if (socketReady && voiceSocket?.readyState === WebSocket.OPEN) {
+      return new Promise((resolve) => {
+        const timeout = setTimeout(() => resolve(null), 8000);
+        const handler = (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            if (data.event === 'connected') return;
+            if (data.event === 'error' && data.intent === 'ACCESS_DENIED') {
+              voiceSocket.removeEventListener('message', handler);
+              clearTimeout(timeout);
+              resolve(data);
+              return;
+            }
+            if (data.event === 'response' || data.reply) {
+              voiceSocket.removeEventListener('message', handler);
+              clearTimeout(timeout);
+              resolve(data);
+            }
+          } catch (e) {}
+        };
+        voiceSocket.addEventListener('message', handler);
+        voiceSocket.send(JSON.stringify(payload));
+      });
+    }
+    // REST fallback
+    try {
+      const res = await fetch(VOICE_API_URL, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+      });
+      if (res.status === 401) {
+        return { reply: 'Please sign in first. Authentication is required for voice control.', intent: 'ACCESS_DENIED' };
+      }
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    return null;
+  }
   const WAKE_WORDS = [
     'hello boss','hi boss','hello jarvis','hi jarvis',
     'jarvis','jervis','jarvez','charvis',
@@ -107,7 +193,11 @@
 
   // ── Desktop & Web App Launcher Helper ─────────────────────────────
   function desktop(cmd) {
-    fetch(`http://localhost:8765/run?cmd=${encodeURIComponent(cmd)}`, { mode: 'cors' })
+    const t = sessionToken();
+    fetch(`http://localhost:8765/run?cmd=${encodeURIComponent(cmd)}&token=${encodeURIComponent(t)}`, {
+      mode: 'cors',
+      headers: { 'X-JARVIS-TOKEN': t, 'Authorization': t ? ('Bearer ' + t) : '' }
+    })
       .catch(() => {
         fetch('jarvis_executor.php', {
           method: 'POST',
@@ -230,10 +320,13 @@
     [/ஹலோ பாஸ்,? எப்படி இருக்கீங்க\??/g, 'Hello Boss, eppadi irukkeenga?'],
     [/ஜார்விஸ் சிஸ்டம்ஸ் 100% ஆன்லைனில் உள்ளது!?/g, 'Jarvis systems nooRu percent online-il ullathu!'],
     [/சொல்லுங்க பாஸ்,? உங்களுக்கு என்ன வேணும்\??/g, 'Sollunga Boss, ungalukku enna veNum?'],
+    [/என்ன message அனுப்பணும்\??/g, 'enna message anuppaNum?'],
+    [/message அனுப்பிட்டேன்/g, 'message anuppittEn'],
     [/நான் (அக்கரையா )?செய்ய காத்திருக்கிறேன்!?/g, 'Naan seyya kaathirukiren!'],
     [/ஓப்பன் பண்ணிட்டேன் பாஸ்!?/g, 'Open pannittEn Boss!'],
     [/நான் நல்லா இருக்கேன் பாஸ்!?/g, 'Naan nalla irukkEn Boss!'],
     [/ஸ்டார்க் சிஸ்டம்ஸ் 100% ஆன்லைனில் இயங்குகிறது!?/g, 'Stark systems nooRu percent online-il iyanguthu!'],
+    [/இப்போதைய நேரம்/g, 'Ippothaiyya neram'],
     [/பாஸ்/g, 'Boss'],
     [/நான்/g, 'Naan'],
     [/வணக்கம்/g, 'Vanakkam'],
@@ -255,9 +348,14 @@
     [/காத்திருக்கிறேன்/g, 'kaathirukkiREn'],
     [/உங்களுக்கு/g, 'ungalukku'],
     [/கண்டுபிடிக்கிறேன்/g, 'kaNdupidikkirEn'],
+    [/அனுப்பு/g, 'anuppu'],
+    [/மெசேஜ்/g, 'message'],
+    [/கால்/g, 'call'],
+    [/கூப்பிடு/g, 'kooppidu'],
     // Remaining Tamil Unicode chars → strip gracefully
     [/[\u0B80-\u0BFF]+/g, ''],
   ];
+
 
 
   // ── Speech Sanitizer for TTS ─────────────────────────────────────
@@ -297,15 +395,11 @@
 
     unlockAudio();
     isSpeaking = true;
+    micPaused = true;
+    window.JarvisVoiceState?.set('SPEAKING');
 
-    // 🔇 STOP MIC COMPLETELY while JARVIS speaks (prevents echo repeat)
-    try {
-      if (recognition) {
-        recognition.onresult = null;   // discard any pending results
-        recognition.onend    = null;   // don't auto-restart during TTS
-        recognition.stop();
-      }
-    } catch(e) {}
+    // Pause mic during TTS (keep handlers intact for reliable recovery)
+    try { recognition?.stop(); } catch(e) {}
 
     try {
       window.speechSynthesis.cancel();
@@ -321,13 +415,14 @@
       clearTimeout(ttsWatchdog);
       clearInterval(ttsKeepAlive);
       isSpeaking = false;
-      voiceMode = true; // Always stay active in 24/7 voice mode!
+      micPaused = false;
+      voiceMode = true;
+      window.JarvisVoiceState?.set('LISTENING');
       setVoiceUI(true);
-      // 🎙️ INSTANT 24/7 MIC RESUME (Gemini Live / ChatGPT Advanced Voice Mode style)
       if (window.JarvisVoice) {
         setTimeout(() => {
           if (!isSpeaking) window.JarvisVoice._boot();
-        }, 30);
+        }, 80);
       }
       if (onDone) onDone();
     };
@@ -385,37 +480,79 @@
   function handleCommand(raw) {
     if (!raw || raw.trim().length < 1) return;
 
-    // ⚡ INSTANT BARGE-IN: If JARVIS is currently speaking, cancel TTS immediately when user speaks!
-    if (window.speechSynthesis && window.speechSynthesis.speaking) {
+    // Barge-in: cancel TTS when user speaks
+    if (window.speechSynthesis?.speaking || isSpeaking) {
       try { window.speechSynthesis.cancel(); } catch(e){}
       isSpeaking = false;
-      console.log('⚡ BARGE-IN DETECTED: Stopped JARVIS speech to listen to user input.');
+      micPaused = false;
+      console.log('⚡ BARGE-IN: TTS cancelled, listening to user.');
     }
 
-    // 🛡️ SECURITY ENGINE VOICE CONFIRMATION HOOK
-    if (window.JarvisSecurityEngine && typeof window.JarvisSecurityEngine.handleVoiceConfirmation === 'function') {
-      if (window.JarvisSecurityEngine.handleVoiceConfirmation(raw)) {
-        return; // Confirmation modal resolved by voice!
-      }
-    }
+    if (window.JarvisSecurityEngine?.handleVoiceConfirmation?.(raw)) return;
 
-    // Normalize
     const t = raw.toLowerCase()
       .replace(/[^\u0000-\u007E\u0B80-\u0BFF\s]/g, '')
       .replace(/\s+/g, ' ').trim();
 
-    // 🔇 ECHO SUPPRESSION GUARD: Prevent JARVIS from listening to its own TTS voice!
-    if (isSpeaking) {
-      console.log('🔇 ECHO GUARD: Discarding recognized audio matching active TTS output.');
+    // Discard mic input only while TTS is actively playing (not after barge-in)
+    if (micPaused && window.speechSynthesis?.speaking) {
+      console.log('🔇 Mic paused during TTS output.');
       return;
     }
 
-    // ⚡ 0. FAST COMMAND ROUTER (Bypasses LLM, zero latency < 20ms response)
+    const inp = document.getElementById('chatInput');
+    if (inp) inp.value = '';
+
+    // Route through Python backend first (guaranteed reply pipeline)
+    window.JarvisVoiceState?.set('PROCESSING');
+    sendToBackend(raw.trim()).then(async (data) => {
+      if (data && data.requires_confirmation && data.pending_id && window.JarvisSecurityEngine?.promptBackendConfirm) {
+        speak(data.reply || 'Please confirm.');
+        const decision = await window.JarvisSecurityEngine.promptBackendConfirm({
+          ...data,
+          command: raw.trim()
+        });
+        data = await sendToBackend(raw.trim(), {
+          confirmed: !!decision.ok,
+          pending_id: data.pending_id
+        });
+      }
+      if (data && (data.reply || data.response)) {
+        const reply = data.reply || data.response;
+        const tag = data.fast_command ? '⚡ FAST' : '🤖';
+        window.JarvisApp?.appendDirectMessage('ai', `${tag} **${reply}**`);
+        if (data.requires_followup || data.requires_confirmation) {
+          activateWakeGate();
+        }
+        speak(reply);
+        return;
+      }
+      // Backend offline — local fallback
+      handleCommandLocal(raw, t);
+    }).catch(() => handleCommandLocal(raw, t));
+  }
+
+  function handleCommandLocal(raw, t) {
+    if (localStorage.getItem('jarvis_authenticated') !== 'true' && !sessionToken()) {
+      const msg = 'Please sign in first. Voice control requires authentication.';
+      window.JarvisApp?.appendDirectMessage('ai', `🛡️ **${msg}**`);
+      speak(msg);
+      return;
+    }
     if (/are you listening|can you hear me|are you there|listening check|கேட்கிறதா|கேட்குதா/.test(t)) {
       return debounced('fast-listening-check', () => {
-        const respText = 'Yes, Boss! I am listening 100 percent. All microphone streams, VAD sensors, and voice channels are operational.';
-        const respTamil = 'ஆம் பாஸ்! நான் கேட்டுக்கொண்டுதான் இருக்கிறேன். அனைத்து வாய்ஸ் சிஸ்டம்களும் தயார் நிலையில் உள்ளன!';
-        window.JarvisApp?.appendDirectMessage('ai', `🎙️ **FAST RESPONSE [<15ms]**: ${respTamil}`);
+        const respText = 'Yes, sir. I am listening. All voice channels are operational.';
+        window.JarvisApp?.appendDirectMessage('ai', `🎙️ **FAST**: ${respText}`);
+        speak(respText);
+      });
+    }
+
+    if (/^(stop|cancel|quiet|shut up|stand down|repeat)$/.test(t)) {
+      return debounced('fast-stop', () => {
+        const respText = t === 'repeat'
+          ? 'Please repeat your last command, sir.'
+          : 'Standing down, sir. Listening for your next command.';
+        window.JarvisApp?.appendDirectMessage('ai', `⏹️ **${respText}**`);
         speak(respText);
       });
     }
@@ -511,15 +648,29 @@
     // ── 4. Open Commands (instant, open URL/app via browser & desktop) ───────
     const openApp = (key, label, url, speech) => {
       return debounced('open-' + key, () => {
-        window.JarvisApp?.appendDirectMessage('ai', `✅ **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening ${label}...**`);
-        // 1. Open on-screen split window in JARVIS UI if URL exists
+        const linkBtn = url && !url.startsWith('c:') ? `<br><a href="${url}" target="_blank" rel="noopener" style="display:inline-block; margin-top:8px; padding:6px 14px; background:linear-gradient(90deg, rgba(0,212,255,0.25), rgba(0,255,136,0.25)); border:1px solid #00D4FF; color:#FFF; border-radius:6px; text-decoration:none; font-weight:bold; font-family:var(--fhud); font-size:11px; box-shadow:0 0 10px rgba(0,212,255,0.3);">🚀 CLICK HERE TO OPEN ${label.toUpperCase()}</a>` : '';
+        window.JarvisApp?.appendDirectMessage('ai', `✅ **ஓப்பன் பண்ணிட்டேன் பாஸ்! Opening ${label}...**${linkBtn}`);
+        
+        // 1. Direct browser tab launch via synthesized anchor click (bypasses browser popup blocker)
         if (url && !url.startsWith('c:')) {
-          window.JarvisApp?.openMultitaskWindow(url, label);
-        }
-        // 2. Open external browser window/tab
-        if (url) {
+          try {
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          } catch(e) {}
           try { openedWindows[key] = window.open(url, '_blank'); } catch(e){}
         }
+
+        // 2. Open split iframe window ONLY if app allows iframe embedding (WhatsApp/FB/Google block iframe)
+        const iframeBlocklist = ['whatsapp', 'facebook', 'google', 'twitter', 'instagram', 'gmail', 'chatgpt', 'github'];
+        if (url && !iframeBlocklist.includes(key) && !url.startsWith('c:')) {
+          window.JarvisApp?.openMultitaskWindow(url, label);
+        }
+
         // 3. Trigger native OS app launcher fallback
         desktop(key);
         speak(speech || `Open pannitten Boss! Opening ${label}.`);
@@ -529,7 +680,7 @@
     if (/open.*(chatgpt|chat gpt|gpt)|(chatgpt|chat gpt|gpt).*open|^(chatgpt|chat gpt|gpt)$/i.test(t))
       return openApp('chatgpt','ChatGPT', 'https://chatgpt.com', 'Open pannitten Boss! Opening Chat G P T.');
 
-    if (/open.*(whatsapp|whats app|whatapp|what's app|what app)|(whatsapp|whats app|whatapp).*open|^(whatsapp|whats app|whatapp)$/i.test(t))
+    if (/(whatsapp|whats app|whatapp|what's app|வாட்ஸ்அப்)/i.test(t))
       return openApp('whatsapp','WhatsApp', 'https://web.whatsapp.com', 'Open pannitten Boss! Opening WhatsApp.');
 
     if (/open.*(instagram|insta)|(instagram|insta).*open|^(instagram|insta)$/i.test(t))
@@ -575,7 +726,10 @@
       return openApp('control','Control Panel', '', 'Open pannitten Boss! Opening Control Panel.');
 
     if (/open.*(vscode|vs code|code|visual studio code)/i.test(t))
-      return openApp('vscode','VS Code', '', 'Open pannitten Boss! Opening Visual Studio Code.');
+      return openApp('vscode','VS Code', '', 'VS Code is open, sir.');
+
+    if (/open.*(chrome|google chrome|browser)/i.test(t) || /^(chrome|browser)$/i.test(t))
+      return openApp('chrome','Chrome', 'https://google.com', 'Chrome is open, sir.');
 
     if (/open.*(spotify|music)/i.test(t))
       return openApp('spotify','Spotify', 'https://open.spotify.com', 'Open pannitten Boss! Opening Spotify.');
@@ -771,13 +925,14 @@
         const heard = (finalText || interimText).trim();
         if (!heard || heard.length < 2) return;
 
-        // 🎙️ Barge-In Interrupt: If JARVIS is speaking and user says a command, stop speech and process command!
-        if (isSpeaking) {
+        // Barge-in during TTS
+        if (micPaused || isSpeaking) {
           const lowerH = heard.toLowerCase();
-          if (/open|close|stop|jarvis|hello|whatsapp|cmd|explorer/i.test(lowerH)) {
+          if (/open|close|stop|cancel|jarvis|hello|chrome|whatsapp|cmd|explorer|listening/i.test(lowerH)) {
             try { window.speechSynthesis?.cancel(); } catch(er){}
             isSpeaking = false;
-          } else {
+            micPaused = false;
+          } else if (window.speechSynthesis?.speaking) {
             return;
           }
         }
@@ -878,6 +1033,7 @@
   // ── Auto-boot on load + zero-click passive gesture listeners ─────
   document.addEventListener('DOMContentLoaded', () => {
     injectVoiceDiagnosticsHUD();
+    connectVoiceBackend();
     const autoActivate = () => {
       unlockAudio();
       voiceMode = true;

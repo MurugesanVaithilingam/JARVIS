@@ -17,8 +17,35 @@ import sys
 import json
 import subprocess
 import webbrowser
+import os
+import sys
+import json
+import subprocess
+import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlparse
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+def _daemon_authorized(handler) -> bool:
+    incoming = handler.headers.get("X-JARVIS-TOKEN") or handler.headers.get("Authorization", "")
+    if incoming.lower().startswith("bearer "):
+        incoming = incoming[7:].strip()
+    parsed = urlparse(handler.path)
+    query_token = parse_qs(parsed.query).get("token", [""])[0]
+    try:
+        from core.security import authenticate
+
+        principal = authenticate(header_token=incoming or None, query_token=query_token or None)
+        return principal.authenticated and principal.clearance >= 2
+    except Exception:
+        master = os.getenv("JARVIS_ACCESS_TOKEN", "")
+        token = incoming or query_token
+        return bool(master and token and token == master)
+
 
 class JarvisDaemonHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -28,10 +55,21 @@ class JarvisDaemonHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-JARVIS-TOKEN')
         self.end_headers()
 
     def do_GET(self):
+        if not _daemon_authorized(self):
+            self.send_response(401)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "status": "error",
+                "message": "Desktop daemon requires authentication (level 2+)."
+            }).encode("utf-8"))
+            return
+
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Content-Type', 'application/json')
@@ -131,6 +169,15 @@ class JarvisDaemonHandler(BaseHTTPRequestHandler):
             else:
                 subprocess.Popen(['code'])
             response = {'status': 'success', 'message': 'VS Code opened!'}
+
+        elif cmd in ['chrome', 'google chrome', 'browser']:
+            if plat == 'win32':
+                subprocess.Popen('start chrome', shell=True)
+            elif plat == 'darwin':
+                subprocess.Popen(['open', '-a', 'Google Chrome'])
+            else:
+                subprocess.Popen(['google-chrome'])
+            response = {'status': 'success', 'message': 'Google Chrome opened!'}
 
         # ── 7. SPOTIFY / MEDIA PLAYERS ────────────────────────────────────
         elif cmd in ['spotify', 'music']:

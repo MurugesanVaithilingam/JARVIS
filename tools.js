@@ -64,6 +64,62 @@ window.JarvisAudio = {
 };
 
 window.JarvisTools = {
+  _phaseUrl: 'http://localhost:8000/api/phase',
+
+  _sessionHeaders() {
+    const t = localStorage.getItem('jarvis_session') || localStorage.getItem('jarvis_token') || '';
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': t ? ('Bearer ' + t) : '',
+      'X-JARVIS-TOKEN': t,
+      'X-JARVIS-CLEARANCE': localStorage.getItem('jarvis_clearance') || ''
+    };
+  },
+
+  async _phase(module, action = '', target = '', engine = 'sqlite') {
+    const headers = this._sessionHeaders();
+    if (!headers['X-JARVIS-TOKEN']) {
+      window.JarvisToast?.show('Sign in first — phase tools require authentication.', 'error');
+      return null;
+    }
+    try {
+      let res = await fetch(this._phaseUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ module, action, target, engine })
+      });
+      let data = await res.json().catch(() => ({}));
+      if (data.requires_confirmation && window.JarvisSecurityEngine?.promptBackendConfirm) {
+        const decision = await window.JarvisSecurityEngine.promptBackendConfirm({
+          ...data,
+          command: target || action || module
+        });
+        res = await fetch(this._phaseUrl, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            module, action, target, engine,
+            confirmed: !!decision.ok,
+            pending_id: data.pending_id
+          })
+        });
+        data = await res.json().catch(() => ({}));
+      }
+      if (!res.ok) {
+        const msg = data.detail || data.reply || 'Phase request denied.';
+        window.JarvisToast?.show(msg, 'error');
+        return data;
+      }
+      const reply = data.reply || 'Phase module complete.';
+      window.JarvisApp?.appendDirectMessage?.('ai', `🧩 **${reply}**`);
+      window.JarvisToast?.show(String(reply).slice(0, 90), 'success');
+      return data;
+    } catch (e) {
+      window.JarvisToast?.show('JARVIS phase API offline. Start jarvis_server_v1.py on port 8000.', 'warning');
+      return null;
+    }
+  },
+
   _inject(prefix, autoSend = false) {
     const inp = document.getElementById('chatInput');
     if (!inp) return;
@@ -256,72 +312,79 @@ window.JarvisTools = {
   },
 
   // 🌐 BROWSER CONTROLLER & PLAYWRIGHT AUTOMATION
+  async sendHiToRahul() {
+    const ok = await window.JarvisSecurityEngine?.authorizeAction('Send WhatsApp message', 'Rahul');
+    if (!ok) return;
+    window.JarvisAudio.playBeep(980, 'sine', 0.1);
+    await this._phase('whatsapp', 'Hi', 'Rahul');
+  },
+
   async browserOpenUrl() {
-    const url = prompt("🌐 PLAYWRIGHT BROWSER CONTROLLER\nEnter website URL to open & automate:", "https://linkedin.com");
+    const url = prompt("Playwright Browser Controller\nEnter website URL:", "https://linkedin.com");
     if (!url) return;
     const ok = await window.JarvisSecurityEngine?.authorizeAction('Open Browser Web URL', url);
     if (!ok) return;
     window.JarvisAudio.playBeep(900, 'sine', 0.1);
-    this._inject(`Open website ${url} in Playwright automated browser and read DOM structure.`, true);
-    window.JarvisToast?.show(`🌐 Browser Agent Opening: ${url}`, 'info');
+    await this._phase('browser', 'open', url);
   },
 
   async browserReadPage() {
     window.JarvisAudio.playBeep(950, 'triangle', 0.1);
-    this._inject('Read and extract text content from the current active browser page tab using Playwright DOM Parser.', true);
-    window.JarvisToast?.show('🌐 Extracting Web Page Content...', 'info');
+    await this._phase('browser', 'read', '');
   },
 
-  // 🗄️ DATABASE & VECTOR RAG ASSISTANT
+  async browserSearchWeb() {
+    const q = prompt("Search the web:", "AI engineer jobs");
+    if (!q) return;
+    await this._phase('browser', 'search', q);
+  },
+
   async databaseQueryAssistant() {
-    const dbName = prompt("🗄️ DATABASE QUERY ASSISTANT\nSelect Database (MySQL / PostgreSQL / Redis / Qdrant):", "MySQL");
+    const dbName = prompt("Database engine (sqlite / mysql / postgresql / rag):", "sqlite");
     if (!dbName) return;
+    const q = prompt("Read-only question or SELECT:", "How many customers?");
+    if (!q) return;
     const ok = await window.JarvisSecurityEngine?.authorizeAction('Query Database Matrix', dbName);
     if (!ok) return;
     window.JarvisAudio.playBeep(1100, 'sawtooth', 0.12);
-    this._inject(`Execute restricted SQL/Vector query on ${dbName} database: SELECT COUNT(*) FROM active_records;`, false);
-    window.JarvisToast?.show(`🗄️ ${dbName} Database Connected`, 'success');
+    await this._phase('database', 'query', q, dbName);
   },
 
-  // 📊 DATA ANALYSIS & PANDAS ENGINE
   async pandasDataAnalysis() {
     window.JarvisAudio.playBeep(1000, 'sine', 0.12);
-    this._inject('Analyze sales & customer dataset using Pandas, calculate standard deviation, clean missing values, and generate Plotly charts.', false);
-    window.JarvisToast?.show('📊 Data Analytics & Pandas Engine Engaged', 'info');
+    await this._phase('analytics', 'pandas', '');
   },
 
-  // 👁️ COMPUTER VISION & YOLO OBJECT DETECTION
+  async mlModelBuilder() {
+    window.JarvisAudio.playBeep(1100, 'triangle', 0.12);
+    await this._phase('analytics', 'ml', 'classification');
+  },
+
   async computerVisionScan() {
     window.JarvisAudio.playBeep(1200, 'square', 0.12);
-    this._inject('Initiate Camera Feed Computer Vision Scan: run YOLOv8 object detection, face recognition, and OCR text extraction on visual frame stream.', true);
-    window.JarvisToast?.show('👁️ Computer Vision YOLOv8 Active', 'info');
+    await this._phase('vision', 'auto', '');
   },
 
-  // 🏠 IoT & SMART HOME CONTROLLER (MQTT / ESP32)
   async iotSmartHomeControl() {
-    const dev = prompt("🏠 IoT SMART HOME CONTROLLER\nEnter device & action (e.g. Living Room Light ON, Bedroom AC 22C, Lock Door):", "Living Room Light ON");
+    const dev = prompt("IoT device & action:", "Living Room Light ON");
     if (!dev) return;
     const ok = await window.JarvisSecurityEngine?.authorizeAction('Control IoT Device', dev);
     if (!ok) return;
     window.JarvisAudio.playBeep(900, 'triangle', 0.1);
-    this._inject(`Send MQTT payload to ESP32 Smart Gateway: ACTION="${dev}".`, true);
-    window.JarvisToast?.show(`🏠 IoT Gateway Triggered: ${dev}`, 'success');
+    await this._phase('iot', 'control', dev);
   },
 
-  // 🤖 ROBOTICS & DRONE TELEMETRY
   async robotTelemetryCheck() {
     const ok = await window.JarvisSecurityEngine?.authorizeAction('Robot Telemetry Check', 'ROS 2 Micro-Rover');
     if (!ok) return;
     window.JarvisAudio.playBeep(1300, 'sawtooth', 0.15);
-    this._inject('Query ROS 2 Robot Telemetry: check LiDAR obstacle map, IMU orientation, motor encoder RPM, and battery level.', true);
-    window.JarvisToast?.show('🤖 ROS 2 Robot Telemetry Received', 'success');
+    await this._phase('robot', 'status', '');
   },
 
   async droneBatteryCheck() {
     const ok = await window.JarvisSecurityEngine?.authorizeAction('Drone Telemetry Check', 'PX4 Mark LXXXV Drone');
     if (!ok) return;
     window.JarvisAudio.playBeep(1350, 'sine', 0.15);
-    this._inject('Query PX4 MAVLink Drone Telemetry: Altitude, GPS Lock 3D, Airspeed, and Battery Voltage Level.', true);
-    window.JarvisToast?.show('🚁 PX4 Drone Telemetry Active', 'info');
+    await this._phase('drone', 'drone', '');
   }
 };

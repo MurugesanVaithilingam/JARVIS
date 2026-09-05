@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>STARK INDUSTRIES — Biometric Intelligence Security Portal</title>
   <meta name="description" content="Stark Industries Level 5 Classified Biometric Authentication Portal & Security Gate.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="shell.css">
   <style>
     /* ══════════════════════════════════════════════════════════════════
        STYLISH STARK BIOMETRIC LOGIN PORTAL STYLES
@@ -285,102 +286,121 @@ function renderBg() {
 renderBg();
 
 // ── 2. BIOMETRIC SCAN TRIGGER ─────────────────────────────────────
+function finishLogin(user, label) {
+  const msg = document.getElementById('statusMsg');
+  msg.style.color = '#00FF88';
+  msg.textContent = `${label}: ${(user.username || user.full_name || 'USER').toUpperCase()} — LEVEL ${user.clearance} ACCESS GRANTED`;
+  if (window.JarvisSecurityEngine?.applySession) {
+    window.JarvisSecurityEngine.applySession(user);
+  } else {
+    localStorage.setItem('jarvis_user', user.full_name || user.username || 'User');
+    localStorage.setItem('jarvis_role', user.role || 'Administrator');
+    localStorage.setItem('jarvis_clearance', String(user.clearance || '1'));
+    localStorage.setItem('jarvis_authenticated', 'true');
+    if (user.session) {
+      localStorage.setItem('jarvis_session', user.session);
+      localStorage.setItem('jarvis_token', user.session);
+    }
+  }
+  if (window.speechSynthesis) {
+    const u = new SpeechSynthesisUtterance(`Welcome back. Access granted.`);
+    window.speechSynthesis.speak(u);
+  }
+  setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+}
+
 function triggerBiometricScan() {
   const icon = document.getElementById('scanIcon');
   const msg = document.getElementById('statusMsg');
   const btn = document.getElementById('loginBtn');
-  
-  icon.textContent = '⚡';
-  msg.style.color = '#00D4FF';
-  msg.textContent = 'SCANNING RETINA & BIOMETRICS... HOLD STILL';
-  btn.disabled = true;
-
-  setTimeout(() => {
-    icon.textContent = '🟢';
-    msg.style.color = '#00FF88';
-    msg.textContent = 'BIOMETRIC MATCH VERIFIED — TONY STARK CONFIRMED!';
-    
-    // Play speech synthesis
-    if (window.speechSynthesis) {
-      const u = new SpeechSynthesisUtterance("Welcome back, Mr. Stark. Access granted.");
-      u.rate = 1.0; u.pitch = 1.0;
-      window.speechSynthesis.speak(u);
-    }
-
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 1200);
-  }, 1600);
+  icon.textContent = '⛔';
+  msg.style.color = '#FF2244';
+  msg.textContent = 'BIOMETRIC BYPASS DISABLED — ENTER USERNAME AND PIN';
+  btn.disabled = false;
 }
 
-// ── 3. VOICE AUTH ─────────────────────────────────────────────────
 function voiceAuth() {
   const msg = document.getElementById('statusMsg');
+  const username = document.getElementById('userInp').value;
+  const pin = document.getElementById('passInp').value;
+  if (!username || !pin) {
+    msg.style.color = '#FF2244';
+    msg.textContent = 'ENTER USERNAME AND PIN BEFORE VOICE AUTHORIZE';
+    return;
+  }
   msg.style.color = '#00D4FF';
-  msg.textContent = 'LISTENING FOR VOICE KEY... SAY "JARVIS AUTHORIZE"';
-
+  msg.textContent = 'SAY "JARVIS AUTHORIZE" TO SUBMIT YOUR PIN';
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const rec = new SpeechRecognition();
     rec.start();
     rec.onresult = function(e) {
-      const text = e.results[0][0].transcript;
-      msg.style.color = '#00FF88';
-      msg.textContent = `VOICE VERIFIED: "${text.toUpperCase()}" — ACCESS GRANTED!`;
-      setTimeout(() => window.location.href = 'index.html', 1200);
+      const text = (e.results[0][0].transcript || '').toLowerCase();
+      if (text.includes('authorize') || text.includes('jarvis') || text.includes('சரி')) {
+        handleLogin({ preventDefault() {} });
+      } else {
+        msg.style.color = '#FF2244';
+        msg.textContent = 'VOICE PHRASE REJECTED';
+      }
     };
     rec.onerror = function() {
-      triggerBiometricScan();
+      msg.style.color = '#FF2244';
+      msg.textContent = 'VOICE AUTH FAILED — USE PIN FORM';
     };
-  } else {
-    triggerBiometricScan();
   }
 }
 
-// ── 4. FORM LOGIN VIA REAL MYSQL DATABASE ─────────────────────────
 function handleLogin(e) {
   e.preventDefault();
   const username = document.getElementById('userInp').value;
   const pin = document.getElementById('passInp').value;
   const msg = document.getElementById('statusMsg');
+  if (!username || !pin) {
+    msg.style.color = '#FF2244';
+    msg.textContent = 'USERNAME AND PIN REQUIRED';
+    return;
+  }
 
   msg.style.color = '#00D4FF';
-  msg.textContent = 'CONNECTING TO MYSQL DATABASE... VERIFYING CLEARANCE...';
+  msg.textContent = 'VERIFYING CLEARANCE...';
 
-  fetch('api_auth.php', {
+  fetch('http://localhost:8000/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, pin })
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.authenticated) {
-      msg.style.color = '#00FF88';
-      msg.textContent = `MYSQL VERIFIED: ${data.user.full_name.toUpperCase()} — LEVEL ${data.user.clearance} ACCESS GRANTED!`;
-      
-      // Save authenticated user & clearance to Security Engine
-      localStorage.setItem('jarvis_user', data.user.full_name);
-      localStorage.setItem('jarvis_role', data.user.role || 'Supreme Administrator');
-      localStorage.setItem('jarvis_clearance', data.user.clearance || '6');
-
-      if (window.JarvisSecurityEngine) {
-        window.JarvisSecurityEngine.setClearance(data.user.clearance || 6);
-      }
-
-      if (window.speechSynthesis) {
-        const u = new SpeechSynthesisUtterance(`Welcome back, ${data.user.full_name}. Access granted.`);
-        window.speechSynthesis.speak(u);
-      }
-      setTimeout(() => window.location.href = 'index.html', 1200);
-    } else {
-      msg.style.color = '#FF2244';
-      msg.textContent = `ACCESS DENIED: ${data.message}`;
+  .then(async (res) => {
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.authenticated && data.user) {
+      finishLogin(data.user, 'SESSION ISSUED');
+      return;
     }
+    return fetch('api_auth.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, pin })
+    }).then((r) => r.json()).then((phpData) => {
+      if (phpData.authenticated && phpData.user) {
+        finishLogin({
+          username: phpData.user.full_name || phpData.user.username,
+          role: phpData.user.role,
+          clearance: phpData.user.clearance,
+          session: ''
+        }, 'MYSQL VERIFIED');
+      } else {
+        msg.style.color = '#FF2244';
+        msg.textContent = `ACCESS DENIED: ${phpData.message || data.detail || 'Invalid credentials'}`;
+      }
+    });
   })
-  .catch(() => triggerBiometricScan());
+  .catch(() => {
+    msg.style.color = '#FF2244';
+    msg.textContent = 'AUTH SERVICE UNREACHABLE — START THE JARVIS SERVER AND SET JARVIS_ADMIN_PIN';
+  });
 }
 </script>
 <script src="security_engine.js"></script>
 <script src="voice.js"></script>
+  <script src="nav.js" defer></script>
 </body>
 </html>

@@ -144,9 +144,10 @@ window.JarvisApp = (function() {
     loadHistory();
     loadDatabaseTelemetry();
 
-    // Auto-select first provider if available
-    if (window.JarvisProviders && window.JarvisProviders.length > 0) {
-      selectProvider(window.JarvisProviders[0].id);
+    // Auto-select default free provider (Pollinations) if available
+    const defaultProv = window.JarvisProviders?.find(p => p.id === 'pollinations') || window.JarvisProviders?.[0];
+    if (defaultProv) {
+      selectProvider(defaultProv.id);
     }
 
     // Greet on Startup
@@ -223,16 +224,25 @@ window.JarvisApp = (function() {
   // ── Tabs & Sidebar ────────────────────────────────────────────
   function buildTabs() {
     const c = document.getElementById('providerTabs');
-    if (!c) return;
-    c.innerHTML = '';
+    const pSel = document.getElementById('providerSel');
+    if (c) c.innerHTML = '';
+    if (pSel) pSel.innerHTML = '';
     window.JarvisProviders?.forEach(p => {
       const userKey = window.JarvisSettings?.getKey(p.id);
-      const tab = document.createElement('div');
-      tab.className = 'ptab';
-      tab.dataset.id = p.id;
-      tab.innerHTML = `<span class="ti">${p.icon}</span><span>${p.name}</span><span class="td ${userKey ? 'ok' : 'free'}"></span>`;
-      tab.addEventListener('click', () => selectProvider(p.id));
-      c.appendChild(tab);
+      if (c) {
+        const tab = document.createElement('div');
+        tab.className = 'ptab';
+        tab.dataset.id = p.id;
+        tab.innerHTML = `<span class="ti">${p.icon}</span><span>${p.name}</span><span class="td ${userKey ? 'ok' : 'free'}"></span>`;
+        tab.addEventListener('click', () => selectProvider(p.id));
+        c.appendChild(tab);
+      }
+      if (pSel) {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.icon} ${p.name.toUpperCase()} ${p.free ? '(FREE)' : (userKey ? '🔑 KEY' : '⚡ FREE')}`;
+        pSel.appendChild(opt);
+      }
     });
   }
 
@@ -275,23 +285,37 @@ window.JarvisApp = (function() {
     provider = window.JarvisProviders?.find(p => p.id === id);
     if (!provider) return;
 
+    // Sync dropdown
+    const pSel = document.getElementById('providerSel');
+    if (pSel && pSel.value !== id) pSel.value = id;
+
     // Tab highlight
     document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
     document.querySelector(`.ptab[data-id="${id}"]`)?.classList.add('active');
 
     // Header
     const persona = window.JarvisActivePersona;
-    document.getElementById('chatPName').textContent = `${provider.icon} ${provider.name.toUpperCase()} — ${persona?.shortName||'JARVIS'}`;
-    document.getElementById('footerProv').textContent = `ACTIVE: ${provider.name.toUpperCase()}`;
+    const chatPName = document.getElementById('chatPName');
+    if (chatPName) chatPName.textContent = `${provider.icon} ${provider.name.toUpperCase()} — ${persona?.shortName||'JARVIS'}`;
+    const footerProv = document.getElementById('footerProv');
+    if (footerProv) footerProv.textContent = `ACTIVE: ${provider.name.toUpperCase()}`;
 
     // Model select
     const sel = document.getElementById('modelSel');
-    sel.innerHTML = '';
-    provider.models.forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m.id; opt.textContent = m.label;
-      sel.appendChild(opt);
-    });
+    if (sel) {
+      sel.innerHTML = '';
+      const modelsList = (provider.models && provider.models.length > 0) ? provider.models : [
+        { id: 'default', label: `${provider.name} Core Engine` }
+      ];
+      modelsList.forEach((m, idx) => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.label;
+        if (idx === 0) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      if (modelsList[0]) sel.value = modelsList[0].id;
+    }
 
     // Capabilities
     updateCaps();
@@ -540,9 +564,18 @@ window.JarvisApp = (function() {
 
 
   function clearChat() {
-    if (!provider) return;
-    convos[provider.id] = [];
-    renderMsgs(provider.id);
+    if (provider) {
+      convos[provider.id] = [];
+    }
+    const c = document.getElementById('chatMsgs');
+    if (c) {
+      const persona = window.JarvisActivePersona;
+      c.innerHTML = `<div class="welcome" id="welcomeMsg">
+        <div class="wt" id="welcomeTitle">GOOD ${getTimeOfDay()}.</div>
+        <div class="ws" id="welcomeSub">${provider ? `${provider.icon} <strong>${provider.name}</strong> connected via ${persona?.name||'JARVIS'}.<br>How may I be of service?` : 'Select a provider above.'}</div>
+      </div>`;
+    }
+    window.JarvisToast?.show('Chat history cleared cleanly', 'info', 2000);
   }
 
   // ── History ─────────────────────────────────────────────────
@@ -593,6 +626,7 @@ window.JarvisApp = (function() {
       this.style.height = Math.min(this.scrollHeight,120)+'px';
     });
     document.getElementById('clearBtn')?.addEventListener('click', clearChat);
+    document.getElementById('providerSel')?.addEventListener('change', (e) => selectProvider(e.target.value));
     document.getElementById('modelSel')?.addEventListener('change', () => {});
 
     // Image Upload & AI Vision Handler

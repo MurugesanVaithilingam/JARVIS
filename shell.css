@@ -1,0 +1,939 @@
+/* JARVIS — Unified Modern Animated Sci-Fi Navigation & Multi-Device System */
+
+:root {
+  --shell-nav-h: 86px;
+  --shell-dock-h: 62px;
+  --shell-safe-top: env(safe-area-inset-top, 0px);
+  --shell-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --shell-safe-left: env(safe-area-inset-left, 0px);
+  --shell-safe-right: env(safe-area-inset-right, 0px);
+  --shell-cyan: #00d4ff;
+  --shell-cyan-glow: rgba(0, 212, 255, 0.45);
+  --shell-gold: #ffb703;
+  --shell-ink: #040d18;
+  --shell-glass: rgba(3, 14, 28, 0.92);
+  --shell-glass-card: rgba(0, 212, 255, 0.05);
+  --shell-border: rgba(0, 212, 255, 0.28);
+  --shell-border-glow: rgba(0, 212, 255, 0.55);
+}
+
+html.jarvis-shell {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html.jarvis-shell body {
+  padding-top: calc(var(--shell-nav-h) + var(--shell-safe-top));
+  padding-bottom: var(--shell-safe-bottom);
+  padding-left: var(--shell-safe-left);
+  padding-right: var(--shell-safe-right);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+html.jarvis-shell *,
+html.jarvis-shell *::before,
+html.jarvis-shell *::after {
+  box-sizing: border-box;
+}
+
+html.shell-fixed-app body {
+  padding-top: 0;
+}
+
+html.jarvis-shell .main-hud,
+html.jarvis-shell .stark-hud-container,
+.main-hud,
+.stark-hud-container {
+  top: calc(var(--shell-nav-h) + var(--shell-safe-top)) !important;
+  height: calc(100dvh - var(--shell-nav-h) - var(--shell-safe-top)) !important;
+  inset: calc(var(--shell-nav-h) + var(--shell-safe-top)) 0 0 0 !important;
+}
+
+/* ── INNER HEADER NAVIGATION CONTAINERS ACROSS ALL PAGES ── */
+html.jarvis-shell .hud-header,
+html.jarvis-shell .stark-header,
+html.jarvis-shell .eco-nav,
+html.jarvis-shell .rag-nav-header,
+html.jarvis-shell .drone-nav,
+html.jarvis-shell .lab-nav,
+#jarvis-shell-nav {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 30000 !important;
+  height: calc(var(--shell-nav-h) + var(--shell-safe-top)) !important;
+  padding: var(--shell-safe-top) max(16px, var(--shell-safe-right)) 0 max(16px, var(--shell-safe-left)) !important;
+  background: linear-gradient(180deg, rgba(2, 10, 20, 0.96) 0%, var(--shell-glass) 100%) !important;
+  border-bottom: 1px solid var(--shell-border) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin: 0 !important;
+}
+
+/* Scanner beam bottom animation */
+html.jarvis-shell .hud-header::after,
+html.jarvis-shell .stark-header::after,
+html.jarvis-shell .eco-nav::after,
+html.jarvis-shell .rag-nav-header::after,
+html.jarvis-shell .drone-nav::after,
+html.jarvis-shell .lab-nav::after,
+#jarvis-shell-nav::after {
+  content: '';
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--shell-cyan), transparent);
+  box-shadow: 0 0 14px var(--shell-cyan);
+  animation: shellScan 3.6s ease-in-out infinite;
+}
+
+/* Brand & Logo */
+.logo-mark,
+.shell-brand,
+.nav-brand,
+.nav-brand-drone {
+  display: inline-flex !alignment;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  text-decoration: none;
+  font-family: Orbitron, Rajdhani, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  font-size: 14px;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(0, 212, 255, 0.7);
+}
+
+.logo-s {
+  color: var(--shell-cyan);
+  text-shadow: 0 0 16px var(--shell-cyan);
+}
+
+.shell-reactor {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--shell-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15), 0 0 18px var(--shell-cyan-glow);
+  background: radial-gradient(circle, #fff 0 28%, var(--shell-cyan) 32% 55%, transparent 58%);
+  animation: shellPulse 2.2s ease-in-out infinite;
+}
+
+.shell-reactor.sm {
+  width: 18px;
+  height: 18px;
+}
+
+/* Header Left Wrapper */
+.hud-header .hl,
+.stark-header > div:first-child,
+.lab-nav > div:first-child,
+.drone-nav > div:first-child,
+.rag-nav-header > div:first-child {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+/* ── TAB LINKS ROW INSIDE THE HEADER DIV ── */
+html.jarvis-shell .main-nav-links,
+html.jarvis-shell .nav-links,
+html.jarvis-shell .nav-links-scroll,
+html.jarvis-shell .drone-nav-scroll,
+html.jarvis-shell .shell-links-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  padding: 4px 6px !important;
+  mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+}
+
+html.jarvis-shell .main-nav-links::-webkit-scrollbar,
+html.jarvis-shell .nav-links-scroll::-webkit-scrollbar,
+html.jarvis-shell .shell-links-wrap::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* ── FUTURISTIC SCI-FI TAB BUTTONS INSIDE DIV ── */
+html.jarvis-shell .nav-tab,
+html.jarvis-shell .shell-link {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 44px !important;
+  padding: 0 16px !important;
+  border-radius: 10px !important;
+  color: #b0d8fa !important;
+  text-decoration: none !important;
+  font-family: Rajdhani, Orbitron, sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 14.5px !important;
+  letter-spacing: 0.08em !important;
+  border: 1px solid rgba(0, 212, 255, 0.32) !important;
+  background: rgba(0, 212, 255, 0.08) !important;
+  white-space: nowrap !important;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.jarvis-shell .nav-tab:hover,
+html.jarvis-shell .shell-link:hover,
+html.jarvis-shell .nav-tab:focus-visible,
+html.jarvis-shell .shell-link:focus-visible {
+  color: #ffffff;
+  background: rgba(0, 212, 255, 0.18);
+  border-color: var(--shell-cyan);
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.38);
+  transform: translateY(-1px);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.7);
+  outline: none;
+}
+
+html.jarvis-shell .nav-tab.active,
+html.jarvis-shell .shell-link.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.38), rgba(0, 150, 255, 0.22));
+  border-color: var(--shell-cyan);
+  box-shadow: 0 0 22px rgba(0, 212, 255, 0.65), inset 0 0 12px rgba(0, 212, 255, 0.25);
+  text-shadow: 0 0 12px #00d4ff;
+}
+
+html.jarvis-shell .nav-tab.active::after,
+html.jarvis-shell .shell-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 14%;
+  right: 14%;
+  height: 2px;
+  background: var(--shell-cyan);
+  box-shadow: 0 0 10px var(--shell-cyan);
+  border-radius: 2px;
+}
+
+/* Active Indicator Pill (JS Driven) */
+.shell-indicator {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(0, 212, 255, 0.24), rgba(0, 212, 255, 0.06));
+  border: 1px solid var(--shell-border-glow);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), width 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s;
+  z-index: 0;
+}
+
+/* Action Buttons & Controls inside Header */
+.hud-header .hr,
+.stark-header > div:last-child,
+.lab-nav > div:last-child,
+.drone-nav > div:last-child,
+.rag-nav-header > div:last-child,
+.shell-nav-end {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+.shell-tool-btn {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--shell-border);
+  background: rgba(0, 212, 255, 0.06);
+  color: #d7eeff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: Rajdhani, sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shell-tool-btn:hover {
+  background: rgba(0, 212, 255, 0.18);
+  border-color: var(--shell-cyan);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.shell-kbd-hint {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(0, 212, 255, 0.15);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--shell-cyan);
+}
+
+.shell-clock,
+.clock {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--shell-cyan);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+}
+
+.shell-login,
+.shell-menu-btn,
+.shell-drawer-close,
+.hbtn {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 12px !important;
+  border: 1px solid var(--shell-border) !important;
+  background: rgba(0, 212, 255, 0.06) !important;
+  color: #d7eeff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.shell-login:hover,
+.shell-menu-btn:hover,
+.shell-drawer-close:hover,
+.hbtn:hover {
+  background: rgba(0, 212, 255, 0.18) !important;
+  border-color: var(--shell-cyan) !important;
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.shell-menu-btn { display: none !important; }
+
+/* Hamburger Icon */
+.shell-burger {
+  width: 18px;
+  height: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.shell-burger span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: #e8f7ff;
+  border-radius: 2px;
+  transition: transform 0.28s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+html.shell-nav-open .shell-burger span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+  background: var(--shell-cyan);
+}
+html.shell-nav-open .shell-burger span:nth-child(2) { opacity: 0; }
+html.shell-nav-open .shell-burger span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+  background: var(--shell-cyan);
+}
+
+/* ── OVERLAY ── */
+.shell-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 29990;
+  background: rgba(1, 6, 14, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.shell-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── MOBILE DRAWER ── */
+.shell-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 100vw);
+  z-index: 29995;
+  background: linear-gradient(180deg, #051426 0%, #020914 100%);
+  border-left: 1px solid var(--shell-border);
+  padding: calc(var(--shell-nav-h) + var(--shell-safe-top) + 8px) 18px calc(24px + var(--shell-safe-bottom));
+  transform: translateX(104%);
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.shell-drawer.open { transform: translateX(0); }
+
+.shell-drawer-handle {
+  display: none;
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(0, 212, 255, 0.3);
+  margin: 0 auto -6px;
+}
+
+.shell-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: Orbitron, sans-serif;
+  letter-spacing: 0.16em;
+  font-size: 13px;
+  color: var(--shell-cyan);
+}
+
+.shell-drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shell-drawer-search input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--shell-border);
+  background: rgba(0, 212, 255, 0.05);
+  color: #fff;
+  font-family: Rajdhani, sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shell-drawer-search input:focus {
+  border-color: var(--shell-cyan);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.25);
+}
+
+.shell-drawer-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shell-drawer-cat {
+  font-family: Orbitron, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--shell-gold);
+  margin-top: 6px;
+}
+
+.shell-drawer-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.shell-drawer-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 212, 255, 0.14);
+  background: rgba(0, 212, 255, 0.04);
+  text-decoration: none;
+  color: #e0f2fe;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.shell-drawer-card:hover,
+.shell-drawer-card.active {
+  background: rgba(0, 212, 255, 0.15);
+  border-color: var(--shell-cyan);
+  transform: translateX(4px);
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.2);
+}
+
+.shell-drawer-card .sd-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.shell-drawer-card .sd-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.shell-drawer-card .sd-title {
+  font-family: Rajdhani, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shell-drawer-card .sd-badge {
+  font-size: 9px;
+  font-family: Orbitron, sans-serif;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--shell-cyan);
+}
+
+.shell-drawer-card .sd-desc {
+  font-family: sans-serif;
+  font-size: 11px;
+  color: #8bb2d6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* ── COMMAND PALETTE MODAL ── */
+.shell-cmd-palette {
+  position: fixed;
+  inset: 0;
+  z-index: 35000;
+  background: rgba(2, 8, 16, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 80px 16px 16px;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.shell-cmd-palette.hidden {
+  display: none !important;
+}
+
+.shell-cmd-box {
+  width: min(640px, 100%);
+  background: linear-gradient(180deg, #07192d 0%, #030d1a 100%);
+  border: 1px solid var(--shell-cyan);
+  border-radius: 20px;
+  box-shadow: 0 0 50px rgba(0, 212, 255, 0.35);
+  overflow: hidden;
+  animation: cmdBoxIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.shell-cmd-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--shell-border);
+}
+
+.shell-cmd-icon {
+  font-size: 20px;
+}
+
+.shell-cmd-head input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-family: Orbitron, Rajdhani, sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+}
+
+.shell-cmd-head input::placeholder {
+  color: #5c88b0;
+}
+
+.shell-cmd-close {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--shell-border);
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--shell-cyan);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.shell-cmd-results {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shell-cmd-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #d2eafe;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.shell-cmd-item:hover,
+.shell-cmd-item.active {
+  background: rgba(0, 212, 255, 0.16);
+  border-color: var(--shell-cyan);
+  color: #fff;
+}
+
+.shell-cmd-item .cmd-ico { font-size: 20px; }
+.shell-cmd-item .cmd-text { flex: 1; display: flex; flex-direction: column; }
+.shell-cmd-item .cmd-title { font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 15px; color: #fff; }
+.shell-cmd-item .cmd-sub { font-size: 11px; color: #7ca8d2; }
+.shell-cmd-item .cmd-cat { font-family: Orbitron, sans-serif; font-size: 9px; padding: 3px 7px; border-radius: 6px; background: rgba(0, 212, 255, 0.12); color: var(--shell-cyan); }
+
+.shell-cmd-empty {
+  padding: 24px;
+  text-align: center;
+  color: #709bc4;
+  font-family: Rajdhani, sans-serif;
+  font-size: 14px;
+}
+
+.shell-cmd-foot {
+  padding: 10px 20px;
+  border-top: 1px solid var(--shell-border);
+  background: rgba(0, 0, 0, 0.2);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: #6390ba;
+}
+
+.shell-cmd-foot kbd {
+  background: rgba(0, 212, 255, 0.15);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--shell-cyan);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+/* ── MOBILE BOTTOM FLOATING DOCK ── */
+.shell-bottom-dock {
+  display: none;
+  position: fixed;
+  bottom: max(10px, var(--shell-safe-bottom));
+  left: 14px;
+  right: 14px;
+  z-index: 29000;
+  height: var(--shell-dock-h);
+  background: linear-gradient(180deg, rgba(4, 18, 36, 0.92) 0%, rgba(2, 10, 22, 0.96) 100%);
+  border: 1px solid var(--shell-border-glow);
+  border-radius: 20px;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 212, 255, 0.2);
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 6px;
+  animation: shellDockIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.shell-dock-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 100%;
+  text-decoration: none;
+  color: #92b8d9;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: Rajdhani, sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.shell-dock-item:hover,
+.shell-dock-item.active {
+  color: var(--shell-cyan);
+  transform: translateY(-2px);
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.8);
+}
+
+.shell-dock-ico {
+  font-size: 18px;
+}
+
+/* ── KEYFRAME ANIMATIONS ── */
+@keyframes shellScan {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes shellPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15), 0 0 18px var(--shell-cyan-glow); }
+  50% { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(0, 212, 255, 0.25), 0 0 28px rgba(0, 212, 255, 0.85); }
+}
+
+@keyframes cmdBoxIn {
+  from { opacity: 0; transform: scale(0.94) translateY(-10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes shellFade {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+html.jarvis-shell .hud-body,
+html.jarvis-shell .stark-hud-container,
+html.jarvis-shell .eco-page,
+html.jarvis-shell .matrix-page,
+html.jarvis-shell .rag-page,
+html.jarvis-shell .drone-page,
+html.jarvis-shell .lab-body,
+html.jarvis-shell .soc-grid,
+html.jarvis-shell .studio-layout,
+html.jarvis-shell .login-container,
+html.jarvis-shell .cmd-wrap,
+html.jarvis-shell .tracker-grid {
+  animation: shellFade 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.jarvis-shell .vline { display: inline-block; width: 1px; height: 20px; background: rgba(0, 212, 255, 0.3); }
+
+/* ── DEVICE MEDIA QUERIES ── */
+
+/* ── Mobile Phones (< 768px) ── */
+@media (max-width: 768px) {
+  :root {
+    --shell-nav-h: 56px;
+    --shell-dock-h: 56px;
+  }
+
+  .shell-menu-btn { display: inline-flex !important; }
+  html.jarvis-shell .main-nav-links,
+  html.jarvis-shell .nav-links-scroll,
+  html.jarvis-shell .shell-links-wrap { display: none !important; }
+  
+  .shell-login { display: none !important; }
+  .shell-clock, .clock { display: none !important; }
+  .shell-kbd-hint { display: none !important; }
+  .shell-bottom-dock { display: flex !important; }
+
+  /* Body bottom padding to clear floating mobile dock */
+  html.jarvis-shell body {
+    padding-top: calc(var(--shell-nav-h) + var(--shell-safe-top)) !important;
+    padding-bottom: calc(var(--shell-dock-h) + var(--shell-safe-bottom) + 12px) !important;
+    overflow-x: hidden !important;
+  }
+
+  html.shell-fixed-app .main-hud,
+  html.shell-fixed-app .stark-hud-container {
+    position: relative !important;
+    inset: auto !important;
+    height: auto !important;
+    min-height: calc(100dvh - var(--shell-nav-h) - var(--shell-dock-h) - 20px) !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .logo-mark { font-size: 13px; letter-spacing: 0.14em; }
+
+  /* Drawer on Mobile: Slide up or full width */
+  .shell-drawer {
+    width: 100vw;
+    border-left: 0;
+    border-top: 1px solid var(--shell-border);
+    border-radius: 24px 24px 0 0;
+  }
+
+  .shell-drawer-handle { display: block; }
+
+  /* Universal Mobile Header Alignments across HUD, STARK, ECO, etc. */
+  html.jarvis-shell .hud-header,
+  html.jarvis-shell .stark-header,
+  html.jarvis-shell .eco-nav,
+  html.jarvis-shell .rag-nav-header,
+  html.jarvis-shell .drone-nav,
+  html.jarvis-shell .lab-nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 12px !important;
+  }
+
+  html.jarvis-shell .hbtn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px;
+    min-height: 38px;
+    font-size: 15px !important;
+    border-radius: 10px !important;
+  }
+
+  html.jarvis-shell .hud-body,
+  html.jarvis-shell .eco-page,
+  html.jarvis-shell .matrix-page,
+  html.jarvis-shell .rag-page,
+  html.jarvis-shell .drone-page,
+  html.jarvis-shell .lab-body,
+  html.jarvis-shell .login-container,
+  html.jarvis-shell .tracker-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    flex-direction: column !important;
+  }
+
+  html.jarvis-shell .lpanel,
+  html.jarvis-shell .rpanel,
+  html.jarvis-shell .panel,
+  html.jarvis-shell .center-col {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html.jarvis-shell .stark-top-bar,
+  html.jarvis-shell .stats-row,
+  html.jarvis-shell .hud-grid,
+  html.jarvis-shell .matrix-grid,
+  html.jarvis-shell .eco-grid,
+  html.jarvis-shell .ai-grid,
+  html.jarvis-shell .grid-2col,
+  html.jarvis-shell .grid-3col,
+  html.jarvis-shell .grid-4col,
+  html.jarvis-shell .tracker-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+}
+
+/* ── Extra Small Mobile (< 480px) ── */
+@media (max-width: 480px) {
+  :root { --shell-nav-h: 52px; }
+  .shell-tool-btn { padding: 0 8px; font-size: 12px; }
+  html.jarvis-shell .hr .hbtn:nth-child(n+7) { display: none !important; }
+  html.jarvis-shell .clockdate { display: none !important; }
+  html.jarvis-shell .sys-status .slabel { display: none !important; }
+}
+
+/* ── Mobile Landscape (max-height: 500px) ── */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root { --shell-nav-h: 48px; --shell-dock-h: 48px; }
+  .shell-drawer { padding-top: 56px; }
+  .shell-cmd-palette { padding-top: 50px; }
+}
+
+/* ── Tablets (769px - 1100px) ── */
+@media (min-width: 769px) and (max-width: 1100px) {
+  :root { --shell-nav-h: 60px; }
+  .shell-menu-btn { display: inline-flex !important; }
+  .shell-links-wrap, .main-nav-links { display: flex !important; }
+  .shell-login { display: inline-flex !important; }
+
+  html.jarvis-shell .lpanel,
+  html.jarvis-shell .rpanel,
+  html.jarvis-shell .panel {
+    width: 100% !important;
+  }
+}
+
+/* ── Laptops / Standard Desktops (1101px - 1600px) ── */
+@media (min-width: 1101px) and (max-width: 1400px) {
+  html.jarvis-shell .nav-tab { padding: 0 14px; font-size: 14px; height: 42px; }
+}
+
+/* ── Large Displays & 4K Smart TVs (> 1600px) ── */
+@media (min-width: 1600px) {
+  :root { --shell-nav-h: 96px; }
+  html.jarvis-shell .nav-tab { font-size: 16px; height: 48px; padding: 0 20px; }
+  .shell-clock, .clock { font-size: 17px; }
+}
+
+@media (min-width: 2200px) {
+  :root { --shell-nav-h: 110px; }
+  html.jarvis-shell .nav-tab { font-size: 18px; height: 54px; padding: 0 24px; }
+  .shell-clock, .clock { font-size: 20px; }
+  .shell-tool-btn { height: 54px; font-size: 18px; }
+}
+
+/* TV Focus rings for Remote Arrow Key Control */
+.nav-tab:focus-visible,
+.shell-link:focus-visible,
+.shell-tool-btn:focus-visible,
+.shell-dock-item:focus-visible,
+.shell-drawer-card:focus-visible,
+.shell-cmd-item:focus-visible {
+  outline: 3px solid var(--shell-cyan) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 24px var(--shell-cyan) !important;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  html.jarvis-shell .hud-header,
+  html.jarvis-shell .stark-header,
+  .shell-reactor,
+  .shell-drawer,
+  .shell-overlay,
+  .nav-tab,
+  .shell-link,
+  .shell-bottom-dock,
+  .shell-cmd-box {
+    animation: none !important;
+    transition: none !important;
+  }
+}

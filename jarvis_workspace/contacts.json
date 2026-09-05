@@ -1,0 +1,46 @@
+{
+  "contacts": [
+    {
+      "id": "arun",
+      "name": "Arun",
+      "aliases": ["arun", "arun kumar", "அருண்", "அருண"],
+      "phone": "+919876543210",
+      "whatsapp": true
+    },
+    {
+      "id": "rahul",
+      "name": "Rahul",
+      "aliases": ["rahul", "rahul kumar", "ராகுல்"],
+      "phone": "+919876543211",
+      "whatsapp": true
+    },
+    {
+      "id": "amma",
+      "name": "Amma",
+      "aliases": ["amma", "mom", "mother", "அம்மா"],
+      "phone": "+919876543212",
+      "whatsapp": true
+    },
+    {
+      "id": "appa",
+      "name": "Appa",
+      "aliases": ["appa", "dad", "father", "அப்பா"],
+      "phone": "+919876543213",
+      "whatsapp": true
+    },
+    {
+      "id": "suresh",
+      "name": "Suresh",
+      "aliases": ["suresh", "suresh kumar", "சுரேஷ்"],
+      "phone": "+919876543214",
+      "whatsapp": true
+    },
+    {
+      "id": "boss",
+      "name": "Boss",
+      "aliases": ["boss", "stark", "பாஸ்"],
+      "phone": "+919876543215",
+      "whatsapp": true
+    }
+  ]
+}

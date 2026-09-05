@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>JARVIS Voice Architecture — Gemini & Device Action Engine</title>
+  <meta name="description" content="J.A.R.V.I.S. Voice Architecture — Gemini-style Voice Assistant, Speech-to-Text, LLM Intent Classification, Tool Calling Engine, Android/PC Action Engine, Context Memory and Security Policy System.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Mukta+Malar:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="shell.css">
+  <style>
+    :root {
+      --red:   #FF2244;
+      --blue:  #00D4FF;
+      --green: #00FF88;
+      --gold:  #FFD21E;
+      --purple:#A855F7;
+      --bg:    #020B18;
+      --brd:   rgba(0,212,255,0.25);
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background: #020B18;
+      font-family: 'Rajdhani', 'Mukta Malar', sans-serif;
+      color: #C8E8FF;
+      overflow-x: hidden;
+    }
+
+    .scanlines {
+      position: fixed; inset: 0; z-index: 1000; pointer-events: none;
+      background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
+    }
+
+    .va-page {
+      padding: 16px 20px 40px;
+      max-width: 1600px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    /* Banner */
+    .va-banner {
+      text-align: center; padding: 24px 20px 14px;
+      position: relative;
+    }
+    .va-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(22px, 3.8vw, 42px);
+      font-weight: 900; letter-spacing: .25em;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(0,212,255,.8), 0 0 60px rgba(0,212,255,.3);
+    }
+    .va-title .highlight { color: #00D4FF; }
+    .va-sub {
+      font-family: 'Mukta Malar', 'Share Tech Mono', monospace;
+      font-size: 13px; color: #8AAABB; letter-spacing: .12em; margin-top: 6px;
+    }
+    .banner-line {
+      height: 2px; margin: 14px auto 0;
+      background: linear-gradient(90deg, transparent, #00D4FF, #FF2244, #00FF88, #00D4FF, transparent);
+      box-shadow: 0 0 15px rgba(0,212,255,.6);
+    }
+
+    /* Interactive Pipeline Flowchart */
+    .pipeline-section {
+      background: rgba(2,14,30,0.85);
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 12px; padding: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 30px rgba(0,212,255,0.1);
+    }
+    .sec-hdr {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px; font-weight: 800;
+      color: #00D4FF; letter-spacing: .2em;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px; text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(0,212,255,0.5);
+    }
+
+    .pipeline-nodes {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      position: relative;
+    }
+    @media (max-width: 1100px) {
+      .pipeline-nodes { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    }
+    @media (max-width: 600px) {
+      .pipeline-nodes { grid-template-columns: 1fr; }
+    }
+
+    .p-node {
+      background: rgba(4,22,46,0.9);
+      border: 1px solid rgba(0,212,255,0.25);
+      border-radius: 8px; padding: 14px 10px;
+      text-align: center; position: relative;
+      transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .p-node:hover, .p-node.active {
+      border-color: #00D4FF;
+      background: rgba(0,212,255,0.12);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0,212,255,0.3);
+    }
+    .p-node.active { border-color: #00FF88; background: rgba(0,255,136,0.12); box-shadow: 0 0 25px rgba(0,255,136,0.4); }
+    .p-node .step-num {
+      position: absolute; top: 6px; left: 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px; color: #5A7B98;
+    }
+    .p-node .ico { font-size: 26px; margin-bottom: 6px; display: block; }
+    .p-node .lbl {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px; font-weight: 700;
+      color: #00D4FF; letter-spacing: .1em; margin-bottom: 4px;
+    }
+    .p-node.active .lbl { color: #00FF88; }
+    .p-node .desc { font-size: 10px; color: #8AAABB; line-height: 1.3; }
+
+    /* Interactive Voice Simulator Box */
+    .sim-box {
+      background: rgba(3,18,38,0.95);
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 10px; padding: 18px;
+      display: grid; grid-template-columns: 340px 1fr; gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 900px) { .sim-box { grid-template-columns: 1fr; } }
+
+    .sim-cmds { display: flex; flex-direction: column; gap: 8px; }
+    .sim-btn {
+      padding: 10px 14px;
+      background: rgba(0,212,255,0.06);
+      border: 1px solid rgba(0,212,255,0.25);
+      border-radius: 6px; color: #C8E8FF;
+      font-family: 'Mukta Malar', 'Rajdhani', sans-serif;
+      font-size: 12px; font-weight: 600;
+      text-align: left; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: all .2s;
+    }
+    .sim-btn:hover, .sim-btn.active {
+      background: rgba(0,212,255,0.2);
+      border-color: #00D4FF; color: #fff;
+      box-shadow: 0 0 15px rgba(0,212,255,0.4);
+    }
+    .sim-btn.active { border-color: #00FF88; box-shadow: 0 0 20px rgba(0,255,136,0.4); }
+
+    .sim-output {
+      background: #010814;
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 6px; padding: 14px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      display: flex; flex-direction: column; gap: 8px;
+      overflow-x: auto;
+    }
+    .json-key { color: #00D4FF; }
+    .json-str { color: #00FF88; }
+    .json-num { color: #FFD21E; }
+
+    /* Grid Layout for Concepts */
+    .concept-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+    }
+    @media (max-width: 900px) { .concept-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: rgba(2,14,30,0.85);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 8px; padding: 16px;
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+    .card-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px; font-weight: 800;
+      color: #00D4FF; letter-spacing: .15em;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+      text-transform: uppercase;
+    }
+    .card-body {
+      font-size: 13px; color: #B0D4F0; line-height: 1.6;
+    }
+    .card-body p { margin-bottom: 8px; }
+    .card-body ul { margin-left: 18px; margin-bottom: 8px; }
+    .card-body li { margin-bottom: 4px; }
+    .code-block {
+      background: #010814;
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 6px; padding: 10px 12px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: #00FF88;
+      overflow-x: auto; margin: 8px 0;
+    }
+
+    /* Diagram flow box */
+    .flow-diagram {
+      background: rgba(1,10,24,0.9);
+      border: 1px dashed rgba(0,212,255,0.3);
+      border-radius: 8px; padding: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; text-align: center;
+      color: #00D4FF; margin: 10px 0;
+    }
+    .flow-step {
+      padding: 6px 12px; background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.3); border-radius: 4px;
+      display: inline-block; margin: 4px; color: #fff;
+    }
+    .flow-arrow { color: #FF2244; font-weight: bold; margin: 0 4px; }
+  </style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+
+<div class="va-page">
+
+  <!-- BANNER -->
+  <div class="va-banner">
+    <div class="va-title">JARVIS <span class="highlight">VOICE & DEVICE CONTROL</span> ARCHITECTURE</div>
+    <div class="va-sub">Gemini-Style Voice Assistant Pipeline, Intent Parsing & Multi-Device Action Engine</div>
+    <div class="banner-line"></div>
+  </div>
+
+  <!-- SECTION 1: INTERACTIVE PIPELINE FLOWCHART -->
+  <div class="pipeline-section">
+    <div class="sec-hdr">🎙️ COMPLETE END-TO-END VOICE PIPELINE (VOICE → BRAIN → TOOL → DEVICE → TTS)</div>
+
+    <div class="pipeline-nodes" id="pipelineNodes">
+      <div class="p-node active" data-step="1">
+        <span class="step-num">STEP 01</span>
+        <span class="ico">🎤</span>
+        <div class="lbl">VOICE STT</div>
+        <div class="desc">Tamil / Tanglish Audio captured & transcribed to clean text</div>
+      </div>
+      <div class="p-node" data-step="2">
+        <span class="step-num">STEP 02</span>
+        <span class="ico">🧠</span>
+        <div class="lbl">LLM BRAIN</div>
+        <div class="desc">Semantic Intent & Parameter Extraction ({ intent, app, contact })</div>
+      </div>
+      <div class="p-node" data-step="3">
+        <span class="step-num">STEP 03</span>
+        <span class="ico">💾</span>
+        <div class="lbl">CONTEXT SLOT</div>
+        <div class="desc">Multi-turn slot filling for missing fields (contact, message body)</div>
+      </div>
+      <div class="p-node" data-step="4">
+        <span class="step-num">STEP 04</span>
+        <span class="ico">🛠️</span>
+        <div class="lbl">TOOL ROUTER</div>
+        <div class="desc">Executes open_app(), make_call(), send_whatsapp(), set_volume()</div>
+      </div>
+      <div class="p-node" data-step="5">
+        <span class="step-num">STEP 05</span>
+        <span class="ico">📱</span>
+        <div class="lbl">DEVICE ACTION</div>
+        <div class="desc">Android Intent / PC Controller executes app & contact actions</div>
+      </div>
+      <div class="p-node" data-step="6">
+        <span class="step-num">STEP 06</span>
+        <span class="ico">🔊</span>
+        <div class="lbl">VOICE RESPONSE</div>
+        <div class="desc">Natural TTS audio feedback ("Done, Boss! I've sent the message.")</div>
+      </div>
+    </div>
+
+    <!-- Live Interactive Simulator -->
+    <div class="sim-box">
+      <div>
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700; color:#00D4FF; margin-bottom:10px;">TEST VOICE COMMANDS</div>
+        <div class="sim-cmds">
+          <button class="sim-btn active" onclick="runSim(0)">
+            <span>“Jarvis, WhatsApp open பண்ணு”</span>
+            <span style="color:#00FF88;">OPEN_APP</span>
+          </button>
+          <button class="sim-btn" onclick="runSim(1)">
+            <span>“Arun-க்கு call பண்ணு”</span>
+            <span style="color:#00D4FF;">MAKE_CALL</span>
+          </button>
+          <button class="sim-btn" onclick="runSim(2)">
+            <span>“Arun-க்கு WhatsApp-ல message அனுப்பு”</span>
+            <span style="color:#FFD21E;">SLOT_FILLING</span>
+          </button>
+          <button class="sim-btn" onclick="runSim(3)">
+            <span>“நான் 10 மணிக்கு வரேன்” (Followup)</span>
+            <span style="color:#00FF88;">SEND_WHATSAPP</span>
+          </button>
+          <button class="sim-btn" onclick="runSim(4)">
+            <span>“Volume 50% பண்ணு”</span>
+            <span style="color:#A855F7;">SET_VOLUME</span>
+          </button>
+          <button class="sim-btn" onclick="runSim(5)">
+            <span>“Camera open பண்ணு”</span>
+            <span style="color:#FF2244;">CAMERA</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sim-output" id="simConsole">
+        <div><span class="json-key">// JARVIS Real-Time Intent & Tool Calling Telemetry</span></div>
+        <div>[VOICE_INPUT]: <span class="json-str">"Jarvis, WhatsApp open பண்ணு"</span></div>
+        <div>[NORMALIZER]: <span class="json-str">"whatsapp open pannu"</span></div>
+        <div>[INTENT_PARSER]: {</div>
+        <div>&nbsp;&nbsp;<span class="json-key">"intent"</span>: <span class="json-str">"OPEN_APP"</span>,</div>
+        <div>&nbsp;&nbsp;<span class="json-key">"target"</span>: <span class="json-str">"WhatsApp"</span>,</div>
+        <div>&nbsp;&nbsp;<span class="json-key">"confidence"</span>: <span class="json-num">0.99</span></div>
+        <div>}</div>
+        <div>[TOOL_EXECUTION]: <span class="json-key">DesktopController.launch_app("whatsapp")</span></div>
+        <div>[DEVICE_STATUS]: <span class="json-str">"SUCCESS: Launched com.whatsapp"</span></div>
+        <div>[TTS_RESPONSE]: <span class="json-str">"Open பண்ணிட்டேன் பாஸ்! Opening WhatsApp."</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: ARCHITECTURE CONCEPTS GRID -->
+  <div class="concept-grid">
+
+    <!-- Visual Reference Architecture Box from User Picture -->
+    <div class="card" style="grid-column: 1 / -1; background: rgba(3, 14, 30, 0.95); border: 1px solid var(--blue);">
+      <div class="card-title">📷 REFERENCE ARCHITECTURE DIAGRAM (VOICE STT → AI ASSISTANT → FUNCTION CALLING → TTS)</div>
+      <div style="padding: 24px; background: #000; border-radius: 10px; border: 1px solid rgba(0,212,255,0.3); box-shadow: inset 0 0 20px rgba(0,0,0,0.8);">
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; text-align: center;">
+          
+          <!-- User's Speech -->
+          <div style="flex: 1; min-width: 200px; border: 2px solid #ffffff; border-radius: 14px; padding: 28px 16px; background: rgba(10, 20, 35, 0.9); box-shadow: 0 0 15px rgba(255,255,255,0.1);">
+            <div style="font-family: 'Share Tech Mono', sans-serif; font-size: 22px; font-weight: 800; color: #ffffff; margin-bottom: 12px; letter-spacing: 0.05em;">User's Speech</div>
+            <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; color: #ffd21e; font-weight: 700; letter-spacing: 0.1em;">Web Speech API</div>
+          </div>
+
+          <!-- Arrow -->
+          <div style="font-size: 28px; color: #00d4ff; align-self: center; font-weight: bold; text-shadow: 0 0 10px #00d4ff;">➔</div>
+
+          <!-- OpenAI / Gemini Assistant -->
+          <div style="flex: 1.6; min-width: 260px; display: flex; flex-direction: column; gap: 14px; align-items: center;">
+            <div style="width: 100%; border: 2px solid #ffffff; border-radius: 16px; padding: 28px 16px; background: rgba(10, 20, 35, 0.9); box-shadow: 0 0 15px rgba(255,255,255,0.1);">
+              <div style="font-family: 'Share Tech Mono', sans-serif; font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: 0.05em;">OpenAI / Gemini assistant</div>
+            </div>
+            
+            <!-- Function Calling Box -->
+            <div style="width: 92%; border: 2px solid #ffffff; border-radius: 12px; padding: 14px 12px; background: rgba(5, 15, 28, 0.95); box-shadow: 0 0 10px rgba(0,255,136,0.15);">
+              <div style="font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #ffffff; line-height: 1.5;">Need a real time data?<br><span style="color:#00ff88; font-weight:bold;">Use Function Calling</span></div>
+            </div>
+
+            <!-- SerpApi API Box -->
+            <div style="width: 75%; border: 2px solid #ffffff; border-radius: 10px; padding: 12px; background: rgba(2, 8, 18, 0.95);">
+              <div style="font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 800; color: #00d4ff; letter-spacing: 0.05em;">SerpApi API</div>
+            </div>
+          </div>
+
+          <!-- Arrow -->
+          <div style="font-size: 28px; color: #00d4ff; align-self: center; font-weight: bold; text-shadow: 0 0 10px #00d4ff;">➔</div>
+
+          <!-- Voice Output -->
+          <div style="flex: 1; min-width: 200px; border: 2px solid #ffffff; border-radius: 14px; padding: 28px 16px; background: rgba(10, 20, 35, 0.9); box-shadow: 0 0 15px rgba(255,255,255,0.1);">
+            <div style="font-family: 'Share Tech Mono', sans-serif; font-size: 22px; font-weight: 800; color: #ffffff; margin-bottom: 12px; letter-spacing: 0.05em;">Voice Output</div>
+            <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; color: #ffd21e; font-weight: 700; letter-spacing: 0.1em;">Web Speech API</div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Card 1: Speech Recognition -->
+    <div class="card">
+      <div class="card-title">1. 🎤 Voice → Speech-to-Text (STT) Engine</div>
+      <div class="card-body">
+        <p>நீங்கள் பேசும்போது Phone / Browser microphone உங்கள் voice-ஐ audio signal-ஆ capture செய்கிறது.</p>
+        <div class="flow-diagram">
+          <span class="flow-step">🎤 Microphone</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">Audio Signal</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">STT Engine</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">"WhatsApp open pannu"</span>
+        </div>
+        <p><b>Supported Models:</b> Whisper, Google Speech Recognition, Android SpeechRecognizer, Web Speech API.</p>
+      </div>
+    </div>
+
+    <!-- Card 2: AI Intent Parsing -->
+    <div class="card">
+      <div class="card-title">2. 🧠 AI / LLM Intent & Parameter Extraction</div>
+      <div class="card-body">
+        <p>LLM வெறும் text-ஆ பார்க்காது; அதன் <b>Intent</b> (என்ன செய்ய வேண்டும்) மற்றும் <b>Entities</b> (எதைக் கொண்டு செய்ய வேண்டும்) ஆகியவற்றை structured format-ல் பிரித்தெடுக்கும்.</p>
+        <div class="code-block">
+{
+  "intent": "SEND_MESSAGE",
+  "platform": "WhatsApp",
+  "contact": "Arun",
+  "message": "நான் 10 மணிக்கு வரேன்"
+}
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Multi-turn Context Memory -->
+    <div class="card">
+      <div class="card-title">3. 🧠 Conversational Context Memory (Slot Filling)</div>
+      <div class="card-body">
+        <p>User முழு விவரத்தையும் ஒரே வாக்கியத்தில் சொல்லாவிட்டாலும், JARVIS முந்தைய context-ஐ நினைவில் வைத்து விவரங்களைக் கேட்கும்.</p>
+        <ul>
+          <li><b>Turn 1:</b> User: <i>“Arun-க்கு message அனுப்பு”</i></li>
+          <li><b>JARVIS State:</b> <code>{ intent: "SEND_MESSAGE", contact: "Arun", message: null }</code></li>
+          <li><b>JARVIS Reply:</b> <i>“Sure Boss. என்ன message அனுப்பணும்?”</i></li>
+          <li><b>Turn 2:</b> User: <i>“நாளைக்கு meeting இருக்கு”</i></li>
+          <li><b>Execution:</b> Merges state → Sends <code>"நாளைக்கு meeting இருக்கு"</code> to <code>Arun</code> via WhatsApp!</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Card 4: Tool Calling Secret -->
+    <div class="card">
+      <div class="card-title">4. 🛠️ Tool Calling & Action Router</div>
+      <div class="card-body">
+        <p>LLM நேரடியாக OS-ஐ இயக்காது; structured tool router மூலம் தேவையான action function-ஐத் தேர்வு செய்யும்:</p>
+        <div class="code-block">
+open_app(app="whatsapp")
+make_phone_call(contact="Arun")
+send_whatsapp_message(contact="Arun", message="...")
+set_system_volume(level=50)
+open_camera()
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 5: Android & Device Action -->
+    <div class="card">
+      <div class="card-title">5. 📱 Android & Device Assistance Control</div>
+      <div class="card-body">
+        <p>Gemini Android implementation போன்று, JARVIS Android app permissions & system APIs மூலம் actions-ஐ execute செய்கிறது:</p>
+        <div class="flow-diagram">
+          <span class="flow-step">LLM Tool Call</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">Action Router</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">Android Intent</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">Target App</span>
+        </div>
+        <ul>
+          <li><b>OPEN_APP:</b> Launch intent via PackageManager (com.whatsapp)</li>
+          <li><b>CALL:</b> Contacts lookup → Phone Dialer / WhatsApp Call</li>
+          <li><b>SMS / WhatsApp:</b> Message compose & launch automation</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Card 6: Multilingual Tamil + Tanglish -->
+    <div class="card">
+      <div class="card-title">6. 🗣️ Tamil + Tanglish + English Semantic Engine</div>
+      <div class="card-body">
+        <p>JARVIS மனிதனைப் போல் semantic meaning-ஐப் பார்க்கிறது:</p>
+        <ul>
+          <li><code>“WhatsApp open பண்ணு”</code></li>
+          <li><code>“WhatsApp-ah open pannu”</code></li>
+          <li><code>“WhatsApp திற”</code></li>
+          <li><code>“WhatsApp launch pannunga”</code></li>
+        </ul>
+        <p style="color:#00FF88;"><b>All map to single intent:</b> <code>OPEN_APP(WhatsApp)</code></p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 3: FULL ARCHITECTURE MAP & ROADMAP -->
+  <div class="card">
+    <div class="sec-hdr">🚀 ALL-DEVICE HYBRID ARCHITECTURE (WEB + ANDROID + PC CONTROLLER)</div>
+    <div class="flow-diagram" style="padding: 20px; font-size: 12px; text-align: left; font-family: 'Share Tech Mono', monospace; line-height: 1.7;">
+🌐 <b>JARVIS WEB APP</b> (Mobile & PC Browsers)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+&nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+☁️ <b>JARVIS CLOUD BACKEND (FastAPI + WebSocket)</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── 🧠 <b>LLM Brain</b> (Gemini 2.5 Flash / Fast Intent Router)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── 💾 <b>Context & Memory Engine</b> (Short-term, Long-term, Task)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── 🔐 <b>Security & Policy Check</b> (Permission manager)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;└── 🛠️ <b>Tool Router</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── 📱 <b>Android Companion Agent</b> (App Launcher, Calls, SMS, WhatsApp)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── 💻 <b>Desktop PC Agent</b> (VS Code, File Explorer, Volume, Camera)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── 🌐 <b>Web Agent</b> (Google Search, YouTube Search)<br>
+    </div>
+  </div>
+
+</div>
+
+<script src="nav.js"></script>
+<script src="voice.js"></script>
+<script>
+  const simData = [
+    {
+      input: "Jarvis, WhatsApp open பண்ணு",
+      norm: "whatsapp open pannu",
+      intent: "OPEN_APP",
+      target: "WhatsApp",
+      conf: "0.99",
+      tool: 'DesktopController.launch_app("whatsapp")',
+      status: 'SUCCESS: Launched com.whatsapp',
+      tts: 'Open பண்ணிட்டேன் பாஸ்! Opening WhatsApp.'
+    },
+    {
+      input: "Arun-க்கு call பண்ணு",
+      norm: "arun-ku call pannu",
+      intent: "MAKE_CALL",
+      target: "Arun",
+      conf: "0.98",
+      tool: 'make_phone_call("Arun")',
+      status: 'SUCCESS: Initiating WhatsApp Web Call to Arun (+919876543210)',
+      tts: 'Initiating call to Arun, Boss!'
+    },
+    {
+      input: "Arun-க்கு WhatsApp-ல message அனுப்பு",
+      norm: "arun-ku whatsapp-la message anuppu",
+      intent: "SLOT_FILLING_REQUIRED",
+      target: "Arun",
+      conf: "0.96",
+      tool: 'ContextManager.set_pending_task("SEND_WHATSAPP", "Arun")',
+      status: 'WAITING_FOR_USER_FOLLOWUP',
+      tts: 'Sure Boss! Arun-க்கு என்ன message அனுப்பணும்?'
+    },
+    {
+      input: "நான் 10 மணிக்கு வரேன்",
+      norm: "naan 10 manikku varen",
+      intent: "SEND_WHATSAPP",
+      target: "Arun",
+      conf: "0.99",
+      tool: 'send_whatsapp_message("Arun", "நான் 10 மணிக்கு வரேன்")',
+      status: 'SUCCESS: Message composed & WhatsApp launched',
+      tts: "Done, Boss! Arun-க்கு WhatsApp message அனுப்பிட்டேன்: 'நான் 10 மணிக்கு வரேன்'"
+    },
+    {
+      input: "Volume 50% பண்ணு",
+      norm: "volume 50% pannu",
+      intent: "FAST_VOLUME",
+      target: "System Audio",
+      conf: "1.00",
+      tool: 'set_system_volume(50)',
+      status: 'SUCCESS: System volume set to 50%',
+      tts: 'System volume set to 50%, Boss!'
+    },
+    {
+      input: "Camera open பண்ணு",
+      norm: "camera open pannu",
+      intent: "OPEN_CAMERA",
+      target: "Camera",
+      conf: "0.99",
+      tool: 'DesktopController.launch_app("camera")',
+      status: 'SUCCESS: Camera opened',
+      tts: 'Opening Camera, Boss!'
+    }
+  ];
+
+  function runSim(idx) {
+    const d = simData[idx];
+    const btns = document.querySelectorAll('.sim-btn');
+    btns.forEach((b, i) => b.classList.toggle('active', i === idx));
+
+    const nodes = document.querySelectorAll('.p-node');
+    nodes.forEach(n => n.classList.remove('active'));
+    
+    // Animate pipeline nodes sequentially
+    let step = 1;
+    const interval = setInterval(() => {
+      nodes.forEach((n, i) => n.classList.toggle('active', i < step));
+      step++;
+      if (step > 6) clearInterval(interval);
+    }, 150);
+
+    const consoleEl = document.getElementById('simConsole');
+    consoleEl.innerHTML = `
+      <div><span class="json-key">// JARVIS Real-Time Telemetry</span></div>
+      <div>[VOICE_INPUT]: <span class="json-str">"${d.input}"</span></div>
+      <div>[NORMALIZER]: <span class="json-str">"${d.norm}"</span></div>
+      <div>[INTENT_PARSER]: {</div>
+      <div>&nbsp;&nbsp;<span class="json-key">"intent"</span>: <span class="json-str">"${d.intent}"</span>,</div>
+      <div>&nbsp;&nbsp;<span class="json-key">"target"</span>: <span class="json-str">"${d.target}"</span>,</div>
+      <div>&nbsp;&nbsp;<span class="json-key">"confidence"</span>: <span class="json-num">${d.conf}</span></div>
+      <div>}</div>
+      <div>[TOOL_EXECUTION]: <span class="json-key">${d.tool}</span></div>
+      <div>[DEVICE_STATUS]: <span class="json-str">"${d.status}"</span></div>
+      <div>[TTS_RESPONSE]: <span class="json-str">"${d.tts}"</span></div>
+    `;
+
+    // Optionally speak using JARVIS voice engine
+    if (window.JarvisVoice) {
+      window.JarvisVoice.speak(d.tts);
+    }
+  }
+</script>
+
+</body>
+</html>

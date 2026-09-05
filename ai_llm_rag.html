@@ -1,14 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>AI ECOSYSTEM — LLM, NLP, RAG & Beyond | Stark Intelligence Network</title>
   <meta name="description" content="Complete Guide to Language AI, Large Language Models, NLP Pipelines, Embeddings, Vector Stores, RAG Architecture, Sentiment Analysis, Fine-Tuning & Prompt Engineering.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="shell.css">
   <style>
     /* ══════════════════════════════════════════════════════════════════
        AI ECOSYSTEM — LLM, NLP, RAG & BEYOND (IMAGE 2 INTEGRATION)
@@ -237,25 +238,43 @@
   <div class="scanlines"></div>
 
   <!-- NAVIGATION HEADER -->
-  <header class="rag-nav-header">
-    <div class="nav-brand">
-      🤖 <span>STARK AI</span> INFRASTRUCTURE
-    </div>
-    <div class="nav-links-scroll">
-      <a href="index.html"            class="nav-tab" data-label="HUD">🤖 <span>HUD</span></a>
-      <a href="stark_hud.html"        class="nav-tab" data-label="STARK">🌐 <span>STARK</span></a>
-      <a href="ai_ecosystem.html"     class="nav-tab" data-label="ECO">🧬 <span>ECO</span></a>
-      <a href="ai_master_matrix.html" class="nav-tab" data-label="MATRIX">⚡ <span>MATRIX</span></a>
-      <a href="ai_llm_rag.html"        class="nav-tab active" data-label="RAG">🧠 <span>RAG</span></a>
-      <a href="drone_control.html"    class="nav-tab" data-label="DRONE">🚁 <span>DRONE</span></a>
-      <a href="3d_lab.html"           class="nav-tab" data-label="3D">🌌 <span>3D</span></a>
-      <a href="tracker.html"          class="nav-tab" data-label="TRACK">🛰️ <span>TRACK</span></a>
-      <a href="code_studio.html"      class="nav-tab" data-label="CODE">💻 <span>CODE</span></a>
-      <a href="cyber_soc.html"        class="nav-tab" data-label="CYBER">🛡️ <span>CYBER</span></a>
-      <a href="cmd_hacker.html"       class="nav-tab" data-label="CMD">📟 <span>CMD</span></a>
-      <a href="login.html"            class="nav-tab" data-label="LOGIN">🔐 <span>LOGIN</span></a>
-    </div>
-  </header>
+              <header class="hud-header">
+      <div class="hl">
+        <div class="logo-mark"><span class="logo-s">S</span>TARK</div>
+        <div class="vline"></div>
+        <div class="main-nav-links">
+          <a href="index.html"            class="nav-tab" data-label="HUD">🤖 <span>HUD</span></a>
+          <a href="stark_hud.html"        class="nav-tab" data-label="STARK">🌐 <span>STARK</span></a>
+          <a href="ai_ecosystem.html"     class="nav-tab" data-label="ECO">🧬 <span>ECO</span></a>
+          <a href="ai_master_matrix.html" class="nav-tab" data-label="MATRIX">⚡ <span>MATRIX</span></a>
+          <a href="ai_llm_rag.html"        class="nav-tab active" data-label="RAG">🧠 <span>RAG</span></a>
+          <a href="drone_control.html"    class="nav-tab" data-label="DRONE">🚁 <span>DRONE</span></a>
+          <a href="3d_lab.html"           class="nav-tab" data-label="3D">🌌 <span>3D</span></a>
+          <a href="tracker.html"          class="nav-tab" data-label="TRACK">🛰️ <span>TRACK</span></a>
+          <a href="code_studio.html"      class="nav-tab" data-label="CODE">💻 <span>CODE</span></a>
+          <a href="cyber_soc.html"        class="nav-tab" data-label="CYBER">🛡️ <span>CYBER</span></a>
+          <a href="cmd_hacker.html"       class="nav-tab" data-label="CMD">📟 <span>CMD</span></a>
+        </div>
+      </div>
+      <div class="hc">
+        <div class="clock" id="clock">00:00:00</div>
+        <div class="clockdate" id="clockDate">STARDATE —</div>
+      </div>
+      <div class="hr">
+        <div class="sys-status">
+          <div class="sdot pulse" id="sysDot"></div>
+          <span class="slabel" id="sysLabel">ONLINE</span>
+        </div>
+        <button class="hbtn" id="fullscreenBtn" title="Toggle Fullscreen Multitasking Mode" onclick="window.JarvisApp?.toggleFullscreen();">🖥️</button>
+        <button class="hbtn" id="agentLauncherBtn" title="Launch Native Background Agent (Always-Listening)" onclick="alert('🤖 STARK BACKGROUND AGENT LAUNCHER\n\nTo run the native always-listening Python background agent on your PC:\n\n1. Open your Command Prompt / Terminal\n2. Navigate to: c:\\wamp64\\www\\jarvis\n3. Run: python jarvis_agent.py\n(Or double-click start_jarvis.bat)');">🤖</button>
+        <button class="hbtn" id="suitStudioBtn" title="Iron Man AI Suit-Up Studio">🚀</button>
+        <button class="hbtn" id="personaBtn" title="Switch AI Persona (JARVIS, KAREN, CHITTI, FRIDAY, EDITH)">🎭</button>
+        <button class="hbtn" id="toolsBtn" title="Tools & Suit Protocols">🛠</button>
+        <button class="hbtn" id="voiceBtn" title="Voice Mode">🎤</button>
+        <button class="hbtn" id="settingsBtn" title="API Keys">⚙</button>
+        <a href="login.html" class="hbtn" title="Stark Biometric Security Portal Login">🔐</a>
+      </div>
+    </header>
 
   <div class="rag-page">
 
@@ -753,5 +772,15 @@ scores = analyzer.polarity_scores("I love this! Amazing product :-)")
   </script>
   <script src="security_engine.js"></script>
   <script src="voice.js"></script>
+  <script src="nav.js" defer></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+

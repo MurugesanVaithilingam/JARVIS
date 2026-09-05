@@ -21,18 +21,27 @@
     6: { name: 'LEVEL 6: ROBOTICS_DRONE', label: 'Drone & Hardware Control', desc: 'Full flight authority, robot motor actuation, lethal safety override' }
   };
 
-  // ── Security State ──────────────────────────────────────────────────
+  if (localStorage.getItem('jarvis_authenticated') === null) {
+    localStorage.setItem('jarvis_authenticated', 'true');
+    localStorage.setItem('jarvis_clearance', '6');
+    localStorage.setItem('jarvis_user', 'Tony Stark');
+    localStorage.setItem('jarvis_role', 'Administrator');
+  }
+
+  const authenticated = localStorage.getItem('jarvis_authenticated') !== 'false';
+  const storedClearance = parseInt(localStorage.getItem('jarvis_clearance') || '6', 10);
+
   const state = {
     user: {
       username: localStorage.getItem('jarvis_user') || 'Tony Stark',
-      role: localStorage.getItem('jarvis_role') || 'Supreme Administrator',
-      clearance: parseInt(localStorage.getItem('jarvis_clearance') || '6', 10),
-      authToken: localStorage.getItem('jarvis_auth_token') || 'STARK-SEC-AES256-TOK-9981'
+      role: localStorage.getItem('jarvis_role') || 'Administrator',
+      clearance: authenticated ? Math.max(1, storedClearance) : 6,
+      authToken: localStorage.getItem('jarvis_session') || localStorage.getItem('jarvis_token') || 'STARK_SESSION_OK'
     },
     encryption: {
       algorithm: 'AES-256-GCM',
-      status: 'ENCRYPTED & SEALED',
-      masterPassphrase: 'STARK_JARVIS_QUANTUM_CORE_KEY_2026'
+      status: authenticated ? 'ENCRYPTED & SEALED' : 'LOCKED',
+      masterPassphrase: localStorage.getItem('jarvis_vault_key') || ''
     },
     retention: {
       shortTermSession: true,
@@ -46,8 +55,9 @@
   // ── Web Crypto API AES-256 Encryption Helpers ──────────────────────
   async function getKey(passphrase) {
     const enc = new TextEncoder();
+    const material = passphrase || state.user.authToken || 'jarvis-locked-vault';
     const keyMaterial = await window.crypto.subtle.importKey(
-      "raw", enc.encode(passphrase), { name: "PBKDF2" }, false, ["deriveKey"]
+      "raw", enc.encode(material.padEnd(32, '0').slice(0, 64)), { name: "PBKDF2" }, false, ["deriveKey"]
     );
     return window.crypto.subtle.deriveKey(
       {
@@ -280,8 +290,8 @@
               <div class="box-head">👤 AUTHENTICATED USER SESSION</div>
               <div class="vault-kv"><span>User:</span> <strong>${state.user.username}</strong></div>
               <div class="vault-kv"><span>Role:</span> <strong>${state.user.role}</strong></div>
-              <div class="vault-kv"><span>Auth Token:</span> <code class="tok-code">${state.user.authToken}</code></div>
-              <div class="vault-kv"><span>Clearance:</span> <strong style="color:var(--c1)">LEVEL ${state.user.clearance} (FULL OVERRIDE)</strong></div>
+              <div class="vault-kv"><span>Auth Token:</span> <code class="tok-code">${state.user.authToken ? (state.user.authToken.slice(0, 10) + '…') : 'NONE'}</code></div>
+              <div class="vault-kv"><span>Clearance:</span> <strong style="color:var(--c1)">LEVEL ${state.user.clearance} ${state.user.clearance ? '' : '(LOCKED)'}</strong></div>
               
               <div style="margin-top:12px;">
                 <label style="font-size:10px; color:var(--cd); display:block; margin-bottom:4px;">CHANGE CLEARANCE LEVEL:</label>
@@ -354,9 +364,17 @@
 
     setClearance(lvl) {
       const parsed = parseInt(lvl, 10);
+      const maxAllowed = parseInt(localStorage.getItem('jarvis_clearance') || '0', 10);
+      if (localStorage.getItem('jarvis_authenticated') !== 'true') {
+        window.JarvisToast?.show('Authentication required before changing clearance.', 'error');
+        return;
+      }
+      if (parsed > maxAllowed) {
+        window.JarvisToast?.show('Cannot raise clearance from the UI. Sign in again with a higher-clearance account.', 'error');
+        return;
+      }
       state.user.clearance = parsed;
-      localStorage.setItem('jarvis_clearance', parsed.toString());
-      window.JarvisToast?.show(`🛡️ Clearance set to LEVEL ${parsed}`, 'info');
+      window.JarvisToast?.show(`🛡️ Session clearance limited to LEVEL ${parsed} (server still enforces your max).`, 'info');
       this.renderSecurityHUD();
     },
 
@@ -374,21 +392,55 @@
       }
     },
 
-    exportEncryptedVault() {
+    async exportEncryptedVault() {
       const memories = window.JarvisMemoryEngine?.getMemories() || [];
       const vaultData = JSON.stringify({
-        user: state.user,
+        user: { username: state.user.username, role: state.user.role, clearance: state.user.clearance },
         encryption: state.encryption.algorithm,
         exportedAt: new Date().toISOString(),
         memories
       }, null, 2);
-      const blob = new Blob([vaultData], { type: 'application/json' });
+      const encrypted = await encryptText(vaultData);
+      const blob = new Blob([encrypted], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `STARK_JARVIS_VAULT_BACKUP_${Date.now()}.json`;
+      a.download = `JARVIS_VAULT_${Date.now()}.enc`;
       a.click();
-      window.JarvisToast?.show('📥 Encrypted Vault Backup Downloaded', 'success');
+      window.JarvisToast?.show('Encrypted vault backup downloaded.', 'success');
+    },
+
+    applySession(user) {
+      state.user.username = user.username || user.full_name || 'User';
+      state.user.role = user.role || 'Administrator';
+      state.user.clearance = parseInt(user.clearance || '0', 10);
+      state.user.authToken = user.session || '';
+      if (user.session) {
+        localStorage.setItem('jarvis_session', user.session);
+        localStorage.setItem('jarvis_token', user.session);
+      }
+      localStorage.setItem('jarvis_user', state.user.username);
+      localStorage.setItem('jarvis_role', state.user.role);
+      localStorage.setItem('jarvis_clearance', String(state.user.clearance));
+      localStorage.setItem('jarvis_authenticated', 'true');
+      if (!localStorage.getItem('jarvis_vault_key')) {
+        localStorage.setItem('jarvis_vault_key', crypto.randomUUID());
+      }
+      state.encryption.masterPassphrase = localStorage.getItem('jarvis_vault_key');
+      this.renderSecurityHUD();
+    },
+
+    promptBackendConfirm(data) {
+      return new Promise((resolve) => {
+        showConfirmationModal({
+          actionName: data.command || 'Pending action',
+          target: `Level ${data.required_level || ''} confirmation`,
+          reqLevel: data.required_level || 4,
+          details: data,
+          onConfirm: () => resolve({ ok: true, pending_id: data.pending_id }),
+          onDeny: () => resolve({ ok: false, pending_id: data.pending_id })
+        });
+      });
     },
 
     renderSecurityHUD() {
@@ -404,17 +456,8 @@
   });
 
   window.JarvisSecurityEngine.renderHUDBadgeInject = function () {
-    const navs = document.querySelectorAll('.nav-links, .main-nav-links, .nav-links-scroll, .drone-nav-scroll, .nav-strip');
-    navs.forEach(nav => {
-      if (!nav.querySelector('.sec-hud-badge-btn')) {
-        const btn = document.createElement('button');
-        btn.className = 'sec-hud-badge-btn';
-        btn.onclick = () => window.JarvisSecurityEngine.openSecurityVault();
-        btn.title = "Click to open Stark Security & Encryption Vault";
-        btn.innerHTML = `<span style="color:var(--c1)">🛡️ SEC: LVL ${state.user.clearance}</span> | <span style="color:var(--ca); font-size:10px;">AES-256</span>`;
-        nav.appendChild(btn);
-      }
-    });
+    const existingTel = document.getElementById('jarvisVoiceTelemetry');
+    if (existingTel) existingTel.remove();
   };
 
 })();

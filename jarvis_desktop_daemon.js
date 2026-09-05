@@ -7,7 +7,7 @@ const PORT = 8765;
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-JARVIS-TOKEN');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(200);
@@ -17,6 +17,13 @@ const server = http.createServer((req, res) => {
 
   const reqUrl = url.parse(req.url, true);
   const cmd = (reqUrl.query.cmd || '').toLowerCase().trim();
+  const master = process.env.JARVIS_ACCESS_TOKEN || '';
+  const incoming = (req.headers['x-jarvis-token'] || req.headers['authorization'] || reqUrl.query.token || '').toString().replace(/^Bearer\s+/i, '');
+  if (master && incoming !== master && !incoming.includes('.')) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'error', message: 'Desktop daemon authentication required.' }));
+    return;
+  }
 
   res.writeHead(200, { 'Content-Type': 'application/json' });
 

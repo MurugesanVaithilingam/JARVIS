@@ -12,3 +12,18 @@ scratch_run_*.php
 # Environment & Credentials
 .env
 config.local.json
+credentials.json
+token.json
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# JARVIS runtime data
+jarvis_history.db
+jarvis_memory/
+user_voice.ogg
+jarvis_reply.mp3
+temp_screen.jpg
+response.mp3
+
